@@ -43,6 +43,7 @@ def get_books(
                 title=book.title,
                 author=book.author,
                 isbn=book.isbn,
+                cover=book.cover,
                 highlight_count=count,
                 created_at=book.created_at,
                 updated_at=book.updated_at,

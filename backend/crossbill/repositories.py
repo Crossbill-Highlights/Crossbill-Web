@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from crossbill import models, schemas
+from crossbill import cover_service, models, schemas
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,16 @@ class BookRepository:
         self.db.commit()
         self.db.refresh(book)
         logger.info(f"Created book: {book.title} (id={book.id})")
+
+        # Fetch book cover if ISBN is available and no cover is set
+        if book.isbn and not book.cover:
+            cover_path = cover_service.fetch_book_cover(book.isbn, book.id)
+            if cover_path:
+                book.cover = cover_path
+                self.db.commit()
+                self.db.refresh(book)
+                logger.info(f"Added cover for book {book.id}: {cover_path}")
+
         return book
 
     def update(self, book: models.Book, book_data: schemas.BookCreate) -> models.Book:
@@ -41,6 +51,16 @@ class BookRepository:
         self.db.commit()
         self.db.refresh(book)
         logger.info(f"Updated book: {book.title} (id={book.id})")
+
+        # Fetch book cover if ISBN is available and no cover is set
+        if book.isbn and not book.cover:
+            cover_path = cover_service.fetch_book_cover(book.isbn, book.id)
+            if cover_path:
+                book.cover = cover_path
+                self.db.commit()
+                self.db.refresh(book)
+                logger.info(f"Added cover for book {book.id}: {cover_path}")
+
         return book
 
     def get_or_create(self, book_data: schemas.BookCreate) -> models.Book:
