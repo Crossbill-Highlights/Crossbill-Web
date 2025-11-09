@@ -3,7 +3,7 @@ local UIManager = require("ui/uimanager")
 local InfoMessage = require("ui/widget/infomessage")
 local InputDialog = require("ui/widget/inputdialog")
 local DocSettings = require("docsettings")
-local Device = require("device")
+local NetworkMgr = require("ui/network/manager")
 local socket = require("socket")
 local http = require("socket.http")
 local https = require("ssl.https")
@@ -80,33 +80,22 @@ function InkwellSync:configureServer()
     input_dialog:onShowKeyboard()
 end
 
-function InkwellSync:ensureWifiEnabled()
-    -- Enable WiFi if device supports it (important for battery-saving devices like Pocketbook)
-    if Device:hasWifiToggle() then
-        logger.info("Inkwell: Ensuring WiFi is enabled...")
-        UIManager:show(InfoMessage:new{
-            text = _("Enabling WiFi..."),
-            timeout = 1,
-        })
-
-        -- Turn on WiFi (this is safe to call even if already on)
-        Device:turnOnWifi()
-
-        -- Give WiFi a moment to initialize
-        -- Using a simple delay instead of checking connection status
-        local util = require("util")
-        util.usleep(2000000)  -- 2 seconds in microseconds
-
-        logger.info("Inkwell: WiFi enabled")
+function InkwellSync:ensureWifiEnabled(callback)
+    -- Enable WiFi if needed using NetworkMgr (the proper KOReader way)
+    -- This will prompt user or auto-enable based on settings
+    if NetworkMgr:willRerunWhenOnline(callback) then
+        -- Network is off, NetworkMgr will call callback when online
+        logger.info("Inkwell: WiFi is off, prompting to enable...")
+        return false
+    else
+        -- Network is already on
+        logger.info("Inkwell: WiFi already enabled")
+        return true
     end
-
-    return true
 end
 
-function InkwellSync:syncCurrentBook()
-    -- Ensure WiFi is enabled before attempting to sync
-    self:ensureWifiEnabled()
-
+function InkwellSync:performSync()
+    -- The actual sync logic (separated so it can be called after WiFi is enabled)
     UIManager:show(InfoMessage:new{
         text = _("Syncing highlights..."),
         timeout = 2,
@@ -160,6 +149,22 @@ function InkwellSync:syncCurrentBook()
             text = _("Error syncing book: ") .. tostring(err),
             timeout = 5,
         })
+    end
+end
+
+function InkwellSync:syncCurrentBook()
+    -- Ensure WiFi is enabled before attempting to sync
+    -- NetworkMgr will handle prompting user or auto-enabling based on settings
+    local callback = function()
+        self:performSync()
+    end
+
+    if not self:ensureWifiEnabled(callback) then
+        -- WiFi is being enabled, callback will be called when ready
+        logger.info("Inkwell: Waiting for WiFi to be enabled...")
+    else
+        -- WiFi already on, sync immediately
+        self:performSync()
     end
 end
 
