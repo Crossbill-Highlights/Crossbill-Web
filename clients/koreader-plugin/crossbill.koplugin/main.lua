@@ -112,13 +112,11 @@ function CrossbillSync:performSync()
         local isbn = nil
         if book_props.identifiers then
             -- Try to extract ISBN from identifiers string
-            -- Format: "uuid:...\ncalibre:...\nISBN:9780735211292\n..."
-            for identifier in string.gmatch(book_props.identifiers, "[^\n]+") do
-                if identifier:match("^ISBN:") then
-                    isbn = identifier:gsub("^ISBN:", "")
-                    break
-                end
-            end
+            -- Note: KOReader uses backslash line continuation in the metadata file,
+            -- so the identifiers are concatenated without newlines at runtime.
+            -- Format: "uuid:...calibre:...ISBN:9780735211292AMAZON:..."
+            -- ISBNs are numeric with possible hyphens and X (for ISBN-10)
+            isbn = book_props.identifiers:match("ISBN:([%d%-X]+)")
         end
 
         local book_data = {
