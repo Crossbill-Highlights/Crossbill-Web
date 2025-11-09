@@ -301,7 +301,7 @@ class TestHighlightsUpload:
 
         response = client.post("/api/v1/highlights/upload", json=payload)
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_upload_invalid_payload_missing_required_fields(self, client: TestClient) -> None:
         """Test upload with missing required fields."""
@@ -320,7 +320,7 @@ class TestHighlightsUpload:
 
         response = client.post("/api/v1/highlights/upload", json=payload)
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_upload_creates_chapter_only_once(
         self, client: TestClient, db_session: Session
