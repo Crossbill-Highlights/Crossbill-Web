@@ -62,3 +62,6 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Media files
+book-covers/
