@@ -87,3 +87,26 @@ class HighlightUploadResponse(BaseModel):
     highlights_skipped: int = Field(
         ..., ge=0, description="Number of highlights skipped (duplicates)"
     )
+
+
+class BookWithHighlightCount(BaseModel):
+    """Schema for Book with highlight count."""
+
+    id: int
+    title: str
+    author: str | None
+    isbn: str | None
+    highlight_count: int = Field(..., ge=0, description="Number of highlights for this book")
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class BooksListResponse(BaseModel):
+    """Schema for paginated books list response."""
+
+    books: list[BookWithHighlightCount] = Field(..., description="List of books with highlight counts")
+    total: int = Field(..., ge=0, description="Total number of books")
+    offset: int = Field(..., ge=0, description="Current offset")
+    limit: int = Field(..., ge=1, description="Current limit")

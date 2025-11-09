@@ -3,7 +3,7 @@
 import logging
 from collections.abc import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -53,6 +53,36 @@ class BookRepository:
 
         # Create new book
         return self.create(book_data)
+
+    def get_books_with_highlight_count(
+        self, offset: int = 0, limit: int = 100
+    ) -> tuple[Sequence[tuple[models.Book, int]], int]:
+        """
+        Get books with their highlight counts, sorted alphabetically by title.
+
+        Args:
+            offset: Number of books to skip (default: 0)
+            limit: Maximum number of books to return (default: 100)
+
+        Returns:
+            tuple[Sequence[tuple[Book, int]], int]: (list of (book, count) tuples, total count)
+        """
+        # Count query for total number of books
+        total_stmt = select(func.count(models.Book.id))
+        total = self.db.execute(total_stmt).scalar() or 0
+
+        # Main query for books with highlight counts
+        stmt = (
+            select(models.Book, func.count(models.Highlight.id).label("highlight_count"))
+            .outerjoin(models.Highlight, models.Book.id == models.Highlight.book_id)
+            .group_by(models.Book.id)
+            .order_by(models.Book.title)
+            .offset(offset)
+            .limit(limit)
+        )
+
+        result = self.db.execute(stmt).all()
+        return result, total
 
 
 class ChapterRepository:
