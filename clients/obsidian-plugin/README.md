@@ -75,13 +75,28 @@ Before using the plugin, you need to configure your Crossbill server:
 
 ## Usage
 
+The plugin provides two commands for importing highlights:
+
+### Import highlights from a chapter
+
+Import highlights from a single chapter of a book:
+
 1. Open a note where you want to import highlights
 2. Open the Command Palette (Ctrl/Cmd + P)
-3. Search for "Import highlights from Crossbill"
-4. Select the command
-5. Choose a book from the list
-6. Choose a chapter from the book
-7. The highlights will be inserted at your cursor position
+3. Search for "Import highlights from a chapter"
+4. Choose a book from the list
+5. Choose a chapter from the book
+6. The highlights will be inserted at your cursor position
+
+### Import all highlights from a book
+
+Import all highlights from all chapters of a book:
+
+1. Open a note where you want to import highlights
+2. Open the Command Palette (Ctrl/Cmd + P)
+3. Search for "Import all highlights from a book"
+4. Choose a book from the list
+5. All chapters and their highlights will be inserted at your cursor position
 
 ## Highlight Format
 
@@ -91,9 +106,8 @@ Highlights are imported in the following format:
 ## Book Title
 
 **Author:** Author Name
-**Chapter:** Chapter Name
 
-### Highlight 1
+### Chapter Name
 
 > Highlighted text here
 
@@ -102,7 +116,13 @@ Highlights are imported in the following format:
 _Page 42_
 
 ---
+
+> Another highlight...
+
+---
 ```
+
+When importing all chapters, each chapter is formatted as a level 3 heading (###) with all its highlights below.
 
 ## Development
 

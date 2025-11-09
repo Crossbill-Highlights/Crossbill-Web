@@ -196,10 +196,19 @@ export default class CrossbillPlugin extends Plugin {
 
     // Add command to import highlights from a single chapter
     this.addCommand({
-      id: 'import-highlights',
+      id: 'import-chapter-highlights',
       name: 'Import highlights from a chapter',
       editorCallback: (editor: Editor) => {
         this.importChapterHighlights(editor);
+      },
+    });
+
+    // Add command to import all highlights from a book
+    this.addCommand({
+      id: 'import-all-highlights',
+      name: 'Import all highlights from a book',
+      editorCallback: (editor: Editor) => {
+        this.importAllChapters(editor);
       },
     });
 
@@ -325,6 +334,33 @@ export default class CrossbillPlugin extends Plugin {
           console.error('Error inserting highlights:', error);
         }
       }).open();
+    });
+  }
+
+  /**
+   * Import all highlights from all chapters of a book
+   */
+  async importAllChapters(editor: Editor) {
+    await this.selectBook((bookDetails) => {
+      try {
+        const content = this.formatBook(bookDetails);
+
+        const cursor = editor.getCursor();
+        editor.replaceRange(content, cursor);
+
+        // Calculate total highlights across all chapters
+        const totalHighlights = bookDetails.chapters.reduce(
+          (sum, chapter) => sum + chapter.highlights.length,
+          0
+        );
+
+        new Notice(
+          `Imported ${totalHighlights} highlights from ${bookDetails.chapters.length} chapters of "${bookDetails.title}"`
+        );
+      } catch (error) {
+        new Notice(`Error inserting highlights: ${error.message}`);
+        console.error('Error inserting highlights:', error);
+      }
     });
   }
 
