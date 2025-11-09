@@ -9,7 +9,9 @@ class Settings:
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./inkwell.db")
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL", "postgresql://inkwell:inkwell_dev_password@localhost:5432/inkwell"
+    )
 
     # API
     API_V1_PREFIX: str = "/api/v1"

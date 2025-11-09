@@ -22,7 +22,9 @@ if config.config_file_name is not None:
 target_metadata = None
 
 # Get database URL from environment variable
-database_url = os.getenv("DATABASE_URL", "sqlite:///./inkwell.db")
+database_url = os.getenv(
+    "DATABASE_URL", "postgresql://inkwell:inkwell_dev_password@localhost:5432/inkwell"
+)
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)
 

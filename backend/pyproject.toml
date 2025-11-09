@@ -11,7 +11,8 @@ dependencies = [
     "fastapi (>=0.121.1,<0.122.0)",
     "uvicorn[standard] (>=0.38.0,<0.39.0)",
     "sqlalchemy (>=2.0.44,<3.0.0)",
-    "alembic (>=1.17.1,<2.0.0)"
+    "alembic (>=1.17.1,<2.0.0)",
+    "psycopg[binary] (>=3.2.12,<4.0.0)"
 ]
 
 

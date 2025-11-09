@@ -6,6 +6,7 @@ Backend API for Inkwell - a self-hosted web app to sync highlights from KOReader
 
 - FastAPI web framework
 - SQLAlchemy 2.0 ORM
+- PostgreSQL database with Docker support
 - Alembic database migrations
 - Poetry dependency management
 - Ruff linting
@@ -13,26 +14,91 @@ Backend API for Inkwell - a self-hosted web app to sync highlights from KOReader
 - pytest testing framework
 - Strong typing with mypy
 
+## Prerequisites
+
+- Python 3.11+
+- Poetry
+- Docker and Docker Compose (for PostgreSQL)
+
 ## Setup
 
-1. Install dependencies:
+### 1. Start PostgreSQL Database
+
+```bash
+docker-compose up -d
+```
+
+This starts a PostgreSQL 16 container with the following configuration:
+- Host: localhost
+- Port: 5432
+- Database: inkwell
+- User: inkwell
+- Password: inkwell_dev_password
+
+### 2. Install dependencies
+
 ```bash
 poetry install
 ```
 
-2. Copy environment variables:
+### 3. Copy environment variables
+
 ```bash
 cp .env.example .env
 ```
 
-3. Run migrations:
+The `.env` file is already configured to connect to the Docker PostgreSQL instance.
+
+**Alternative: SQLite for local development**
+If you prefer to use SQLite without Docker, edit `.env` and change the DATABASE_URL:
+```
+DATABASE_URL=sqlite:///./inkwell.db
+```
+
+### 4. Run migrations
+
 ```bash
 poetry run alembic upgrade head
 ```
 
-4. Run the development server:
+### 5. Run the development server
+
 ```bash
 poetry run uvicorn inkwell.main:app --reload
+```
+
+The API will be available at http://localhost:8000
+
+## Docker Commands
+
+### Stop the database
+```bash
+docker-compose stop
+```
+
+### Start the database
+```bash
+docker-compose start
+```
+
+### Stop and remove containers (data is preserved in volumes)
+```bash
+docker-compose down
+```
+
+### Remove containers and volumes (⚠️ deletes all data)
+```bash
+docker-compose down -v
+```
+
+### View database logs
+```bash
+docker-compose logs -f postgres
+```
+
+### Access PostgreSQL CLI
+```bash
+docker-compose exec postgres psql -U inkwell -d inkwell
 ```
 
 ## Development
