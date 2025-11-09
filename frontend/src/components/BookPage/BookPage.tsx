@@ -1,4 +1,9 @@
-import { useState } from 'react';
+import {
+  BookmarkBorder as BookmarkIcon,
+  CalendarMonth as CalendarIcon,
+  ChevronRight as ChevronRightIcon,
+  FormatQuote as QuoteIcon,
+} from '@mui/icons-material';
 import {
   Alert,
   Box,
@@ -9,13 +14,8 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import {
-  BookmarkBorder as BookmarkIcon,
-  CalendarMonth as CalendarIcon,
-  ChevronRight as ChevronRightIcon,
-  FormatQuote as QuoteIcon,
-} from '@mui/icons-material';
 import { useParams } from '@tanstack/react-router';
+import { useState } from 'react';
 import { useGetBookDetailsApiV1BookBookIdGet } from '../../api/generated/books/books';
 import { Spinner } from '../common/Spinner';
 
@@ -78,11 +78,11 @@ export const BookPage = () => {
         >
           <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" component="h1" gutterBottom sx={{ lineHeight: 1.3, mb: 1 }}>
+              <Typography variant="h1" component="h1" gutterBottom sx={{ lineHeight: 1.3, mb: 1 }}>
                 {book.title}
               </Typography>
               <Typography
-                variant="h6"
+                variant="h2"
                 sx={{ color: 'primary.dark', fontWeight: 500, mb: 2 }}
                 gutterBottom
               >
@@ -123,22 +123,7 @@ export const BookPage = () => {
               <Box key={chapter.id}>
                 {/* Chapter Header */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, px: 0.5 }}>
-                  <Typography
-                    variant="h6"
-                    component="h2"
-                    sx={(theme) => ({
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      color: 'primary.dark',
-                      letterSpacing: '0.05em',
-                      px: 2,
-                      py: 1,
-                      bgcolor: theme.palette.mode === 'light'
-                        ? `rgba(${parseInt(theme.palette.secondary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.secondary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.secondary.main.slice(5, 7), 16)}, 0.15)`
-                        : 'secondary.dark',
-                      borderRadius: 2,
-                    })}
-                  >
+                  <Typography variant="h3" component="h2" sx={{ color: 'primary.dark' }}>
                     {chapter.name}
                   </Typography>
                   <Box
@@ -191,7 +176,12 @@ export const BookPage = () => {
                                 {/* Quote Icon and Text */}
                                 <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5, mb: 2 }}>
                                   <QuoteIcon
-                                    sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0, mt: 0.3 }}
+                                    sx={{
+                                      fontSize: 18,
+                                      color: 'primary.main',
+                                      flexShrink: 0,
+                                      mt: 0.3,
+                                    }}
                                   />
                                   <Typography
                                     variant="body1"
@@ -232,17 +222,19 @@ export const BookPage = () => {
                                   <CalendarIcon
                                     sx={(theme) => ({
                                       fontSize: 14,
-                                      color: theme.palette.mode === 'light'
-                                        ? `rgba(${parseInt(theme.palette.secondary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.secondary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.secondary.main.slice(5, 7), 16)}, 0.7)`
-                                        : 'secondary.light',
+                                      color:
+                                        theme.palette.mode === 'light'
+                                          ? `rgba(${parseInt(theme.palette.secondary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.secondary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.secondary.main.slice(5, 7), 16)}, 0.7)`
+                                          : 'secondary.light',
                                     })}
                                   />
                                   <Typography
                                     variant="caption"
                                     sx={(theme) => ({
-                                      color: theme.palette.mode === 'light'
-                                        ? `rgba(${parseInt(theme.palette.secondary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.secondary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.secondary.main.slice(5, 7), 16)}, 0.9)`
-                                        : 'secondary.light',
+                                      color:
+                                        theme.palette.mode === 'light'
+                                          ? `rgba(${parseInt(theme.palette.secondary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.secondary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.secondary.main.slice(5, 7), 16)}, 0.9)`
+                                          : 'secondary.light',
                                     })}
                                   >
                                     {new Date(highlight.datetime).toLocaleDateString('en-US', {

@@ -18,7 +18,7 @@ export const LandingPage = () => {
       </Box>
 
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h2" gutterBottom>
+        <Typography variant="h3" component="h2" gutterBottom sx={{ color: 'primary.dark' }}>
           Books
         </Typography>
 
