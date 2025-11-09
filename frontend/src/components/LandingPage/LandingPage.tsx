@@ -1,5 +1,6 @@
 import { Alert, Box, Container, Typography } from '@mui/material';
 import { useGetBooksApiV1HighlightsBooksGet } from '../../api/generated/highlights/highlights';
+import { SectionTitle } from '../common/SectionTitle';
 import { Spinner } from '../common/Spinner';
 import { BookList } from './components/BookList';
 
@@ -18,9 +19,7 @@ export const LandingPage = () => {
       </Box>
 
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h2" gutterBottom sx={{ color: 'primary.dark' }}>
-          Books
-        </Typography>
+        <SectionTitle>Books</SectionTitle>
 
         {isLoading && <Spinner />}
 

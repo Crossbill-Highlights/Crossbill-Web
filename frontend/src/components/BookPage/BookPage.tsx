@@ -17,6 +17,7 @@ import {
 import { useParams } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useGetBookDetailsApiV1BookBookIdGet } from '../../api/generated/books/books';
+import { SectionTitle } from '../common/SectionTitle';
 import { Spinner } from '../common/Spinner';
 
 export const BookPage = () => {
@@ -122,18 +123,7 @@ export const BookPage = () => {
             book.chapters.map((chapter) => (
               <Box key={chapter.id}>
                 {/* Chapter Header */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, px: 0.5 }}>
-                  <Typography variant="h3" component="h2" sx={{ color: 'primary.dark' }}>
-                    {chapter.name}
-                  </Typography>
-                  <Box
-                    sx={(theme) => ({
-                      height: '1px',
-                      flex: 1,
-                      background: `linear-gradient(to right, ${theme.palette.secondary.light}, transparent)`,
-                    })}
-                  />
-                </Box>
+                <SectionTitle showDivider>{chapter.name}</SectionTitle>
 
                 {/* Highlights in this chapter */}
                 {chapter.highlights && chapter.highlights.length > 0 ? (
