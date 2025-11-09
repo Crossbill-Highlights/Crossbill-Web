@@ -19,7 +19,7 @@ export const LandingPage = () => {
       </Box>
 
       <Box sx={{ mb: 4 }}>
-        <SectionTitle>Books</SectionTitle>
+        <SectionTitle showDivider>Books</SectionTitle>
 
         {isLoading && <Spinner />}
 
