@@ -83,28 +83,28 @@ export const BookPage = () => {
               </Typography>
               <Typography
                 variant="h6"
-                sx={{ color: '#92400e', fontWeight: 500, mb: 2 }}
+                sx={{ color: 'primary.dark', fontWeight: 500, mb: 2 }}
                 gutterBottom
               >
                 {book.author || 'Unknown Author'}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <BookmarkIcon sx={{ fontSize: 18, color: '#b45309' }} />
+                <BookmarkIcon sx={{ fontSize: 18, color: 'primary.main' }} />
                 <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   {totalHighlights} {totalHighlights === 1 ? 'highlight' : 'highlights'}
                 </Typography>
               </Box>
             </Box>
             <Box
-              sx={{
+              sx={(theme) => ({
                 width: { xs: 80, sm: 96 },
                 height: { xs: 106, sm: 128 },
-                background: 'linear-gradient(135deg, #d97706 0%, #92400e 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.dark} 100%)`,
                 borderRadius: 2,
                 boxShadow: 2,
                 flexShrink: 0,
                 ml: 2,
-              }}
+              })}
             />
           </Box>
         </Card>
@@ -124,24 +124,29 @@ export const BookPage = () => {
                 {/* Chapter Header */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, px: 0.5 }}>
                   <Typography
-                    variant="overline"
-                    sx={{
+                    variant="h6"
+                    component="h2"
+                    sx={(theme) => ({
                       fontSize: '0.75rem',
                       fontWeight: 600,
-                      color: '#78350f',
+                      color: 'primary.dark',
                       letterSpacing: '0.05em',
                       px: 2,
                       py: 1,
-                    }}
+                      bgcolor: theme.palette.mode === 'light'
+                        ? `rgba(${parseInt(theme.palette.secondary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.secondary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.secondary.main.slice(5, 7), 16)}, 0.15)`
+                        : 'secondary.dark',
+                      borderRadius: 2,
+                    })}
                   >
                     {chapter.name}
                   </Typography>
                   <Box
-                    sx={{
+                    sx={(theme) => ({
                       height: '1px',
                       flex: 1,
-                      background: 'linear-gradient(to right, #d6d3d1, transparent)',
-                    }}
+                      background: `linear-gradient(to right, ${theme.palette.secondary.light}, transparent)`,
+                    })}
                   />
                 </Box>
 
@@ -158,14 +163,14 @@ export const BookPage = () => {
                       return (
                         <Card
                           key={highlight.id}
-                          sx={{
+                          sx={(theme) => ({
                             overflow: 'visible',
                             transition: 'all 0.2s',
                             '&:hover': {
                               boxShadow: 3,
-                              borderColor: 'rgba(180, 83, 9, 0.3)',
+                              borderColor: `rgba(${parseInt(theme.palette.primary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.primary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.primary.main.slice(5, 7), 16)}, 0.3)`,
                             },
-                          }}
+                          })}
                         >
                           <CardContent
                             onClick={() => toggleCard(highlight.id)}
@@ -186,7 +191,7 @@ export const BookPage = () => {
                                 {/* Quote Icon and Text */}
                                 <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5, mb: 2 }}>
                                   <QuoteIcon
-                                    sx={{ fontSize: 18, color: '#b45309', flexShrink: 0, mt: 0.3 }}
+                                    sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0, mt: 0.3 }}
                                   />
                                   <Typography
                                     variant="body1"
@@ -205,7 +210,7 @@ export const BookPage = () => {
                                   <Typography
                                     variant="body1"
                                     sx={{
-                                      color: '#44403c',
+                                      color: 'secondary.dark',
                                       lineHeight: 1.6,
                                       mb: 2,
                                       pl: 4.5,
@@ -225,11 +230,20 @@ export const BookPage = () => {
                                   }}
                                 >
                                   <CalendarIcon
-                                    sx={{ fontSize: 14, color: 'rgba(120, 113, 108, 0.7)' }}
+                                    sx={(theme) => ({
+                                      fontSize: 14,
+                                      color: theme.palette.mode === 'light'
+                                        ? `rgba(${parseInt(theme.palette.secondary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.secondary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.secondary.main.slice(5, 7), 16)}, 0.7)`
+                                        : 'secondary.light',
+                                    })}
                                   />
                                   <Typography
                                     variant="caption"
-                                    sx={{ color: 'rgba(120, 113, 108, 0.9)' }}
+                                    sx={(theme) => ({
+                                      color: theme.palette.mode === 'light'
+                                        ? `rgba(${parseInt(theme.palette.secondary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.secondary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.secondary.main.slice(5, 7), 16)}, 0.9)`
+                                        : 'secondary.light',
+                                    })}
                                   >
                                     {new Date(highlight.datetime).toLocaleDateString('en-US', {
                                       year: 'numeric',
@@ -245,7 +259,7 @@ export const BookPage = () => {
                               <IconButton
                                 size="small"
                                 sx={{
-                                  color: '#b45309',
+                                  color: 'primary.main',
                                   transition: 'transform 0.2s',
                                   transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
                                   flexShrink: 0,
