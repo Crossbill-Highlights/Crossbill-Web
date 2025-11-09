@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from inkwell import models, schemas
+from crossbill import models, schemas
 
 logger = logging.getLogger(__name__)
 

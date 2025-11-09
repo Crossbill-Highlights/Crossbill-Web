@@ -8,7 +8,7 @@ from alembic import context
 # add your model's MetaData object here
 # for 'autogenerate' support
 # Import your models here to enable autogenerate
-from inkwell.models import Base
+from crossbill.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,7 +23,7 @@ target_metadata = Base.metadata
 
 # Get database URL from environment variable
 database_url = os.getenv(
-    "DATABASE_URL", "postgresql://inkwell:inkwell_dev_password@localhost:5432/inkwell"
+    "DATABASE_URL", "postgresql://crossbill:crossbill_dev_password@localhost:5432/crossbill"
 )
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)

@@ -4,7 +4,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from inkwell import models
+from crossbill import models
 
 
 class TestHighlightsUpload:

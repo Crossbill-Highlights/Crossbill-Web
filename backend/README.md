@@ -1,6 +1,6 @@
-# Inkwell Backend
+# crossbill Backend
 
-Backend API for Inkwell - a self-hosted web app to sync highlights from KOReader to a server.
+Backend API for crossbill - a self-hosted web app to sync highlights from KOReader to a server.
 
 ## Features
 
@@ -31,9 +31,9 @@ docker-compose up -d
 This starts a PostgreSQL 16 container with the following configuration:
 - Host: localhost
 - Port: 5432
-- Database: inkwell
-- User: inkwell
-- Password: inkwell_dev_password
+- Database: crossbill
+- User: crossbill
+- Password: crossbill_dev_password
 
 ### 2. Install dependencies
 
@@ -52,7 +52,7 @@ The `.env` file is already configured to connect to the Docker PostgreSQL instan
 **Alternative: SQLite for local development**
 If you prefer to use SQLite without Docker, edit `.env` and change the DATABASE_URL:
 ```
-DATABASE_URL=sqlite:///./inkwell.db
+DATABASE_URL=sqlite:///./crossbill.db
 ```
 
 ### 4. Run migrations
@@ -64,7 +64,7 @@ poetry run alembic upgrade head
 ### 5. Run the development server
 
 ```bash
-poetry run uvicorn inkwell.main:app --reload
+poetry run uvicorn crossbill.main:app --reload
 ```
 
 The API will be available at http://localhost:8000
@@ -98,7 +98,7 @@ docker-compose logs -f postgres
 
 ### Access PostgreSQL CLI
 ```bash
-docker-compose exec postgres psql -U inkwell -d inkwell
+docker-compose exec postgres psql -U crossbill -d crossbill
 ```
 
 ## Development
@@ -121,7 +121,7 @@ poetry run black .
 
 ### Type checking
 ```bash
-poetry run mypy inkwell
+poetry run mypy crossbill
 ```
 
 ### Creating migrations

@@ -3,19 +3,19 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: inkwell-postgres
+    container_name: crossbill-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: inkwell
-      POSTGRES_PASSWORD: inkwell_dev_password
-      POSTGRES_DB: inkwell
+      POSTGRES_USER: crossbill
+      POSTGRES_PASSWORD: crossbill_dev_password
+      POSTGRES_DB: crossbill
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U inkwell"]
+      test: ["CMD-SHELL", "pg_isready -U crossbill"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from inkwell.config import Settings, get_settings
+from crossbill.config import Settings, get_settings
 
 
 class Base(DeclarativeBase):

@@ -1,8 +1,8 @@
-# Inkwell Highlights Upload - Implementation Plan
+# crossbill Highlights Upload - Implementation Plan
 
 ## Project Overview
 
-Create a KOReader plugin and backend API to upload highlights from KOReader to the Inkwell database for later editing and management.
+Create a KOReader plugin and backend API to upload highlights from KOReader to the crossbill database for later editing and management.
 
 **Scope**: Backend API + KOReader Plugin (frontend excluded from this phase)
 
@@ -16,7 +16,7 @@ Create a KOReader plugin and backend API to upload highlights from KOReader to t
 
 ## Phase 1: Database Schema & Migrations
 
-### 1.1 Update Database Models (`backend/inkwell/models.py`)
+### 1.1 Update Database Models (`backend/crossbill/models.py`)
 
 **Add Book Model**:
 ```python
@@ -82,7 +82,7 @@ class Chapter(Base):
 
 Uncomment the target_metadata line:
 ```python
-from inkwell.models import Base
+from crossbill.models import Base
 target_metadata = Base.metadata
 ```
 
@@ -98,7 +98,7 @@ poetry run alembic upgrade head
 
 ## Phase 2: Backend API Implementation
 
-### 2.1 Create Pydantic Schemas (`backend/inkwell/schemas.py`)
+### 2.1 Create Pydantic Schemas (`backend/crossbill/schemas.py`)
 
 **New file**: Create schemas for request/response validation
 
@@ -163,14 +163,14 @@ class HighlightUploadResponse(BaseModel):
     highlights_skipped: int  # duplicates
 ```
 
-### 2.2 Implement CRUD Operations (`backend/inkwell/crud.py`)
+### 2.2 Implement CRUD Operations (`backend/crossbill/crud.py`)
 
 **New file**: Database operations
 
 ```python
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from inkwell import models, schemas
+from crossbill import models, schemas
 
 def get_or_create_book(db: Session, book_data: schemas.BookCreate) -> models.Book:
     """Get existing book by file_path or create new one."""
@@ -239,15 +239,15 @@ def bulk_create_highlights(
     return created, skipped
 ```
 
-### 2.3 Create API Endpoint (`backend/inkwell/routers/highlights.py`)
+### 2.3 Create API Endpoint (`backend/crossbill/routers/highlights.py`)
 
 **New file**: API routes for highlights
 
 ```python
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from inkwell import schemas, crud
-from inkwell.database import get_db
+from crossbill import schemas, crud
+from crossbill.database import get_db
 
 router = APIRouter(prefix="/highlights", tags=["highlights"])
 
@@ -283,12 +283,12 @@ def upload_highlights(
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 ```
 
-### 2.4 Register Router (`backend/inkwell/main.py`)
+### 2.4 Register Router (`backend/crossbill/main.py`)
 
 Update main.py to include the highlights router:
 
 ```python
-from inkwell.routers import highlights
+from crossbill.routers import highlights
 
 # Add to create_app() function
 app.include_router(highlights.router, prefix="/api/v1")
@@ -314,11 +314,11 @@ You can see examples fo koreader highlights file in `clients/koreader-plugin/exa
 
 ### 3.1 Plugin Structure
 
-Create directory: `clients/koreader-plugin/inkwell.koplugin/`
+Create directory: `clients/koreader-plugin/crossbill.koplugin/`
 
 **File structure**:
 ```
-inkwell.koplugin/
+crossbill.koplugin/
 ├── _meta.lua           # Plugin metadata
 ├── main.lua            # Main plugin logic
 └── README.md           # Installation & usage instructions
@@ -329,9 +329,9 @@ inkwell.koplugin/
 ```lua
 local _ = require("gettext")
 return {
-    name = "inkwell",
-    fullname = _("Inkwell Sync"),
-    description = _([[Syncs your highlights to Inkwell server for editing and management.]]),
+    name = "crossbill",
+    fullname = _("crossbill Sync"),
+    description = _([[Syncs your highlights to crossbill server for editing and management.]]),
 }
 ```
 
@@ -349,23 +349,23 @@ local socketutil = require("socketutil")
 local JSON = require("json")
 local _ = require("gettext")
 
-local InkwellSync = WidgetContainer:extend{
-    name = "inkwell",
+local crossbillSync = WidgetContainer:extend{
+    name = "crossbill",
     is_doc_only = true,  -- Only show when document is open
 }
 
-function InkwellSync:init()
+function crossbillSync:init()
     -- Load settings
-    self.settings = G_reader_settings:readSetting("inkwell_sync") or {
+    self.settings = G_reader_settings:readSetting("crossbill_sync") or {
         api_url = "http://localhost:8000/api/v1/highlights/upload",
     }
 
     self.ui.menu:registerToMainMenu(self)
 end
 
-function InkwellSync:addToMainMenu(menu_items)
-    menu_items.inkwell_sync = {
-        text = _("Inkwell Sync"),
+function crossbillSync:addToMainMenu(menu_items)
+    menu_items.crossbill_sync = {
+        text = _("crossbill Sync"),
         sub_item_table = {
             {
                 text = _("Sync Current Book"),
@@ -383,10 +383,10 @@ function InkwellSync:addToMainMenu(menu_items)
     }
 end
 
-function InkwellSync:configureServer()
+function crossbillSync:configureServer()
     local input_dialog
     input_dialog = InputDialog:new{
-        title = _("Inkwell Server URL"),
+        title = _("crossbill Server URL"),
         input = self.settings.api_url,
         input_type = "text",
         buttons = {
@@ -402,7 +402,7 @@ function InkwellSync:configureServer()
                     is_enter_default = true,
                     callback = function()
                         self.settings.api_url = input_dialog:getInputText()
-                        G_reader_settings:saveSetting("inkwell_sync", self.settings)
+                        G_reader_settings:saveSetting("crossbill_sync", self.settings)
                         UIManager:close(input_dialog)
                         UIManager:show(InfoMessage:new{
                             text = _("Server URL saved"),
@@ -416,7 +416,7 @@ function InkwellSync:configureServer()
     input_dialog:onShowKeyboard()
 end
 
-function InkwellSync:syncCurrentBook()
+function crossbillSync:syncCurrentBook()
     UIManager:show(InfoMessage:new{
         text = _("Syncing highlights..."),
         timeout = 2,
@@ -447,7 +447,7 @@ function InkwellSync:syncCurrentBook()
     self:sendToServer(book_data, highlights)
 end
 
-function InkwellSync:getHighlights(doc_path)
+function crossbillSync:getHighlights(doc_path)
     local doc_settings = DocSettings:open(doc_path)
     local results = {}
 
@@ -499,7 +499,7 @@ function InkwellSync:getHighlights(doc_path)
     return results
 end
 
-function InkwellSync:sendToServer(book_data, highlights)
+function crossbillSync:sendToServer(book_data, highlights)
     local payload = {
         book = book_data,
         highlights = highlights,
@@ -543,42 +543,42 @@ function InkwellSync:sendToServer(book_data, highlights)
     end
 end
 
-function InkwellSync:getFilename(path)
+function crossbillSync:getFilename(path)
     return path:match("^.+/(.+)$") or path
 end
 
-return InkwellSync
+return crossbillSync
 ```
 
 ### 3.4 Plugin README (`README.md`)
 
 ```markdown
-# Inkwell KOReader Plugin
+# crossbill KOReader Plugin
 
-Syncs your KOReader highlights to your Inkwell server.
+Syncs your KOReader highlights to your crossbill server.
 
 ## Installation
 
-1. Copy the `inkwell.koplugin` directory to your KOReader plugins folder:
+1. Copy the `crossbill.koplugin` directory to your KOReader plugins folder:
    - **Device**: `koreader/plugins/`
    - **Desktop**: `.config/koreader/plugins/` (Linux/Mac) or `%APPDATA%\koreader\plugins\` (Windows)
 
 2. Restart KOReader
 
-3. Open any book and go to: Menu → Inkwell Sync → Configure Server
+3. Open any book and go to: Menu → crossbill Sync → Configure Server
 
-4. Enter your Inkwell server URL (e.g., `http://192.168.1.100:8000/api/v1/highlights/upload`)
+4. Enter your crossbill server URL (e.g., `http://192.168.1.100:8000/api/v1/highlights/upload`)
 
 ## Usage
 
 1. Open a book with highlights
-2. Menu → Inkwell Sync → Sync Current Book
-3. View your synced highlights on your Inkwell server
+2. Menu → crossbill Sync → Sync Current Book
+3. View your synced highlights on your crossbill server
 
 ## Requirements
 
 - KOReader version 2021.04 or later
-- Network connection to your Inkwell server
+- Network connection to your crossbill server
 ```
 
 ---
@@ -592,7 +592,7 @@ Syncs your KOReader highlights to your Inkwell server.
 ```python
 import pytest
 from fastapi.testclient import TestClient
-from inkwell.main import app
+from crossbill.main import app
 from tests.conftest import TestingSessionLocal
 
 client = TestClient(app)
@@ -704,7 +704,7 @@ curl -X POST http://localhost:8000/api/v1/highlights/upload \
 - [ ] Update README with API docs
 
 ### KOReader Plugin
-- [ ] Create `clients/koreader/inkwell.koplugin/` directory
+- [ ] Create `clients/koreader/crossbill.koplugin/` directory
 - [ ] Create `_meta.lua`
 - [ ] Create `main.lua` with sync logic
 - [ ] Create `README.md` with installation instructions

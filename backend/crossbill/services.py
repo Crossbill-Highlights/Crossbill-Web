@@ -4,7 +4,7 @@ import logging
 
 from sqlalchemy.orm import Session
 
-from inkwell import repositories, schemas
+from crossbill import repositories, schemas
 
 logger = logging.getLogger(__name__)
 

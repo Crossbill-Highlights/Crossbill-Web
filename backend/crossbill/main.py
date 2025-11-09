@@ -5,8 +5,8 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from inkwell.config import get_settings
-from inkwell.routers import highlights
+from crossbill.config import get_settings
+from crossbill.routers import highlights
 
 settings = get_settings()
 
@@ -34,7 +34,7 @@ app.include_router(highlights.router, prefix=settings.API_V1_PREFIX)
 @app.get("/")
 async def root() -> dict[str, str]:
     """Root endpoint."""
-    return {"message": "Welcome to Inkwell API"}
+    return {"message": "Welcome to crossbill API"}
 
 
 @app.get("/health")
@@ -47,7 +47,7 @@ async def health() -> dict[str, str]:
 async def api_root() -> dict[str, Any]:
     """API root endpoint."""
     return {
-        "message": "Inkwell API v1",
+        "message": "crossbill API v1",
         "version": settings.VERSION,
         "docs": f"{settings.API_V1_PREFIX}/docs",
     }

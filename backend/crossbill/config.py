@@ -10,12 +10,12 @@ class Settings:
 
     # Database
     DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", "postgresql://inkwell:inkwell_dev_password@localhost:5432/inkwell"
+        "DATABASE_URL", "postgresql://crossbill:crossbill_dev_password@localhost:5432/crossbill"
     )
 
     # API
     API_V1_PREFIX: str = "/api/v1"
-    PROJECT_NAME: str = "Inkwell API"
+    PROJECT_NAME: str = "crossbill API"
     VERSION: str = "0.1.0"
 
     # Environment

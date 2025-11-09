@@ -1,7 +1,7 @@
 [project]
-name = "inkwell-backend"
+name = "crossbill-backend"
 version = "0.1.0"
-description = "Inkwell backend - KOReader highlights sync server"
+description = "crossbill backend - KOReader highlights sync server"
 authors = [
     {name = "User",email = "user@example.com"}
 ]

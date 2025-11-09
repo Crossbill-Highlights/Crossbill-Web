@@ -1,1 +1,1 @@
-"""Tests for Inkwell backend."""
+"""Tests for crossbill backend."""

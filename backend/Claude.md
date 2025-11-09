@@ -1,4 +1,4 @@
-# Claude Code Rules for Inkwell Backend
+# Claude Code Rules for crossbill Backend
 
 ## Code Quality Standards
 
@@ -35,7 +35,7 @@ poetry run ruff check --fix .
 
 ### 2. Type Checks (mypy)
 ```bash
-poetry run mypy inkwell
+poetry run mypy crossbill
 ```
 All type errors must be resolved before committing.
 
@@ -57,7 +57,7 @@ Run all checks in sequence:
 ```bash
 poetry run black . && \
 poetry run ruff check --fix . && \
-poetry run mypy inkwell && \
+poetry run mypy crossbill && \
 poetry run pytest
 ```
 

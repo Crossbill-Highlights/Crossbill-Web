@@ -4,8 +4,8 @@ import logging
 
 from fastapi import APIRouter, HTTPException, status
 
-from inkwell import schemas, services
-from inkwell.database import DatabaseSession
+from crossbill import schemas, services
+from crossbill.database import DatabaseSession
 
 logger = logging.getLogger(__name__)
 

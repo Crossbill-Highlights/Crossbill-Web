@@ -13,23 +13,23 @@ local JSON = require("json")
 local logger = require("logger")
 local _ = require("gettext")
 
-local InkwellSync = WidgetContainer:extend{
-    name = "inkwell",
+local CrossbillSync = WidgetContainer:extend{
+    name = "Crossbill",
     is_doc_only = true,  -- Only show when document is open
 }
 
-function InkwellSync:init()
+function CrossbillSync:init()
     -- Load settings
-    self.settings = G_reader_settings:readSetting("inkwell_sync") or {
+    self.settings = G_reader_settings:readSetting("crossbill_sync") or {
         api_url = "http://localhost:8000/api/v1/highlights/upload",
     }
 
     self.ui.menu:registerToMainMenu(self)
 end
 
-function InkwellSync:addToMainMenu(menu_items)
-    menu_items.inkwell_sync = {
-        text = _("Inkwell Sync"),
+function CrossbillSync:addToMainMenu(menu_items)
+    menu_items.crossbill_sync = {
+        text = _("Crossbill Sync"),
         sub_item_table = {
             {
                 text = _("Sync Current Book"),
@@ -47,10 +47,10 @@ function InkwellSync:addToMainMenu(menu_items)
     }
 end
 
-function InkwellSync:configureServer()
+function CrossbillSync:configureServer()
     local input_dialog
     input_dialog = InputDialog:new{
-        title = _("Inkwell Server URL"),
+        title = _("crossbill Server URL"),
         input = self.settings.api_url,
         input_type = "text",
         buttons = {
@@ -66,7 +66,7 @@ function InkwellSync:configureServer()
                     is_enter_default = true,
                     callback = function()
                         self.settings.api_url = input_dialog:getInputText()
-                        G_reader_settings:saveSetting("inkwell_sync", self.settings)
+                        G_reader_settings:saveSetting("crossbill_sync", self.settings)
                         UIManager:close(input_dialog)
                         UIManager:show(InfoMessage:new{
                             text = _("Server URL saved"),
@@ -80,21 +80,21 @@ function InkwellSync:configureServer()
     input_dialog:onShowKeyboard()
 end
 
-function InkwellSync:ensureWifiEnabled(callback)
+function CrossbillSync:ensureWifiEnabled(callback)
     -- Enable WiFi if needed using NetworkMgr (the proper KOReader way)
     -- This will prompt user or auto-enable based on settings
     if NetworkMgr:willRerunWhenOnline(callback) then
         -- Network is off, NetworkMgr will call callback when online
-        logger.info("Inkwell: WiFi is off, prompting to enable...")
+        logger.info("crossbill: WiFi is off, prompting to enable...")
         return false
     else
         -- Network is already on
-        logger.info("Inkwell: WiFi already enabled")
+        logger.info("crossbill: WiFi already enabled")
         return true
     end
 end
 
-function InkwellSync:performSync()
+function CrossbillSync:performSync()
     -- The actual sync logic (separated so it can be called after WiFi is enabled)
     UIManager:show(InfoMessage:new{
         text = _("Syncing highlights..."),
@@ -106,7 +106,7 @@ function InkwellSync:performSync()
         local book_props = self.ui.doc_props
         local doc_path = self.ui.document.file
 
-        logger.dbg("Inkwell: Syncing book:", book_props.display_title or book_props.title or doc_path)
+        logger.dbg("Crossbill: Syncing book:", book_props.display_title or book_props.title or doc_path)
 
         -- Extract ISBN from identifiers if available
         local isbn = nil
@@ -137,14 +137,14 @@ function InkwellSync:performSync()
             return
         end
 
-        logger.dbg("Inkwell: Found", #highlights, "highlights")
+        logger.dbg("Crossbill: Found", #highlights, "highlights")
 
         -- Send to server
         self:sendToServer(book_data, highlights)
     end)
 
     if not success then
-        logger.err("Inkwell: Error in syncCurrentBook:", err)
+        logger.err("Crossbill: Error in syncCurrentBook:", err)
         UIManager:show(InfoMessage:new{
             text = _("Error syncing book: ") .. tostring(err),
             timeout = 5,
@@ -152,7 +152,7 @@ function InkwellSync:performSync()
     end
 end
 
-function InkwellSync:syncCurrentBook()
+function CrossbillSync:syncCurrentBook()
     -- Ensure WiFi is enabled before attempting to sync
     -- NetworkMgr will handle prompting user or auto-enabling based on settings
     local callback = function()
@@ -161,14 +161,14 @@ function InkwellSync:syncCurrentBook()
 
     if not self:ensureWifiEnabled(callback) then
         -- WiFi is being enabled, callback will be called when ready
-        logger.info("Inkwell: Waiting for WiFi to be enabled...")
+        logger.info("Crossbill: Waiting for WiFi to be enabled...")
     else
         -- WiFi already on, sync immediately
         self:performSync()
     end
 end
 
-function InkwellSync:getHighlights(doc_path)
+function CrossbillSync:getHighlights(doc_path)
     local doc_settings = DocSettings:open(doc_path)
     local results = {}
 
@@ -220,7 +220,7 @@ function InkwellSync:getHighlights(doc_path)
     return results
 end
 
-function InkwellSync:sendToServer(book_data, highlights)
+function CrossbillSync:sendToServer(book_data, highlights)
     -- Wrap everything in pcall for error handling
     local success, result = pcall(function()
         local payload = {
@@ -229,8 +229,8 @@ function InkwellSync:sendToServer(book_data, highlights)
         }
 
         local body_json = JSON.encode(payload)
-        logger.dbg("Inkwell: Sending request to", self.settings.api_url)
-        logger.dbg("Inkwell: Payload size:", #body_json, "bytes")
+        logger.dbg("Crossbill: Sending request to", self.settings.api_url)
+        logger.dbg("Crossbill: Payload size:", #body_json, "bytes")
 
         local response_body = {}
 
@@ -249,23 +249,23 @@ function InkwellSync:sendToServer(book_data, highlights)
         -- Use HTTP or HTTPS based on URL scheme
         local code, headers, status
         if self.settings.api_url:match("^https://") then
-            logger.dbg("Inkwell: Using HTTPS")
+            logger.dbg("Crossbill: Using HTTPS")
             code, headers, status = socket.skip(1, https.request(request))
         else
-            logger.dbg("Inkwell: Using HTTP")
+            logger.dbg("Crossbill: Using HTTP")
             code, headers, status = socket.skip(1, http.request(request))
         end
         socketutil:reset_timeout()
 
-        logger.dbg("Inkwell: Response code:", code)
+        logger.dbg("Crossbill: Response code:", code)
 
         if code == 200 then
             local response_text = table.concat(response_body)
-            logger.dbg("Inkwell: Response:", response_text)
+            logger.dbg("Crossbill: Response:", response_text)
 
             local ok, response_data = pcall(JSON.decode, response_text)
             if not ok then
-                logger.err("Inkwell: Failed to decode JSON response:", response_text)
+                logger.err("Crossbill: Failed to decode JSON response:", response_text)
                 return false, "Invalid server response"
             end
 
@@ -279,7 +279,7 @@ function InkwellSync:sendToServer(book_data, highlights)
             })
             return true
         else
-            logger.err("Inkwell: Sync failed with code:", code)
+            logger.err("Crossbill: Sync failed with code:", code)
             UIManager:show(InfoMessage:new{
                 text = _("Sync failed: ") .. tostring(code or "unknown error"),
                 timeout = 3,
@@ -289,7 +289,7 @@ function InkwellSync:sendToServer(book_data, highlights)
     end)
 
     if not success then
-        logger.err("Inkwell: Exception during sync:", result)
+        logger.err("Crossbill: Exception during sync:", result)
         UIManager:show(InfoMessage:new{
             text = _("Sync error: ") .. tostring(result),
             timeout = 5,
@@ -297,8 +297,8 @@ function InkwellSync:sendToServer(book_data, highlights)
     end
 end
 
-function InkwellSync:getFilename(path)
+function CrossbillSync:getFilename(path)
     return path:match("^.+/(.+)$") or path
 end
 
-return InkwellSync
+return CrossbillSync
