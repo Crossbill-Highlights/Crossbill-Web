@@ -36,7 +36,6 @@ export const BookPage = () => {
       <Box
         sx={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #fafaf9 0%, #fef3c7 50%, #fef9c3 100%)',
         }}
       >
         <Container maxWidth="lg">
@@ -51,7 +50,6 @@ export const BookPage = () => {
       <Box
         sx={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #fafaf9 0%, #fef3c7 50%, #fef9c3 100%)',
         }}
       >
         <Container maxWidth="lg">
@@ -67,7 +65,6 @@ export const BookPage = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #fafaf9 0%, #fef3c7 50%, #fef9c3 100%)',
       }}
     >
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, py: 4 }}>
@@ -135,8 +132,6 @@ export const BookPage = () => {
                       letterSpacing: '0.05em',
                       px: 2,
                       py: 1,
-                      bgcolor: 'rgba(120, 113, 108, 0.15)',
-                      borderRadius: 2,
                     }}
                   >
                     {chapter.name}
