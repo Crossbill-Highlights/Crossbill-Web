@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from inkwell.config import get_settings
+from inkwell.routers import highlights
 
 settings = get_settings()
 
@@ -25,6 +26,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register routers
+app.include_router(highlights.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
