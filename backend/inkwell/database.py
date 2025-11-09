@@ -15,7 +15,6 @@ class Base(DeclarativeBase):
     """Base class for all database models."""
 
 
-
 def get_engine(settings: Settings) -> Engine:
     """Create database engine."""
     return create_engine(
