@@ -6,8 +6,9 @@ import { AXIOS_INSTANCE } from './axios-instance';
  */
 export const configureApiClient = () => {
   // Override baseURL with environment variable if provided
+  // Note: Empty string means use relative paths (same origin) for production
   const apiUrl = import.meta.env.VITE_API_URL;
-  if (apiUrl) {
+  if (apiUrl !== undefined) {
     AXIOS_INSTANCE.defaults.baseURL = apiUrl as string;
   }
 };
