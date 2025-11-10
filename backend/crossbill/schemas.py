@@ -161,3 +161,31 @@ class HighlightDeleteResponse(BaseModel):
     success: bool = Field(..., description="Whether the deletion was successful")
     message: str = Field(..., description="Response message")
     deleted_count: int = Field(..., ge=0, description="Number of highlights deleted")
+
+
+class HighlightSearchResult(BaseModel):
+    """Schema for highlight search result with book and chapter data."""
+
+    id: int
+    text: str
+    page: int | None
+    note: str | None
+    datetime: str
+    book_id: int
+    book_title: str
+    book_author: str | None
+    chapter_id: int | None
+    chapter_name: str | None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class HighlightSearchResponse(BaseModel):
+    """Schema for highlight search response."""
+
+    highlights: list[HighlightSearchResult] = Field(
+        default_factory=list, description="List of matching highlights"
+    )
+    total: int = Field(..., ge=0, description="Total number of results")

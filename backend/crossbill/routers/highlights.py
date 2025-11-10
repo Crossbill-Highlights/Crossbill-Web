@@ -92,3 +92,68 @@ def upload_highlights(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Upload failed: {e!s}",
         ) from e
+
+
+@router.get(
+    "/search", response_model=schemas.HighlightSearchResponse, status_code=status.HTTP_200_OK
+)
+def search_highlights(
+    db: DatabaseSession,
+    search_text: str = Query(
+        ..., alias="searchText", min_length=1, description="Text to search for in highlights"
+    ),
+    book_id: int | None = Query(
+        None, alias="bookId", ge=1, description="Optional book ID to filter results"
+    ),
+    limit: int = Query(100, ge=1, le=500, description="Maximum number of results to return"),
+) -> schemas.HighlightSearchResponse:
+    """
+    Search for highlights using full-text search.
+
+    Searches across all highlight text using PostgreSQL full-text search.
+    Results are ranked by relevance and excludes soft-deleted highlights.
+
+    Args:
+        db: Database session
+        search_text: Text to search for
+        book_id: Optional book ID to filter by specific book
+        limit: Maximum number of results to return
+
+    Returns:
+        HighlightSearchResponse with matching highlights and their book/chapter data
+
+    Raises:
+        HTTPException: If search fails due to server error
+    """
+    try:
+        highlight_repo = repositories.HighlightRepository(db)
+        highlights = highlight_repo.search(search_text, book_id, limit)
+
+        # Convert to response schema with book and chapter data
+        search_results = [
+            schemas.HighlightSearchResult(
+                id=highlight.id,
+                text=highlight.text,
+                page=highlight.page,
+                note=highlight.note,
+                datetime=highlight.datetime,
+                book_id=highlight.book_id,
+                book_title=highlight.book.title,
+                book_author=highlight.book.author,
+                chapter_id=highlight.chapter_id,
+                chapter_name=highlight.chapter.name if highlight.chapter else None,
+                created_at=highlight.created_at,
+                updated_at=highlight.updated_at,
+            )
+            for highlight in highlights
+        ]
+
+        return schemas.HighlightSearchResponse(
+            highlights=search_results, total=len(search_results)
+        )
+    except Exception as e:
+        logger.error(f"Failed to search highlights: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search failed: {e!s}",
+        ) from e

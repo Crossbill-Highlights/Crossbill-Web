@@ -3,6 +3,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from crossbill.database import Base
@@ -100,6 +101,9 @@ class Highlight(Base):
     )
     deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, index=True
+    )
+    text_search_vector: Mapped[TSVECTOR | None] = mapped_column(
+        TSVECTOR, nullable=True, index=True
     )
 
     # Relationships

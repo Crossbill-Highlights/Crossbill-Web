@@ -282,6 +282,57 @@ class HighlightRepository:
         )
         return self.db.execute(stmt).scalars().all()
 
+    def search(
+        self, search_text: str, book_id: int | None = None, limit: int = 100
+    ) -> Sequence[models.Highlight]:
+        """
+        Search for highlights using full-text search (PostgreSQL) or LIKE (SQLite).
+
+        Args:
+            search_text: Text to search for
+            book_id: Optional book ID to filter by
+            limit: Maximum number of results to return (default 100)
+
+        Returns:
+            Sequence of matching highlights with their relationships loaded
+        """
+        # Check database type
+        is_postgresql = self.db.bind.dialect.name == "postgresql"
+
+        # Build the base query with eager loading of relationships
+        stmt = (
+            select(models.Highlight)
+            .join(models.Book)
+            .outerjoin(models.Chapter, models.Highlight.chapter_id == models.Chapter.id)
+            .where(models.Highlight.deleted_at.is_(None))
+        )
+
+        if is_postgresql:
+            # PostgreSQL: Use full-text search
+            search_query = func.plainto_tsquery("english", search_text)
+            stmt = stmt.where(models.Highlight.text_search_vector.op("@@")(search_query))
+        else:
+            # SQLite: Use LIKE-based search
+            stmt = stmt.where(models.Highlight.text.ilike(f"%{search_text}%"))
+
+        # Add optional book_id filter
+        if book_id is not None:
+            stmt = stmt.where(models.Highlight.book_id == book_id)
+
+        # Order by relevance and limit results
+        if is_postgresql:
+            search_query = func.plainto_tsquery("english", search_text)
+            stmt = stmt.order_by(
+                func.ts_rank(models.Highlight.text_search_vector, search_query).desc()
+            )
+        else:
+            # SQLite: Order by created_at (newest first)
+            stmt = stmt.order_by(models.Highlight.created_at.desc())
+
+        stmt = stmt.limit(limit)
+
+        return self.db.execute(stmt).scalars().all()
+
     def soft_delete_by_ids(self, book_id: int, highlight_ids: list[int]) -> int:
         """
         Soft delete highlights by their IDs for a specific book.
