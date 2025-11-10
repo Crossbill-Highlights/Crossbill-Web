@@ -33,7 +33,11 @@ export const BookCover = ({
 }: BookCoverProps) => {
   const theme = useTheme();
   // Get the API base URL for cover images
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  // Use empty string in production for same-origin requests
+  const apiUrl =
+    import.meta.env.VITE_API_URL !== undefined
+      ? import.meta.env.VITE_API_URL
+      : 'http://localhost:8000';
   const coverUrl = coverPath ? `${apiUrl}${coverPath}` : null;
 
   const placeholderBackground = theme.palette.action.hover;
