@@ -2,19 +2,33 @@ import type { Highlight } from '@/api/generated/model';
 import {
   CalendarMonth as CalendarIcon,
   ChevronRight as ChevronRightIcon,
+  Delete as DeleteIcon,
+  MoreVert as MoreVertIcon,
   FormatQuote as QuoteIcon,
 } from '@mui/icons-material';
-import { Box, CardContent, Collapse, IconButton, Typography } from '@mui/material';
+import {
+  Box,
+  CardContent,
+  Collapse,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Typography,
+} from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useDeleteHighlightsApiV1BookBookIdHighlightDelete } from '../../../api/generated/books/books';
 import { HoverableCard } from '../../common/HoverableCard';
 
 export interface HighlightCardProps {
   highlight: Highlight;
+  bookId: number;
 }
 
 const previewWordCount = 40;
 
-export const HighlightCard = ({ highlight }: HighlightCardProps) => {
+export const HighlightCard = ({ highlight, bookId }: HighlightCardProps) => {
   const startsWithLowercase =
     highlight.text.length > 0 &&
     highlight.text[0] === highlight.text[0].toLowerCase() &&
@@ -31,17 +45,103 @@ export const HighlightCard = ({ highlight }: HighlightCardProps) => {
   const remainingText = isExpandable ? words.slice(previewWordCount).join(' ') : '';
 
   const [isExpanded, setExpanded] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+  const queryClient = useQueryClient();
+
+  const deleteHighlightMutation = useDeleteHighlightsApiV1BookBookIdHighlightDelete();
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = (event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    setAnchorEl(null);
+  };
+
+  const handleDelete = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    handleMenuClose();
+
+    if (
+      confirm(
+        'Are you sure you want to delete this highlight? This will soft-delete the highlight and prevent it from being recreated during sync.'
+      )
+    ) {
+      try {
+        await deleteHighlightMutation.mutateAsync({
+          bookId,
+          data: { highlight_ids: [highlight.id] },
+        });
+        // Invalidate the book details query to refresh the UI
+        await queryClient.invalidateQueries({
+          queryKey: ['GetBookDetailsApiV1BookBookIdGet', bookId],
+        });
+      } catch (error) {
+        console.error('Failed to delete highlight:', error);
+        alert('Failed to delete highlight. Please try again.');
+      }
+    }
+  };
 
   return (
     <HoverableCard
       sx={{
         overflow: 'visible',
+        position: 'relative',
       }}
     >
+      {/* Menu Button */}
+      <IconButton
+        size="small"
+        onClick={handleMenuOpen}
+        sx={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          bgcolor: 'background.paper',
+          boxShadow: 1,
+          zIndex: 1,
+          '&:hover': {
+            bgcolor: 'background.paper',
+            boxShadow: 2,
+          },
+        }}
+      >
+        <MoreVertIcon fontSize="small" />
+      </IconButton>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={(event) => handleMenuClose(event as React.MouseEvent)}
+        onClick={(event) => event.stopPropagation()}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleDelete}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
+
       <CardContent
         onClick={() => (isExpandable ? setExpanded(!isExpanded) : null)}
         sx={{
           '&:last-child': { pb: 3 },
+          pr: 6, // Make room for the menu button
         }}
       >
         <Box

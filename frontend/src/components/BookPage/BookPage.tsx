@@ -72,7 +72,7 @@ export const BookPage = () => {
                 {chapter.highlights && chapter.highlights.length > 0 ? (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                     {chapter.highlights.map((highlight) => (
-                      <HighlightCard key={highlight.id} highlight={highlight} />
+                      <HighlightCard key={highlight.id} highlight={highlight} bookId={book.id} />
                     ))}
                   </Box>
                 ) : (
