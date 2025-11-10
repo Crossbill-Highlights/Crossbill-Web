@@ -145,3 +145,19 @@ class BookDetails(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class HighlightDeleteRequest(BaseModel):
+    """Schema for soft deleting highlights."""
+
+    highlight_ids: list[int] = Field(
+        ..., min_length=1, description="List of highlight IDs to soft delete"
+    )
+
+
+class HighlightDeleteResponse(BaseModel):
+    """Schema for highlight delete response."""
+
+    success: bool = Field(..., description="Whether the deletion was successful")
+    message: str = Field(..., description="Response message")
+    deleted_count: int = Field(..., ge=0, description="Number of highlights deleted")
