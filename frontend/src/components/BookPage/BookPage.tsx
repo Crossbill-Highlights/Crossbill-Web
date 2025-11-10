@@ -1,9 +1,9 @@
+import { useGetBookDetailsApiV1BookBookIdGet } from '@/api/generated/books/books.ts';
+import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/highlights/highlights.ts';
 import { Alert, Box, Container, Typography } from '@mui/material';
 import { useParams } from '@tanstack/react-router';
 import { debounce } from 'lodash';
 import { useMemo, useState } from 'react';
-import { useGetBookDetailsApiV1BookBookIdGet } from '@/api/generated/books/books.ts';
-import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/highlights/highlights.ts';
 import { SectionTitle } from '../common/SectionTitle';
 import { Spinner } from '../common/Spinner';
 import { BookTitle } from './components/BookTitle';

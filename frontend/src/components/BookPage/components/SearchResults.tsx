@@ -1,10 +1,12 @@
+import { HighlightSearchResult } from '@/api/generated/model';
+import { SectionTitle } from '@/components/common/SectionTitle';
 import { Box, Typography } from '@mui/material';
-import { Highlight } from '@/api/generated/model';
+import { chain, sortBy } from 'lodash';
 import { HighlightCard } from './HighlightCard';
 
 interface SearchResultsProps {
   isSearching: boolean;
-  highlights: Highlight[] | undefined;
+  highlights: HighlightSearchResult[] | undefined;
   searchText: string;
   bookId: number;
 }
@@ -26,6 +28,17 @@ export const SearchResults = ({
     );
   }
 
+  // Group highlights by chapter and sort chapters by chapter_id
+  const sortedChapters = chain(highlights)
+    .groupBy((highlight) => highlight.chapter_id ?? 'null')
+    .map((chapterHighlights, chapterIdStr) => ({
+      chapterId: chapterIdStr === 'null' ? null : Number(chapterIdStr),
+      chapterName: chapterHighlights[0]?.chapter_name ?? 'Unknown Chapter',
+      highlights: sortBy(chapterHighlights, (highlight) => highlight.page ?? Infinity),
+    }))
+    .sortBy((chapter) => chapter.chapterId ?? Infinity)
+    .value();
+
   // Results display
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -35,9 +48,19 @@ export const SearchResults = ({
             Found {highlights.length} highlight
             {highlights.length !== 1 ? 's' : ''}
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {highlights.map((highlight) => (
-              <HighlightCard key={highlight.id} highlight={highlight} bookId={bookId} />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {sortedChapters?.map((chapter) => (
+              <Box key={chapter.chapterId ?? 'unknown'}>
+                {/* Chapter Header */}
+                <SectionTitle showDivider>{chapter.chapterName}</SectionTitle>
+
+                {/* Highlights in this chapter */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {chapter.highlights.map((highlight) => (
+                    <HighlightCard key={highlight.id} highlight={highlight} bookId={bookId} />
+                  ))}
+                </Box>
+              </Box>
             ))}
           </Box>
         </>
