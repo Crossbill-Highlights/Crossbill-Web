@@ -82,11 +82,9 @@ export const BookPage = () => {
             <BookCover
               coverPath={book.cover}
               title={book.title}
-              width={{ xs: 80, sm: 96 }}
-              height={{ xs: 106, sm: 128 }}
-              objectFit="cover"
-              gradientPlaceholder
-              sx={{ boxShadow: 2, flexShrink: 0, ml: 2 }}
+              height={200}
+              width={{ xs: 80, sm: 128 }}
+              sx={{ flexShrink: 0, ml: 2 }}
             />
           </Box>
         </Card>
