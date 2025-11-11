@@ -228,7 +228,7 @@ class HighlightRepository:
     def create(self, book_id: int, highlight_data: schemas.HighlightCreate) -> models.Highlight:
         """Create a new highlight."""
         highlight = models.Highlight(
-            book_id=book_id, **highlight_data.model_dump(exclude={"chapter"})
+            book_id=book_id, **highlight_data.model_dump(exclude={"chapter", "chapter_number"})
         )
         self.db.add(highlight)
         self.db.commit()
@@ -242,7 +242,7 @@ class HighlightRepository:
         highlight = models.Highlight(
             book_id=book_id,
             chapter_id=chapter_id,
-            **highlight_data.model_dump(exclude={"chapter"}),
+            **highlight_data.model_dump(exclude={"chapter", "chapter_number"}),
         )
         self.db.add(highlight)
         self.db.commit()

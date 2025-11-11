@@ -34,13 +34,6 @@ class ChapterBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=500, description="Chapter name")
 
 
-class ChapterInfo(BaseModel):
-    """Schema for chapter information from KOReader TOC."""
-
-    name: str = Field(..., min_length=1, max_length=500, description="Chapter name")
-    number: int = Field(..., ge=1, description="Chapter number/index in TOC")
-
-
 class Chapter(ChapterBase):
     """Schema for Chapter response."""
 
@@ -58,6 +51,7 @@ class HighlightBase(BaseModel):
 
     text: str = Field(..., min_length=1, description="Highlighted text")
     chapter: str | None = Field(None, max_length=500, description="Chapter name")
+    chapter_number: int | None = Field(None, ge=1, description="Chapter order number from TOC")
     page: int | None = Field(None, ge=0, description="Page number")
     note: str | None = Field(None, description="Note/annotation")
     datetime: str = Field(..., min_length=1, max_length=50, description="KOReader datetime format")
@@ -84,9 +78,6 @@ class HighlightUploadRequest(BaseModel):
 
     book: BookCreate = Field(..., description="Book metadata")
     highlights: list[HighlightCreate] = Field(..., description="List of highlights to upload")
-    chapters: list[ChapterInfo] = Field(
-        default_factory=list, description="List of chapters from TOC for ordering"
-    )
 
 
 class HighlightUploadResponse(BaseModel):

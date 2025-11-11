@@ -27,12 +27,11 @@ class HighlightUploadService:
 
         This method:
         1. Creates or updates the book record
-        2. Creates a chapter number mapping from the TOC
-        3. Creates or retrieves chapter records for highlights with chapter info
-        4. Bulk creates highlights with deduplication
+        2. Creates or retrieves chapter records for highlights with chapter info
+        3. Bulk creates highlights with deduplication
 
         Args:
-            request: Upload request containing book metadata, highlights, and chapter list
+            request: Upload request containing book metadata and highlights
 
         Returns:
             HighlightUploadResponse with upload statistics
@@ -42,14 +41,7 @@ class HighlightUploadService:
         # Step 1: Get or create book
         book = self.book_repo.get_or_create(request.book)
 
-        # Step 2: Create chapter number mapping from TOC
-        chapter_number_map: dict[str, int] = {}
-        if request.chapters:
-            for chapter_info in request.chapters:
-                chapter_number_map[chapter_info.name] = chapter_info.number
-            logger.info(f"Received {len(chapter_number_map)} chapters from TOC")
-
-        # Step 3: Process chapters and prepare highlights
+        # Step 2: Process chapters and prepare highlights
         highlights_with_chapters: list[tuple[int | None, schemas.HighlightCreate]] = []
 
         for highlight_data in request.highlights:
@@ -57,8 +49,8 @@ class HighlightUploadService:
 
             # If highlight has chapter info, get or create the chapter
             if highlight_data.chapter:
-                # Look up chapter number from the TOC mapping
-                chapter_number = chapter_number_map.get(highlight_data.chapter)
+                # Use chapter_number from the highlight (set by KOReader plugin)
+                chapter_number = highlight_data.chapter_number
 
                 # Get or create chapter with the chapter number
                 chapter = self.chapter_repo.get_or_create(
@@ -68,7 +60,7 @@ class HighlightUploadService:
 
             highlights_with_chapters.append((chapter_id, highlight_data))
 
-        # Step 4: Bulk create highlights
+        # Step 3: Bulk create highlights
         created, skipped = self.highlight_repo.bulk_create(book.id, highlights_with_chapters)
 
         message = f"Successfully synced highlights for '{book.title}'"
