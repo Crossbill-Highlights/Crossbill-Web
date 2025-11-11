@@ -12,6 +12,7 @@ local socketutil = require("socketutil")
 local JSON = require("json")
 local logger = require("logger")
 local _ = require("gettext")
+local FileManagerBookInfo = require("apps/filemanager/filemanagerbookinfo")
 
 local CrossbillSync = WidgetContainer:extend{
     name = "Crossbill",
@@ -319,6 +320,11 @@ function CrossbillSync:sendToServer(book_data, highlights)
                 return false, "Invalid server response"
             end
 
+            -- Upload cover image if available
+            if response_data.book_id then
+                self:uploadCoverImage(response_data.book_id)
+            end
+
             UIManager:show(InfoMessage:new{
                 text = string.format(
                     _("Synced successfully!\n%d new, %d duplicates"),
@@ -349,6 +355,96 @@ end
 
 function CrossbillSync:getFilename(path)
     return path:match("^.+/(.+)$") or path
+end
+
+function CrossbillSync:uploadCoverImage(book_id)
+    -- Extract and upload the book cover image
+    -- This function is called after successful highlights sync
+    local success, err = pcall(function()
+        logger.dbg("Crossbill: Attempting to extract cover for book_id:", book_id)
+
+        -- Get the cover image from the document
+        local cover_image = FileManagerBookInfo:getCoverImage(self.ui.document)
+
+        if not cover_image then
+            logger.dbg("Crossbill: No cover image available for this document")
+            return
+        end
+
+        logger.dbg("Crossbill: Cover image extracted, size:", cover_image:getWidth(), "x", cover_image:getHeight())
+
+        -- Save cover to temporary file
+        local tmp_cover_path = "/tmp/crossbill_cover_" .. book_id .. ".jpg"
+        cover_image:writeToFile(tmp_cover_path)
+        logger.dbg("Crossbill: Cover saved to temporary file:", tmp_cover_path)
+
+        -- Read the cover file content
+        local cover_file = io.open(tmp_cover_path, "rb")
+        if not cover_file then
+            logger.err("Crossbill: Failed to open temporary cover file")
+            cover_image:free()
+            return
+        end
+
+        local cover_data = cover_file:read("*all")
+        cover_file:close()
+
+        -- Free the cover image from memory
+        cover_image:free()
+
+        -- Prepare multipart/form-data upload
+        local boundary = "----CrossbillBoundary" .. os.time()
+        local body_parts = {}
+
+        -- Add the file part
+        table.insert(body_parts, "--" .. boundary)
+        table.insert(body_parts, 'Content-Disposition: form-data; name="cover"; filename="cover.jpg"')
+        table.insert(body_parts, "Content-Type: image/jpeg")
+        table.insert(body_parts, "")
+        table.insert(body_parts, cover_data)
+        table.insert(body_parts, "--" .. boundary .. "--")
+
+        local body = table.concat(body_parts, "\r\n")
+
+        -- Construct API URL
+        local api_url = self.settings.base_url .. "/api/v1/book/" .. book_id .. "/metadata/cover"
+        logger.dbg("Crossbill: Uploading cover to", api_url)
+
+        local response_body = {}
+        local request = {
+            url = api_url,
+            method = "POST",
+            headers = {
+                ["Content-Type"] = "multipart/form-data; boundary=" .. boundary,
+                ["Content-Length"] = tostring(#body),
+            },
+            source = ltn12.source.string(body),
+            sink = ltn12.sink.table(response_body),
+        }
+
+        -- Use HTTP or HTTPS based on URL scheme
+        local code
+        if api_url:match("^https://") then
+            code = socket.skip(1, https.request(request))
+        else
+            code = socket.skip(1, http.request(request))
+        end
+        socketutil:reset_timeout()
+
+        -- Clean up temporary file
+        os.remove(tmp_cover_path)
+
+        if code == 200 then
+            logger.info("Crossbill: Cover uploaded successfully for book", book_id)
+        else
+            logger.warn("Crossbill: Failed to upload cover, response code:", code)
+        end
+    end)
+
+    if not success then
+        logger.err("Crossbill: Error uploading cover:", err)
+        -- Don't show error to user, cover upload is optional
+    end
 end
 
 return CrossbillSync
