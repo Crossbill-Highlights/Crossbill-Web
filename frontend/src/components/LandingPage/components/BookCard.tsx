@@ -79,8 +79,9 @@ export const BookCard = ({ book }: BookCardProps) => {
         sx={{
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'row',
           position: 'relative',
+          minHeight: 180,
         }}
       >
         {/* Menu Button */}
@@ -89,7 +90,7 @@ export const BookCard = ({ book }: BookCardProps) => {
           onClick={handleMenuOpen}
           sx={{
             position: 'absolute',
-            bottom: 8,
+            top: 8,
             right: 8,
             zIndex: 1,
             '&:hover': {
@@ -122,9 +123,16 @@ export const BookCard = ({ book }: BookCardProps) => {
           </MenuItem>
         </Menu>
 
-        <BookCover coverPath={book.cover} title={book.title} height={200} />
+        <BookCover
+          coverPath={book.cover}
+          title={book.title}
+          width={120}
+          height="100%"
+          objectFit="cover"
+          sx={{ flexShrink: 0 }}
+        />
 
-        <CardContent>
+        <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', paddingRight: 6 }}>
           <Typography
             variant="h6"
             component="h3"
@@ -133,10 +141,20 @@ export const BookCard = ({ book }: BookCardProps) => {
           >
             {book.title}
           </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            gutterBottom
+            sx={{
+              width: '250px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {book.author || 'Unknown Author'}
           </Typography>
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ mt: 'auto' }}>
             <Typography variant="body2" color="text.secondary">
               {book.highlight_count} {book.highlight_count === 1 ? 'highlight' : 'highlights'}
             </Typography>
