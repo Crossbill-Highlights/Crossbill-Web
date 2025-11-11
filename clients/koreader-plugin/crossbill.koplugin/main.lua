@@ -21,7 +21,7 @@ local CrossbillSync = WidgetContainer:extend{
 function CrossbillSync:init()
     -- Load settings
     self.settings = G_reader_settings:readSetting("crossbill_sync") or {
-        api_url = "http://localhost:8000/api/v1/highlights/upload",
+        base_url = "http://localhost:8000",
     }
 
     self.ui.menu:registerToMainMenu(self)
@@ -50,9 +50,10 @@ end
 function CrossbillSync:configureServer()
     local input_dialog
     input_dialog = InputDialog:new{
-        title = _("crossbill Server URL"),
-        input = self.settings.api_url,
+        title = _("Crossbill Server Host"),
+        input = self.settings.base_url,
         input_type = "text",
+        hint = _("e.g., https://example.com or http://example.com:8000"),
         buttons = {
             {
                 {
@@ -65,11 +66,13 @@ function CrossbillSync:configureServer()
                     text = _("Save"),
                     is_enter_default = true,
                     callback = function()
-                        self.settings.api_url = input_dialog:getInputText()
+                        -- Remove trailing slash if present
+                        local host = input_dialog:getInputText():gsub("/$", "")
+                        self.settings.base_url = host
                         G_reader_settings:saveSetting("crossbill_sync", self.settings)
                         UIManager:close(input_dialog)
                         UIManager:show(InfoMessage:new{
-                            text = _("Server URL saved"),
+                            text = _("Server host saved"),
                         })
                     end,
                 },
@@ -273,13 +276,16 @@ function CrossbillSync:sendToServer(book_data, highlights)
         }
 
         local body_json = JSON.encode(payload)
-        logger.dbg("Crossbill: Sending request to", self.settings.api_url)
+
+        -- Construct full API URL from host
+        local api_url = self.settings.base_url .. "/api/v1/highlights/upload"
+        logger.dbg("Crossbill: Sending request to", api_url)
         logger.dbg("Crossbill: Payload size:", #body_json, "bytes")
 
         local response_body = {}
 
         local request = {
-            url = self.settings.api_url,
+            url = api_url,
             method = "POST",
             headers = {
                 ["Content-Type"] = "application/json",
@@ -292,7 +298,7 @@ function CrossbillSync:sendToServer(book_data, highlights)
 
         -- Use HTTP or HTTPS based on URL scheme
         local code, headers, status
-        if self.settings.api_url:match("^https://") then
+        if api_url:match("^https://") then
             logger.dbg("Crossbill: Using HTTPS")
             code, headers, status = socket.skip(1, https.request(request))
         else
