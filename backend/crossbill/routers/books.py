@@ -1,12 +1,13 @@
 """API routes for books management."""
 
 import logging
+from typing import Annotated
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 from crossbill import schemas
 from crossbill.database import DatabaseSession
-from crossbill.exceptions import CrossbillException
+from crossbill.exceptions import CrossbillError
 from crossbill.services import BookService
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ def get_book_details(
     try:
         service = BookService(db)
         return service.get_book_details(book_id)
-    except CrossbillException:
+    except CrossbillError:
         # Re-raise custom exceptions - handled by exception handlers
         raise
     except Exception as e:
@@ -68,7 +69,7 @@ def delete_book(
     try:
         service = BookService(db)
         service.delete_book(book_id)
-    except CrossbillException:
+    except CrossbillError:
         # Re-raise custom exceptions - handled by exception handlers
         raise
     except Exception as e:
@@ -110,7 +111,7 @@ def delete_highlights(
     try:
         service = BookService(db)
         return service.delete_highlights(book_id, request.highlight_ids)
-    except CrossbillException:
+    except CrossbillError:
         # Re-raise custom exceptions - handled by exception handlers
         raise
     except Exception as e:
@@ -128,7 +129,7 @@ def delete_highlights(
 )
 def upload_book_cover(
     book_id: int,
-    cover: UploadFile = File(...),
+    cover: Annotated[UploadFile, File(...)],
     db: DatabaseSession = None,
 ) -> schemas.CoverUploadResponse:
     """
@@ -152,7 +153,7 @@ def upload_book_cover(
     try:
         service = BookService(db)
         return service.upload_cover(book_id, cover)
-    except CrossbillException:
+    except CrossbillError:
         # Re-raise custom exceptions - handled by exception handlers
         raise
     except Exception as e:

@@ -1,7 +1,7 @@
 """Custom exception hierarchy for Crossbill application."""
 
 
-class CrossbillException(Exception):
+class CrossbillError(Exception):
     """Base exception for all Crossbill errors."""
 
     def __init__(self, message: str) -> None:
@@ -10,7 +10,7 @@ class CrossbillException(Exception):
         super().__init__(self.message)
 
 
-class NotFoundError(CrossbillException):
+class NotFoundError(CrossbillError):
     """Resource not found error."""
 
 
@@ -23,9 +23,9 @@ class BookNotFoundError(NotFoundError):
         super().__init__(f"Book with id {book_id} not found")
 
 
-class ValidationError(CrossbillException):
+class ValidationError(CrossbillError):
     """Validation error."""
 
 
-class ServiceError(CrossbillException):
+class ServiceError(CrossbillError):
     """Service layer error."""

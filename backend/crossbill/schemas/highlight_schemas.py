@@ -5,7 +5,6 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from crossbill.schemas.book_schemas import BookCreate
-from crossbill.schemas.chapter_schemas import Chapter
 
 
 class HighlightBase(BaseModel):
