@@ -29,7 +29,7 @@ class BookRepository:
         """Create a new book."""
         book = models.Book(**book_data.model_dump())
         self.db.add(book)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(book)
         logger.info(f"Created book: {book.title} (id={book.id})")
         return book
@@ -39,7 +39,7 @@ class BookRepository:
         book.title = book_data.title
         book.author = book_data.author
         book.isbn = book_data.isbn
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(book)
         logger.info(f"Updated book: {book.title} (id={book.id})")
         return book
@@ -109,7 +109,7 @@ class BookRepository:
             return False
 
         self.db.delete(book)
-        self.db.commit()
+        self.db.flush()
         logger.info(f"Deleted book: {book.title} (id={book.id})")
         return True
 
@@ -134,7 +134,7 @@ class ChapterRepository:
         """Create a new chapter."""
         chapter = models.Chapter(book_id=book_id, name=name, chapter_number=chapter_number)
         self.db.add(chapter)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(chapter)
         logger.info(f"Created chapter: {name} for book_id={book_id} (number={chapter_number})")
         return chapter
@@ -145,7 +145,7 @@ class ChapterRepository:
         chapter = self.db.execute(stmt).scalar_one_or_none()
         if chapter:
             chapter.chapter_number = chapter_number
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(chapter)
             logger.info(f"Updated chapter {chapter_id} number to {chapter_number}")
         return chapter
@@ -160,7 +160,7 @@ class ChapterRepository:
             # Update chapter number if it's different
             if chapter_number is not None and chapter.chapter_number != chapter_number:
                 chapter.chapter_number = chapter_number
-                self.db.commit()
+                self.db.flush()
                 self.db.refresh(chapter)
                 logger.info(
                     f"Updated chapter number for '{name}' (book_id={book_id}) to {chapter_number}"
@@ -177,7 +177,7 @@ class ChapterRepository:
                 # Update chapter number if it's different
                 if chapter_number is not None and chapter.chapter_number != chapter_number:
                     chapter.chapter_number = chapter_number
-                    self.db.commit()
+                    self.db.flush()
                     self.db.refresh(chapter)
                 return chapter
             raise
@@ -211,7 +211,7 @@ class HighlightRepository:
             book_id=book_id, **highlight_data.model_dump(exclude={"chapter", "chapter_number"})
         )
         self.db.add(highlight)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(highlight)
         return highlight
 
@@ -225,7 +225,7 @@ class HighlightRepository:
             **highlight_data.model_dump(exclude={"chapter", "chapter_number"}),
         )
         self.db.add(highlight)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(highlight)
         return highlight
 
@@ -372,6 +372,6 @@ class HighlightRepository:
             highlight.deleted_at = datetime.now(UTC)
             count += 1
 
-        self.db.commit()
+        self.db.flush()
         logger.info(f"Soft deleted {count} highlights for book_id={book_id}")
         return count

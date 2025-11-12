@@ -116,6 +116,9 @@ class BookService:
                 detail=f"Book with id {book_id} not found",
             )
 
+        # Commit the deletion
+        self.db.commit()
+
         logger.info(f"Successfully deleted book {book_id}")
         return True
 
@@ -150,6 +153,9 @@ class BookService:
 
         # Soft delete highlights
         deleted_count = self.highlight_repo.soft_delete_by_ids(book_id, highlight_ids)
+
+        # Commit the changes
+        self.db.commit()
 
         return schemas.HighlightDeleteResponse(
             success=True,

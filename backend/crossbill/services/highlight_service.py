@@ -73,6 +73,9 @@ class HighlightService:
         # Step 3: Bulk create highlights
         created, skipped = self.highlight_repo.bulk_create(book.id, highlights_with_chapters)
 
+        # Commit all changes (book, chapters, highlights)
+        self.db.commit()
+
         message = f"Successfully synced highlights for '{book.title}'"
         logger.info(
             f"Upload complete for book '{book.title}' (id={book.id}): "
