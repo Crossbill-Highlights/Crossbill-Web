@@ -6,6 +6,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 from crossbill import schemas
 from crossbill.database import DatabaseSession
+from crossbill.exceptions import CrossbillException
 from crossbill.services import BookService
 
 logger = logging.getLogger(__name__)
@@ -34,8 +35,8 @@ def get_book_details(
     try:
         service = BookService(db)
         return service.get_book_details(book_id)
-    except HTTPException:
-        # Re-raise HTTP exceptions as-is
+    except CrossbillException:
+        # Re-raise custom exceptions - handled by exception handlers
         raise
     except Exception as e:
         logger.error(f"Failed to fetch book details for book_id={book_id}: {e!s}", exc_info=True)
@@ -67,8 +68,8 @@ def delete_book(
     try:
         service = BookService(db)
         service.delete_book(book_id)
-    except HTTPException:
-        # Re-raise HTTP exceptions as-is
+    except CrossbillException:
+        # Re-raise custom exceptions - handled by exception handlers
         raise
     except Exception as e:
         logger.error(f"Failed to delete book {book_id}: {e!s}", exc_info=True)
@@ -109,8 +110,8 @@ def delete_highlights(
     try:
         service = BookService(db)
         return service.delete_highlights(book_id, request.highlight_ids)
-    except HTTPException:
-        # Re-raise HTTP exceptions as-is
+    except CrossbillException:
+        # Re-raise custom exceptions - handled by exception handlers
         raise
     except Exception as e:
         logger.error(f"Failed to delete highlights for book {book_id}: {e!s}", exc_info=True)
@@ -151,8 +152,8 @@ def upload_book_cover(
     try:
         service = BookService(db)
         return service.upload_cover(book_id, cover)
-    except HTTPException:
-        # Re-raise HTTP exceptions as-is
+    except CrossbillException:
+        # Re-raise custom exceptions - handled by exception handlers
         raise
     except Exception as e:
         logger.error(f"Failed to upload cover for book {book_id}: {e!s}", exc_info=True)

@@ -3,10 +3,11 @@
 import logging
 from pathlib import Path
 
-from fastapi import HTTPException, UploadFile, status
+from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from crossbill import repositories, schemas
+from crossbill.exceptions import BookNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -41,10 +42,7 @@ class BookService:
         book = self.book_repo.get_by_id(book_id)
 
         if not book:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Book with id {book_id} not found",
-            )
+            raise BookNotFoundError(book_id)
 
         # Get chapters for the book
         chapters = self.chapter_repo.get_by_book_id(book_id)
@@ -111,10 +109,7 @@ class BookService:
         deleted = self.book_repo.delete(book_id)
 
         if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Book with id {book_id} not found",
-            )
+            raise BookNotFoundError(book_id)
 
         # Commit the deletion
         self.db.commit()
@@ -146,10 +141,7 @@ class BookService:
         book = self.book_repo.get_by_id(book_id)
 
         if not book:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Book with id {book_id} not found",
-            )
+            raise BookNotFoundError(book_id)
 
         # Soft delete highlights
         deleted_count = self.highlight_repo.soft_delete_by_ids(book_id, highlight_ids)
@@ -185,10 +177,7 @@ class BookService:
         book = self.book_repo.get_by_id(book_id)
 
         if not book:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Book with id {book_id} not found",
-            )
+            raise BookNotFoundError(book_id)
 
         # Ensure covers directory exists
         COVERS_DIR.mkdir(parents=True, exist_ok=True)

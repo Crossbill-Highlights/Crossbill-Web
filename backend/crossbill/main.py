@@ -3,12 +3,13 @@
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from crossbill.config import get_settings
+from crossbill.exceptions import BookNotFoundError, CrossbillException, NotFoundError
 from crossbill.routers import books, highlights
 
 settings = get_settings()
@@ -36,6 +37,45 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Exception handlers
+@app.exception_handler(BookNotFoundError)
+async def book_not_found_handler(request: Request, exc: BookNotFoundError) -> JSONResponse:
+    """Handle book not found errors."""
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "book_not_found",
+            "message": str(exc),
+            "book_id": exc.book_id,
+        },
+    )
+
+
+@app.exception_handler(NotFoundError)
+async def not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
+    """Handle generic not found errors."""
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "not_found",
+            "message": str(exc),
+        },
+    )
+
+
+@app.exception_handler(CrossbillException)
+async def crossbill_exception_handler(request: Request, exc: CrossbillException) -> JSONResponse:
+    """Handle all custom Crossbill exceptions."""
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "internal_error",
+            "message": str(exc),
+        },
+    )
+
 
 # Register routers
 app.include_router(highlights.router, prefix=settings.API_V1_PREFIX)
