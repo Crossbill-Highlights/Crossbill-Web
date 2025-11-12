@@ -1,5 +1,4 @@
 import { useGetBookDetailsApiV1BookBookIdGet } from '@/api/generated/books/books.ts';
-import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/highlights/highlights.ts';
 import { Alert, Box, Container, Typography } from '@mui/material';
 import { useParams } from '@tanstack/react-router';
 import { debounce } from 'lodash';
@@ -34,20 +33,34 @@ export const BookPage = () => {
     };
   }, [debouncedSearch]);
 
-  // Search query - only enabled when there's search text
-  // Use a placeholder when empty to satisfy validation (query won't run due to enabled flag)
-  const { data: searchResults, isLoading: isSearching } =
-    useSearchHighlightsApiV1HighlightsSearchGet(
-      {
-        searchText: debouncedSearchText || 'placeholder',
-        bookId: Number(bookId),
-      },
-      {
-        query: {
-          enabled: debouncedSearchText.length > 0,
-        },
-      }
-    );
+  // Frontend search - filter highlights from book data
+  const searchResults = useMemo(() => {
+    if (!book || !debouncedSearchText || debouncedSearchText.length === 0) {
+      return { highlights: [] };
+    }
+
+    const searchLower = debouncedSearchText.toLowerCase();
+    const matchingHighlights: any[] = [];
+
+    // Iterate through all chapters and their highlights
+    book.chapters?.forEach((chapter) => {
+      chapter.highlights?.forEach((highlight) => {
+        // Case-insensitive search in highlight text
+        if (highlight.text.toLowerCase().includes(searchLower)) {
+          // Transform to match HighlightSearchResult format
+          matchingHighlights.push({
+            ...highlight,
+            book_title: book.title,
+            book_author: book.author,
+            chapter_name: chapter.name,
+            chapter_number: chapter.chapter_number,
+          });
+        }
+      });
+    });
+
+    return { highlights: matchingHighlights };
+  }, [book, debouncedSearchText]);
 
   const totalHighlights =
     book?.chapters?.reduce((sum, chapter) => sum + (chapter.highlights?.length || 0), 0) || 0;
@@ -123,7 +136,7 @@ export const BookPage = () => {
         {/* Search Results */}
         {showSearchResults && (
           <SearchResults
-            isSearching={isSearching}
+            isSearching={false}
             highlights={searchResults?.highlights}
             searchText={debouncedSearchText}
             bookId={book.id}
