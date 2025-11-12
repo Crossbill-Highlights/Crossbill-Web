@@ -1,8 +1,12 @@
 """Application configuration."""
 
+import logging
 import os
+import sys
 from functools import lru_cache
 from typing import ClassVar, Literal
+
+import structlog
 
 
 class Settings:
@@ -26,6 +30,44 @@ class Settings:
     # CORS
     CORS_ORIGINS: ClassVar[list[str]] = (
         os.getenv("CORS_ORIGINS", "*").split(",") if os.getenv("CORS_ORIGINS") != "*" else ["*"]
+    )
+
+
+def configure_logging(environment: str = "development") -> None:
+    """Configure structured logging with structlog."""
+    # Determine if we should use JSON output (production) or console output (dev)
+    use_json = environment == "production"
+
+    # Configure stdlib logging
+    logging.basicConfig(
+        format="%(message)s",
+        stream=sys.stdout,
+        level=logging.INFO,
+    )
+
+    # Configure structlog
+    processors = [
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+    ]
+
+    if use_json:
+        # Production: JSON output
+        processors.append(structlog.processors.JSONRenderer())
+    else:
+        # Development: Console output with colors
+        processors.append(structlog.dev.ConsoleRenderer())
+
+    structlog.configure(
+        processors=processors,
+        wrapper_class=structlog.stdlib.BoundLogger,
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
     )
 
 

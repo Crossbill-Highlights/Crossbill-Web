@@ -1,5 +1,7 @@
 """Main FastAPI application."""
 
+import time
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -8,11 +10,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from crossbill.config import get_settings
+import structlog
+
+from crossbill.config import configure_logging, get_settings
 from crossbill.exceptions import BookNotFoundError, CrossbillException, NotFoundError
 from crossbill.routers import books, highlights
 
 settings = get_settings()
+
+# Configure structured logging
+configure_logging(settings.ENVIRONMENT)
+
+logger = structlog.get_logger(__name__)
 
 # Directory for book cover images
 COVERS_DIR = Path(__file__).parent.parent / "book-covers"
@@ -27,6 +36,48 @@ app = FastAPI(
     redoc_url=f"{settings.API_V1_PREFIX}/redoc",
     openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
 )
+
+
+# Add request ID middleware
+@app.middleware("http")
+async def add_request_id_and_logging(request: Request, call_next):
+    """Add request ID to each request and log request/response."""
+    request_id = str(uuid.uuid4())
+    request.state.request_id = request_id
+
+    # Bind request_id to context for all logs in this request
+    structlog.contextvars.clear_contextvars()
+    structlog.contextvars.bind_contextvars(request_id=request_id)
+
+    start_time = time.time()
+
+    # Log incoming request
+    logger.info(
+        "request_started",
+        method=request.method,
+        path=request.url.path,
+        client_host=request.client.host if request.client else None,
+    )
+
+    response = await call_next(request)
+
+    # Calculate request duration
+    duration = time.time() - start_time
+
+    # Log completed request
+    logger.info(
+        "request_completed",
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        duration_ms=round(duration * 1000, 2),
+    )
+
+    # Add request ID to response headers
+    response.headers["X-Request-ID"] = request_id
+
+    return response
+
 
 # Configure CORS
 # Note: When using wildcard origins, credentials must be False
@@ -43,6 +94,7 @@ app.add_middleware(
 @app.exception_handler(BookNotFoundError)
 async def book_not_found_handler(request: Request, exc: BookNotFoundError) -> JSONResponse:
     """Handle book not found errors."""
+    logger.warning("book_not_found", book_id=exc.book_id)
     return JSONResponse(
         status_code=404,
         content={
@@ -56,6 +108,7 @@ async def book_not_found_handler(request: Request, exc: BookNotFoundError) -> JS
 @app.exception_handler(NotFoundError)
 async def not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
     """Handle generic not found errors."""
+    logger.warning("not_found_error", message=str(exc))
     return JSONResponse(
         status_code=404,
         content={
@@ -68,6 +121,7 @@ async def not_found_handler(request: Request, exc: NotFoundError) -> JSONRespons
 @app.exception_handler(CrossbillException)
 async def crossbill_exception_handler(request: Request, exc: CrossbillException) -> JSONResponse:
     """Handle all custom Crossbill exceptions."""
+    logger.error("crossbill_exception", message=str(exc), exception_type=type(exc).__name__)
     return JSONResponse(
         status_code=500,
         content={

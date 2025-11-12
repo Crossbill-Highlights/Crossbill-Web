@@ -1,14 +1,14 @@
 """Service layer for highlight-related business logic."""
 
-import logging
-
 from fastapi import BackgroundTasks
 from sqlalchemy.orm import Session
+
+import structlog
 
 from crossbill import repositories, schemas
 from crossbill.services import cover_service
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class HighlightService:
@@ -38,7 +38,12 @@ class HighlightService:
         Returns:
             HighlightUploadResponse with upload statistics
         """
-        logger.info(f"Processing highlight upload for book: {request.book.title}")
+        logger.info(
+            "processing_highlight_upload",
+            book_title=request.book.title,
+            book_author=request.book.author,
+            highlight_count=len(request.highlights),
+        )
 
         # Step 1: Get or create book
         book = self.book_repo.get_or_create(request.book)
@@ -53,7 +58,7 @@ class HighlightService:
                 book.id,
                 self.db,
             )
-            logger.info(f"Scheduled background cover fetch for book {book.id}")
+            logger.info("scheduled_cover_fetch", book_id=book.id, isbn=book.isbn)
 
         # Step 2: Process chapters and prepare highlights
         highlights_with_chapters: list[tuple[int | None, schemas.HighlightCreate]] = []
@@ -82,8 +87,11 @@ class HighlightService:
 
         message = f"Successfully synced highlights for '{book.title}'"
         logger.info(
-            f"Upload complete for book '{book.title}' (id={book.id}): "
-            f"{created} created, {skipped} skipped"
+            "upload_complete",
+            book_id=book.id,
+            book_title=book.title,
+            highlights_created=created,
+            highlights_skipped=skipped,
         )
 
         return schemas.HighlightUploadResponse(
