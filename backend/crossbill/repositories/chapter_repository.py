@@ -26,9 +26,7 @@ class ChapterRepository:
         )
         return self.db.execute(stmt).scalar_one_or_none()
 
-    def create(
-        self, book_id: int, name: str, chapter_number: int | None = None
-    ) -> models.Chapter:
+    def create(self, book_id: int, name: str, chapter_number: int | None = None) -> models.Chapter:
         """Create a new chapter."""
         chapter = models.Chapter(book_id=book_id, name=name, chapter_number=chapter_number)
         self.db.add(chapter)

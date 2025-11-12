@@ -22,7 +22,9 @@ class HighlightService:
         self.highlight_repo = repositories.HighlightRepository(db)
 
     def upload_highlights(
-        self, request: schemas.HighlightUploadRequest, background_tasks: BackgroundTasks | None = None
+        self,
+        request: schemas.HighlightUploadRequest,
+        background_tasks: BackgroundTasks | None = None,
     ) -> schemas.HighlightUploadResponse:
         """
         Process highlight upload from KOReader.
@@ -143,13 +145,9 @@ class HighlightService:
             for highlight in highlights
         ]
 
-        return schemas.HighlightSearchResponse(
-            highlights=search_results, total=len(search_results)
-        )
+        return schemas.HighlightSearchResponse(highlights=search_results, total=len(search_results))
 
-    def get_books_with_counts(
-        self, offset: int = 0, limit: int = 100
-    ) -> schemas.BooksListResponse:
+    def get_books_with_counts(self, offset: int = 0, limit: int = 100) -> schemas.BooksListResponse:
         """
         Get all books with their highlight counts, sorted alphabetically by title.
 

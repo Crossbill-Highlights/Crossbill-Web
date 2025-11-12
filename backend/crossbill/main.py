@@ -160,9 +160,7 @@ async def api_root() -> dict[str, Any]:
 # Mount static files for frontend assets (JS, CSS, etc.)
 # Only mount if static directory exists (for development without built frontend)
 if STATIC_DIR.exists():
-    app.mount(
-        "/assets", StaticFiles(directory=str(STATIC_DIR / "assets")), name="static_assets"
-    )
+    app.mount("/assets", StaticFiles(directory=str(STATIC_DIR / "assets")), name="static_assets")
 
     # Catch-all route for SPA - serves index.html for all other routes
     # This must be last to not interfere with API routes
