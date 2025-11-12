@@ -4,7 +4,7 @@ import logging
 
 from sqlalchemy.orm import Session
 
-from crossbill import repositories, schemas
+from crossbill import cover_service, repositories, schemas
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +40,16 @@ class HighlightService:
 
         # Step 1: Get or create book
         book = self.book_repo.get_or_create(request.book)
+
+        # Step 1.5: Fetch book cover if ISBN is available and no cover is set
+        # This was previously done in the repository, but moved here to service layer
+        if book.isbn and not book.cover:
+            cover_path = cover_service.fetch_book_cover(book.isbn, book.id)
+            if cover_path:
+                book.cover = cover_path
+                self.db.commit()
+                self.db.refresh(book)
+                logger.info(f"Added cover for book {book.id}: {cover_path}")
 
         # Step 2: Process chapters and prepare highlights
         highlights_with_chapters: list[tuple[int | None, schemas.HighlightCreate]] = []
