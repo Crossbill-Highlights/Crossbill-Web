@@ -5,15 +5,15 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
-
-import structlog
+from starlette.middleware.base import RequestResponseEndpoint
 
 from crossbill.config import configure_logging, get_settings
-from crossbill.exceptions import BookNotFoundError, CrossbillException, NotFoundError
+from crossbill.exceptions import BookNotFoundError, CrossbillError, NotFoundError
 from crossbill.routers import books, highlights
 
 settings = get_settings()
@@ -40,7 +40,9 @@ app = FastAPI(
 
 # Add request ID middleware
 @app.middleware("http")
-async def add_request_id_and_logging(request: Request, call_next):
+async def add_request_id_and_logging(
+    request: Request, call_next: RequestResponseEndpoint
+) -> Response:
     """Add request ID to each request and log request/response."""
     request_id = str(uuid.uuid4())
     request.state.request_id = request_id
@@ -118,8 +120,8 @@ async def not_found_handler(request: Request, exc: NotFoundError) -> JSONRespons
     )
 
 
-@app.exception_handler(CrossbillException)
-async def crossbill_exception_handler(request: Request, exc: CrossbillException) -> JSONResponse:
+@app.exception_handler(CrossbillError)
+async def crossbill_exception_handler(request: Request, exc: CrossbillError) -> JSONResponse:
     """Handle all custom Crossbill exceptions."""
     logger.error("crossbill_exception", message=str(exc), exception_type=type(exc).__name__)
     return JSONResponse(

@@ -24,26 +24,23 @@ from crossbill.schemas.highlight_schemas import (
 )
 
 __all__ = [
-    # Book schemas
     "Book",
     "BookBase",
     "BookCreate",
+    "BookDetails",
     "BookWithHighlightCount",
     "BooksListResponse",
-    "BookDetails",
-    "CoverUploadResponse",
-    # Chapter schemas
     "Chapter",
     "ChapterBase",
     "ChapterWithHighlights",
-    # Highlight schemas
+    "CoverUploadResponse",
     "Highlight",
     "HighlightBase",
     "HighlightCreate",
-    "HighlightUploadRequest",
-    "HighlightUploadResponse",
     "HighlightDeleteRequest",
     "HighlightDeleteResponse",
-    "HighlightSearchResult",
     "HighlightSearchResponse",
+    "HighlightSearchResult",
+    "HighlightUploadRequest",
+    "HighlightUploadResponse",
 ]

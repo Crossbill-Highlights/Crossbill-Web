@@ -1,9 +1,8 @@
 """Service layer for highlight-related business logic."""
 
+import structlog
 from fastapi import BackgroundTasks
 from sqlalchemy.orm import Session
-
-import structlog
 
 from crossbill import repositories, schemas
 from crossbill.services import cover_service
