@@ -27,13 +27,13 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
 
   const deleteBookMutation = useDeleteBookApiV1BookBookIdDelete({
     mutation: {
-      onSuccess: () => {
-        // Immediately refetch the books list query to refresh the UI
-        queryClient.refetchQueries({
+      onSuccess: async () => {
+        // Refetch the books list query and wait for it to complete
+        await queryClient.refetchQueries({
           queryKey: ['/api/v1/highlights/books'],
           exact: true,
         });
-        // Navigate to landing page after successful delete
+        // Navigate to landing page after refetch is complete
         navigate({ to: '/' });
       },
       onError: (error) => {
@@ -189,7 +189,7 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
           isbn: book.isbn,
           cover: book.cover,
           highlight_count: highlightCount,
-          tags: [], // TODO: Add tags to BookDetails type
+          tags: book.tags || [],
           created_at: book.created_at,
           updated_at: book.updated_at,
         }}
