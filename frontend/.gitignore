@@ -28,9 +28,5 @@ dist-ssr
 .env.local
 .env.*.local
 
-# Generated files
-src/api/generated
-src/routeTree.gen.ts
-
 # Build outputs
 coverage
