@@ -48,7 +48,7 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
     },
   });
 
-  // Reset form when modal opens
+  // Reset form when modal opens - always use the latest book data
   useEffect(() => {
     if (open) {
       reset({

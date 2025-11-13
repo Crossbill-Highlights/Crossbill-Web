@@ -63,12 +63,13 @@ export const useUpdateBookApiV1BookBookIdPost = <TError = unknown, TContext = un
 
   return useMutation<BookWithHighlightCount, TError, { bookId: number; data: BookUpdateRequest }, TContext>({
     mutationFn: ({ bookId, data }) => updateBook(bookId, data),
-    onSuccess: (data, variables, context) => {
-      // Invalidate books list query to refetch updated data
-      queryClient.invalidateQueries({ queryKey: ['/api/v1/highlights/books'] });
+    onSuccess: async (data, variables, context) => {
+      // Refetch books list query immediately to get updated data
+      await queryClient.refetchQueries({ queryKey: ['/api/v1/highlights/books'] });
 
       // Call user-provided onSuccess if exists
-      mutationOptions?.onSuccess?.(data, variables, context);
+      // This will be called after the refetch completes
+      await mutationOptions?.onSuccess?.(data, variables, context);
     },
     ...mutationOptions,
   });
