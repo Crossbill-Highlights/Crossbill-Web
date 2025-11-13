@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from crossbill import repositories, schemas
 from crossbill.exceptions import BookNotFoundError
+from crossbill.services.tag_service import TagService
 
 logger = logging.getLogger(__name__)
 
@@ -201,4 +202,53 @@ class BookService:
             success=True,
             message="Cover uploaded successfully",
             cover_url=cover_url,
+        )
+
+    def update_book(
+        self, book_id: int, update_data: schemas.BookUpdateRequest
+    ) -> schemas.BookWithHighlightCount:
+        """
+        Update book information.
+
+        Currently supports updating tags only. The tags will be replaced with the provided list.
+
+        Args:
+            book_id: ID of the book to update
+            update_data: Book update request containing tags
+
+        Returns:
+            Updated book with highlight count and tags
+
+        Raises:
+            HTTPException: If book is not found
+        """
+        # Verify book exists
+        book = self.book_repo.get_by_id(book_id)
+
+        if not book:
+            raise BookNotFoundError(book_id)
+
+        # Update tags using TagService
+        tag_service = TagService(self.db)
+        updated_book = tag_service.update_book_tags(book_id, update_data.tags)
+
+        # Commit the changes
+        self.db.commit()
+
+        # Get highlight count for the response
+        highlight_count = self.highlight_repo.count_by_book_id(book_id)
+
+        logger.info(f"Successfully updated book {book_id}")
+
+        # Return updated book with highlight count
+        return schemas.BookWithHighlightCount(
+            id=updated_book.id,
+            title=updated_book.title,
+            author=updated_book.author,
+            isbn=updated_book.isbn,
+            cover=updated_book.cover,
+            highlight_count=highlight_count,
+            tags=updated_book.tags,
+            created_at=updated_book.created_at,
+            updated_at=updated_book.updated_at,
         )

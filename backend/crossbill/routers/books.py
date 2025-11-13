@@ -162,3 +162,43 @@ def upload_book_cover(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to upload cover: {e!s}",
         ) from e
+
+
+@router.post(
+    "/{book_id}",
+    response_model=schemas.BookWithHighlightCount,
+    status_code=status.HTTP_200_OK,
+)
+def update_book(
+    book_id: int,
+    request: schemas.BookUpdateRequest,
+    db: DatabaseSession,
+) -> schemas.BookWithHighlightCount:
+    """
+    Update book information.
+
+    Currently supports updating tags only. The tags will be replaced with the provided list.
+
+    Args:
+        book_id: ID of the book to update
+        request: Book update request containing tags
+        db: Database session
+
+    Returns:
+        Updated book with highlight count and tags
+
+    Raises:
+        HTTPException: If book is not found or update fails
+    """
+    try:
+        service = BookService(db)
+        return service.update_book(book_id, request)
+    except CrossbillError:
+        # Re-raise custom exceptions - handled by exception handlers
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update book {book_id}: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update book: {e!s}",
+        ) from e

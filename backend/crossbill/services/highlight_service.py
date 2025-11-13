@@ -168,6 +168,7 @@ class HighlightService:
                 isbn=book.isbn,
                 cover=book.cover,
                 highlight_count=count,
+                tags=book.tags,  # Tags are automatically loaded via lazy="selectin"
                 created_at=book.created_at,
                 updated_at=book.updated_at,
             )
