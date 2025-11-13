@@ -1,6 +1,9 @@
-import { useUpdateBookApiV1BookBookIdPost } from '@/api/generated/books/books.ts';
+import {
+  useDeleteBookApiV1BookBookIdDelete,
+  useUpdateBookApiV1BookBookIdPost,
+} from '@/api/generated/books/books.ts';
 import { BookWithHighlightCount } from '@/api/generated/model';
-import { Close as CloseIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import {
   Autocomplete,
   Box,
@@ -14,6 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { BookCover } from '../../common/BookCover';
@@ -30,6 +34,7 @@ interface BookEditModalProps {
 
 export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { control, handleSubmit, reset } = useForm<BookEditFormData>({
     defaultValues: {
       tags: book.tags?.map((tag) => tag.name) || [],
@@ -48,6 +53,25 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
       },
       onError: (error) => {
         console.error('Error updating book:', error);
+      },
+    },
+  });
+
+  const deleteBookMutation = useDeleteBookApiV1BookBookIdDelete({
+    mutation: {
+      onSuccess: async () => {
+        // Refetch the books list query and wait for it to complete
+        await queryClient.refetchQueries({
+          queryKey: ['/api/v1/highlights/books'],
+          exact: true,
+        });
+        // Close modal and navigate to landing page after refetch is complete
+        onClose();
+        navigate({ to: '/' });
+      },
+      onError: (error) => {
+        console.error('Failed to delete book:', error);
+        alert('Failed to delete book. Please try again.');
       },
     },
   });
@@ -73,7 +97,19 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
     });
   };
 
+  const handleDelete = () => {
+    if (
+      confirm(
+        `Are you sure you want to delete "${book.title}"? This will permanently delete the book and all its highlights.`
+      )
+    ) {
+      deleteBookMutation.mutate({ bookId: book.id });
+    }
+  };
+
   const isSaving = updateBookMutation.isPending;
+  const isDeleting = deleteBookMutation.isPending;
+  const isLoading = isSaving || isDeleting;
   const error = updateBookMutation.error;
 
   return (
@@ -86,7 +122,7 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
             color="inherit"
             onClick={onClose}
             aria-label="close"
-            disabled={isSaving}
+            disabled={isLoading}
           >
             <CloseIcon />
           </IconButton>
@@ -143,15 +179,15 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
                       label="Tags"
                       placeholder="Add tags..."
                       helperText="Press Enter to add a tag"
-                      disabled={isSaving}
+                      disabled={isLoading}
                     />
                   )}
                   slotProps={{
                     chip: {
-                      disabled: isSaving,
+                      disabled: isLoading,
                     },
                   }}
-                  disabled={isSaving}
+                  disabled={isLoading}
                 />
               )}
             />
@@ -166,18 +202,28 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
         </Box>
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose} disabled={isSaving}>
-          Cancel
-        </Button>
+      <DialogActions sx={{ justifyContent: 'space-between' }}>
         <Button
-          onClick={handleSubmit(onSubmit)}
-          variant="contained"
-          disabled={isSaving}
-          color="primary"
+          onClick={handleDelete}
+          color="error"
+          startIcon={<DeleteIcon />}
+          disabled={isLoading}
         >
-          {isSaving ? 'Saving...' : 'Save'}
+          {isDeleting ? 'Deleting...' : 'Delete'}
         </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            variant="contained"
+            disabled={isLoading}
+            color="primary"
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
+        </Box>
       </DialogActions>
     </Dialog>
   );
