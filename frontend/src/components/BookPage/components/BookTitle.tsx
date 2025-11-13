@@ -4,9 +4,18 @@ import {
   Edit as EditIcon,
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
-import { Box, Card, IconButton, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material';
-import { useNavigate } from '@tanstack/react-router';
+import {
+  Box,
+  Card,
+  Chip,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Typography,
+} from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useDeleteBookApiV1BookBookIdDelete } from '../../../api/generated/books/books';
 import type { BookDetails } from '../../../api/generated/model';
@@ -169,6 +178,7 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
+                mb: book.tags && book.tags.length > 0 ? 2 : 0,
               }}
             >
               <BookmarkIcon sx={{ fontSize: 18, color: 'primary.main' }} />
@@ -176,6 +186,26 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
                 {highlightCount} {highlightCount === 1 ? 'highlight' : 'highlights'}
               </Typography>
             </Box>
+            {/* Tags */}
+            {book.tags && book.tags.length > 0 && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                }}
+              >
+                {book.tags.map((tag) => (
+                  <Chip
+                    key={tag.id}
+                    label={tag.name}
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontWeight: 500 }}
+                  />
+                ))}
+              </Box>
+            )}
           </Box>
         </Card>
       </Box>
