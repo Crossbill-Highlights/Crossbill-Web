@@ -87,6 +87,7 @@ class BookService:
             author=book.author,
             isbn=book.isbn,
             cover=book.cover,
+            tags=book.tags,  # Tags are automatically loaded via lazy="selectin"
             chapters=chapters_with_highlights,
             created_at=book.created_at,
             updated_at=book.updated_at,
