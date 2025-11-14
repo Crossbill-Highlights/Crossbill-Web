@@ -158,6 +158,29 @@ class TagRepository:
         )
         return list(self.db.execute(stmt).scalars().all())
 
+    def is_tag_soft_deleted_for_book(self, book_id: int, tag_id: int) -> bool:
+        """
+        Check if a tag association exists and is soft-deleted.
+
+        Args:
+            book_id: ID of the book
+            tag_id: ID of the tag
+
+        Returns:
+            bool: True if the association exists and is soft-deleted, False otherwise
+        """
+        stmt = select(models.book_tags).where(
+            and_(
+                models.book_tags.c.book_id == book_id,
+                models.book_tags.c.tag_id == tag_id,
+            )
+        )
+        existing = self.db.execute(stmt).fetchone()
+
+        if existing and existing.deleted_at is not None:
+            return True
+        return False
+
     def remove_all_tags_from_book_except(self, book_id: int, tag_ids: list[int]) -> None:
         """
         Soft delete all tags from a book except the ones in the provided list.
