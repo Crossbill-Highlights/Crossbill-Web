@@ -22,6 +22,13 @@ from crossbill.schemas.highlight_schemas import (
     HighlightUploadRequest,
     HighlightUploadResponse,
 )
+from crossbill.schemas.highlight_tag_schemas import (
+    HighlightTag,
+    HighlightTagBase,
+    HighlightTagCreateRequest,
+    HighlightTagInBook,
+    HighlightTagsResponse,
+)
 from crossbill.schemas.tag_schemas import BookUpdateRequest, Tag
 
 __all__ = [
@@ -43,6 +50,11 @@ __all__ = [
     "HighlightDeleteResponse",
     "HighlightSearchResponse",
     "HighlightSearchResult",
+    "HighlightTag",
+    "HighlightTagBase",
+    "HighlightTagCreateRequest",
+    "HighlightTagInBook",
+    "HighlightTagsResponse",
     "HighlightUploadRequest",
     "HighlightUploadResponse",
     "Tag",

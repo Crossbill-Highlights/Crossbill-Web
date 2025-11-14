@@ -5,6 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from crossbill.schemas.book_schemas import BookCreate, TagInBook
+from crossbill.schemas.highlight_tag_schemas import HighlightTagInBook
 
 
 class HighlightBase(BaseModel):
@@ -77,6 +78,9 @@ class BookDetails(BaseModel):
     isbn: str | None
     cover: str | None
     tags: list[TagInBook] = Field(default_factory=list, description="List of tags for this book")
+    highlight_tags: list[HighlightTagInBook] = Field(
+        default_factory=list, description="List of highlight tags for this book"
+    )
     chapters: list[ChapterWithHighlights] = Field(
         default_factory=list, description="List of chapters with highlights"
     )
