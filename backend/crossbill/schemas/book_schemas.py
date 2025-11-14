@@ -17,6 +17,10 @@ class BookBase(BaseModel):
 class BookCreate(BookBase):
     """Schema for creating a Book."""
 
+    tags: list[str] = Field(
+        default_factory=list, description="List of tag names to associate with the book"
+    )
+
 
 class Book(BookBase):
     """Schema for Book response."""

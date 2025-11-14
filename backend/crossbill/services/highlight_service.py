@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from crossbill import repositories, schemas
 from crossbill.services import cover_service
+from crossbill.services.tag_service import TagService
 
 logger = structlog.get_logger(__name__)
 
@@ -19,6 +20,7 @@ class HighlightService:
         self.book_repo = repositories.BookRepository(db)
         self.chapter_repo = repositories.ChapterRepository(db)
         self.highlight_repo = repositories.HighlightRepository(db)
+        self.tag_service = TagService(db)
 
     def upload_highlights(
         self,
@@ -30,11 +32,12 @@ class HighlightService:
 
         This method:
         1. Creates or updates the book record
-        2. Creates or retrieves chapter records for highlights with chapter info
-        3. Bulk creates highlights with deduplication
+        2. Syncs tags from KOReader (without restoring soft-deleted tags)
+        3. Creates or retrieves chapter records for highlights with chapter info
+        4. Bulk creates highlights with deduplication
 
         Args:
-            request: Upload request containing book metadata and highlights
+            request: Upload request containing book metadata, tags, and highlights
 
         Returns:
             HighlightUploadResponse with upload statistics
@@ -49,7 +52,16 @@ class HighlightService:
         # Step 1: Get or create book
         book = self.book_repo.get_or_create(request.book)
 
-        # Step 1.5: Schedule cover fetching as background task (non-blocking)
+        # Step 1.5: Sync tags from KOReader (if provided)
+        # Important: Use restore_soft_deleted=False to prevent restoring tags
+        # that the user has explicitly removed from the book
+        if request.book.tags:
+            self.tag_service.update_book_tags(
+                book.id, request.book.tags, restore_soft_deleted=False
+            )
+            logger.info("synced_tags_from_koreader", book_id=book.id, tags=request.book.tags)
+
+        # Step 1.6: Schedule cover fetching as background task (non-blocking)
         # Cover is fetched asynchronously and won't block the response
         if book.isbn and not book.cover and background_tasks:
             # Create a new session for the background task
