@@ -63,6 +63,7 @@ select = [
     "RUF",    # ruff-specific rules
 ]
 ignore = [
+    "E501",    # Line too long (handled by black)
     "S101",    # Use of assert detected (ok in tests)
 ]
 
