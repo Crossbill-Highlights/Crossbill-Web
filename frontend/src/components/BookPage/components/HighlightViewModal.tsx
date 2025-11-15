@@ -16,8 +16,9 @@ import {
   Button,
   Chip,
   Dialog,
+  DialogActions,
   DialogContent,
-  Divider,
+  DialogTitle,
   IconButton,
   TextField,
   Typography,
@@ -183,50 +184,51 @@ export const HighlightViewModal = ({
     onClose();
   };
 
+  const isDeleting = deleteHighlightMutation.isPending;
+  const isLoading = isProcessing || isDeleting;
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          p: 1,
-          pb: 0,
-        }}
-      >
-        <IconButton edge="end" color="inherit" onClick={handleClose} aria-label="close">
-          <CloseIcon />
-        </IconButton>
-      </Box>
+      <DialogTitle>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          View Highlight
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={handleClose}
+            aria-label="close"
+            disabled={isLoading}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
 
-      <DialogContent sx={{ pt: 2, pb: 4 }}>
-        <Box display="flex" flexDirection="column" gap={4}>
+      <DialogContent dividers>
+        <Box display="flex" flexDirection="column" gap={3}>
           {/* Highlight Text */}
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 3 }}>
-              <QuoteIcon
-                sx={{
-                  fontSize: 32,
-                  color: 'primary.main',
-                  flexShrink: 0,
-                  mt: 0.5,
-                  opacity: 0.7,
-                }}
-              />
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 500,
-                  color: 'text.primary',
-                  lineHeight: 1.7,
-                  fontSize: '1.25rem',
-                }}
-              >
-                {formattedText}
-              </Typography>
-            </Box>
+          <Box sx={{ display: 'flex', alignItems: 'start', gap: 2 }}>
+            <QuoteIcon
+              sx={{
+                fontSize: 28,
+                color: 'primary.main',
+                flexShrink: 0,
+                mt: 0.5,
+                opacity: 0.7,
+              }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 500,
+                color: 'text.primary',
+                lineHeight: 1.7,
+                fontSize: '1.25rem',
+              }}
+            >
+              {formattedText}
+            </Typography>
           </Box>
-
-          <Divider />
 
           {/* Metadata */}
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', opacity: 0.8 }}>
@@ -269,7 +271,7 @@ export const HighlightViewModal = ({
                   {...params}
                   placeholder="Add tags..."
                   helperText="Press Enter to add a tag, click X to remove"
-                  disabled={isProcessing}
+                  disabled={isLoading}
                 />
               )}
               renderTags={(tagValue, getTagProps) =>
@@ -280,31 +282,30 @@ export const HighlightViewModal = ({
                       key={key}
                       label={typeof option === 'string' ? option : option.name}
                       {...tagProps}
-                      disabled={isProcessing}
+                      disabled={isLoading}
                     />
                   );
                 })
               }
-              disabled={isProcessing}
+              disabled={isLoading}
             />
-          </Box>
-
-          <Divider />
-
-          {/* Delete Button */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={handleDelete}
-              disabled={deleteHighlightMutation.isPending}
-            >
-              Delete Highlight
-            </Button>
           </Box>
         </Box>
       </DialogContent>
+
+      <DialogActions sx={{ justifyContent: 'space-between' }}>
+        <Button
+          onClick={handleDelete}
+          color="error"
+          startIcon={<DeleteIcon />}
+          disabled={isLoading}
+        >
+          {isDeleting ? 'Deleting...' : 'Delete'}
+        </Button>
+        <Button onClick={handleClose} disabled={isLoading}>
+          Close
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };
