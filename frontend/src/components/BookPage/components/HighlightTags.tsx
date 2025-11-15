@@ -50,7 +50,7 @@ export const HighlightTags = ({ tags, selectedTag, onTagClick }: HighlightTagsPr
             size="small"
             variant={selectedTag === tag.id ? 'filled' : 'outlined'}
             color={selectedTag === tag.id ? 'primary' : 'default'}
-            onClick={() => onTagClick(tag.id)}
+            onClick={() => onTagClick(selectedTag === tag.id ? null : tag.id)}
             sx={{
               cursor: 'pointer',
               '&:hover': {
