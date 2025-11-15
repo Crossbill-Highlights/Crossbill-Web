@@ -95,6 +95,11 @@ class HighlightRepository:
         )
         return created, skipped
 
+    def get_by_id(self, highlight_id: int) -> models.Highlight | None:
+        """Get a highlight by its ID (including soft-deleted ones)."""
+        stmt = select(models.Highlight).where(models.Highlight.id == highlight_id)
+        return self.db.execute(stmt).scalar_one_or_none()
+
     def find_by_book(self, book_id: int) -> Sequence[models.Highlight]:
         """Find all non-deleted highlights for a book."""
         stmt = select(models.Highlight).where(
