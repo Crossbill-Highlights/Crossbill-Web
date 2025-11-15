@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 from src.schemas.book_schemas import BookCreate, TagInBook
 from src.schemas.highlight_tag_schemas import HighlightTagInBook
@@ -36,6 +36,26 @@ class Highlight(HighlightBase):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+    @field_serializer("chapter")
+    def serialize_chapter(self, chapter: object, _info) -> str | None:
+        """Serialize chapter from relationship or string."""
+        if chapter is None:
+            return None
+        # If it's a Chapter model object, extract the name
+        if hasattr(chapter, "name"):
+            return chapter.name
+        # Otherwise it should be a string already
+        return str(chapter) if chapter else None
+
+    @field_serializer("chapter_number")
+    def serialize_chapter_number(self, chapter_number: object, _info) -> int | None:
+        """Serialize chapter_number from chapter relationship if needed."""
+        # chapter_number isn't stored in Highlight model, need to get from chapter relationship
+        # This will be None unless we explicitly set it during serialization
+        if chapter_number is not None and isinstance(chapter_number, int):
+            return chapter_number
+        return None
 
 
 class HighlightUploadRequest(BaseModel):
