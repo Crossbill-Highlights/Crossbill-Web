@@ -1,4 +1,8 @@
 import type { Highlight, HighlightTagInBook } from '@/api/generated/model';
+import {
+  useAddTagToHighlightApiV1BookBookIdHighlightHighlightIdTagPost,
+  useRemoveTagFromHighlightApiV1BookBookIdHighlightHighlightIdTagTagIdDelete,
+} from '@/api/generated/books/books';
 import { Close as CloseIcon, LocalOffer as TagIcon } from '@mui/icons-material';
 import {
   Autocomplete,
@@ -40,34 +44,53 @@ export const HighlightEditDialog = ({
     }
   }, [open, highlight.highlight_tags]);
 
+  // Mutation hooks
+  const addTagMutation = useAddTagToHighlightApiV1BookBookIdHighlightHighlightIdTagPost({
+    mutation: {
+      onSuccess: (data) => {
+        setCurrentTags(data.highlight_tags || []);
+        // Invalidate queries to refresh the UI
+        queryClient.invalidateQueries({
+          queryKey: [`/api/v1/book/${bookId}`],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [`/api/v1/book/${bookId}/highlight_tags`],
+        });
+      },
+      onError: (error) => {
+        console.error('Failed to add tag:', error);
+        alert('Failed to add tag. Please try again.');
+      },
+    },
+  });
+
+  const removeTagMutation = useRemoveTagFromHighlightApiV1BookBookIdHighlightHighlightIdTagTagIdDelete({
+    mutation: {
+      onSuccess: (data) => {
+        setCurrentTags(data.highlight_tags || []);
+        // Invalidate queries to refresh the UI
+        queryClient.invalidateQueries({
+          queryKey: [`/api/v1/book/${bookId}`],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [`/api/v1/book/${bookId}/highlight_tags`],
+        });
+      },
+      onError: (error) => {
+        console.error('Failed to remove tag:', error);
+        alert('Failed to remove tag. Please try again.');
+      },
+    },
+  });
+
   const addTagToHighlight = async (tagName: string) => {
     setIsProcessing(true);
     try {
-      const response = await fetch(`/api/v1/book/${bookId}/highlight/${highlight.id}/tag`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: tagName }),
+      await addTagMutation.mutateAsync({
+        bookId,
+        highlightId: highlight.id,
+        data: { name: tagName },
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to add tag');
-      }
-
-      const updatedHighlight = await response.json();
-      setCurrentTags(updatedHighlight.highlight_tags || []);
-
-      // Invalidate queries to refresh the UI
-      await queryClient.invalidateQueries({
-        queryKey: [`/api/v1/book/${bookId}`],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: [`/api/v1/book/${bookId}/highlight_tags`],
-      });
-    } catch (error) {
-      console.error('Failed to add tag:', error);
-      alert('Failed to add tag. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -76,30 +99,11 @@ export const HighlightEditDialog = ({
   const removeTagFromHighlight = async (tagId: number) => {
     setIsProcessing(true);
     try {
-      const response = await fetch(
-        `/api/v1/book/${bookId}/highlight/${highlight.id}/tag/${tagId}`,
-        {
-          method: 'DELETE',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to remove tag');
-      }
-
-      const updatedHighlight = await response.json();
-      setCurrentTags(updatedHighlight.highlight_tags || []);
-
-      // Invalidate queries to refresh the UI
-      await queryClient.invalidateQueries({
-        queryKey: [`/api/v1/book/${bookId}`],
+      await removeTagMutation.mutateAsync({
+        bookId,
+        highlightId: highlight.id,
+        tagId,
       });
-      await queryClient.invalidateQueries({
-        queryKey: [`/api/v1/book/${bookId}/highlight_tags`],
-      });
-    } catch (error) {
-      console.error('Failed to remove tag:', error);
-      alert('Failed to remove tag. Please try again.');
     } finally {
       setIsProcessing(false);
     }
