@@ -106,6 +106,9 @@ export const HighlightCard = ({ highlight, bookId }: HighlightCardProps) => {
             bgcolor: 'action.hover',
             borderLeftColor: 'primary.main',
           },
+          '&:last-child': {
+            borderBottom: 0,
+          },
         }}
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
