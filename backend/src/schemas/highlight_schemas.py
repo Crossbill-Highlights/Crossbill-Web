@@ -40,7 +40,7 @@ class Highlight(HighlightBase):
 
     @model_validator(mode="before")
     @classmethod
-    def extract_chapter_from_relationship(cls, data: Any) -> Any:
+    def extract_chapter_from_relationship(cls, data: Any) -> Any:  # noqa: ANN401
         """Extract chapter name and number from Chapter relationship object before validation."""
         # Handle both dict and ORM model object
         if isinstance(data, dict):
@@ -51,28 +51,26 @@ class Highlight(HighlightBase):
                 # Also extract chapter_number if not present
                 if "chapter_number" not in data or data["chapter_number"] is None:
                     data["chapter_number"] = getattr(chapter, "chapter_number", None)
-        else:
-            # It's an ORM model object - get attributes
-            if hasattr(data, "chapter"):
-                chapter = data.chapter
-                if chapter is not None and hasattr(chapter, "name"):
-                    # Need to set chapter to the name string
-                    # Since we can't modify the ORM object, create a dict
-                    data_dict = {
-                        "id": data.id,
-                        "book_id": data.book_id,
-                        "chapter_id": data.chapter_id,
-                        "text": data.text,
-                        "page": data.page,
-                        "note": data.note,
-                        "datetime": data.datetime,
-                        "created_at": data.created_at,
-                        "updated_at": data.updated_at,
-                        "highlight_tags": data.highlight_tags,
-                        "chapter": chapter.name,
-                        "chapter_number": getattr(chapter, "chapter_number", None),
-                    }
-                    return data_dict
+        # It's an ORM model object - get attributes
+        elif hasattr(data, "chapter"):
+            chapter = data.chapter
+            if chapter is not None and hasattr(chapter, "name"):
+                # Need to set chapter to the name string
+                # Since we can't modify the ORM object, create a dict
+                return {
+                    "id": data.id,
+                    "book_id": data.book_id,
+                    "chapter_id": data.chapter_id,
+                    "text": data.text,
+                    "page": data.page,
+                    "note": data.note,
+                    "datetime": data.datetime,
+                    "created_at": data.created_at,
+                    "updated_at": data.updated_at,
+                    "highlight_tags": data.highlight_tags,
+                    "chapter": chapter.name,
+                    "chapter_number": getattr(chapter, "chapter_number", None),
+                }
         return data
 
 

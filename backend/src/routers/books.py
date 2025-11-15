@@ -427,8 +427,7 @@ def remove_tag_from_highlight(
     """
     try:
         service = HighlightTagService(db)
-        highlight = service.remove_tag_from_highlight(highlight_id, tag_id)
-        return highlight
+        return service.remove_tag_from_highlight(highlight_id, tag_id)
     except CrossbillError:
         # Re-raise custom exceptions - handled by exception handlers
         raise
