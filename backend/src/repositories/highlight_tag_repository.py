@@ -32,9 +32,10 @@ class HighlightTagRepository:
 
     def get_by_book_id(self, book_id: int) -> list[models.HighlightTag]:
         """
-        Get all highlight tags for a book that have active associations with highlights.
+        Get all highlight tags for a book that have active associations with non-deleted highlights.
 
-        Only returns tags that are currently associated with at least one highlight.
+        Only returns tags that are currently associated with at least one non-deleted highlight.
+        Filters out tags that are only associated with soft-deleted highlights.
         """
         stmt = (
             select(models.HighlightTag)
@@ -42,7 +43,14 @@ class HighlightTagRepository:
                 models.highlight_highlight_tags,
                 models.HighlightTag.id == models.highlight_highlight_tags.c.highlight_tag_id,
             )
-            .where(models.HighlightTag.book_id == book_id)
+            .join(
+                models.Highlight,
+                models.highlight_highlight_tags.c.highlight_id == models.Highlight.id,
+            )
+            .where(
+                models.HighlightTag.book_id == book_id,
+                models.Highlight.deleted_at.is_(None),  # Only non-deleted highlights
+            )
             .distinct()
             .order_by(models.HighlightTag.name)
         )
