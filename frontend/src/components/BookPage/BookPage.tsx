@@ -7,6 +7,7 @@ import { SectionTitle } from '../common/SectionTitle';
 import { Spinner } from '../common/Spinner';
 import { BookTitle } from './components/BookTitle';
 import { HighlightCard } from './components/HighlightCard';
+import { HighlightTags } from './components/HighlightTags';
 import { SearchBar } from './components/SearchBar';
 import { SearchResults } from './components/SearchResults';
 
@@ -95,32 +96,47 @@ export const BookPage = () => {
 
         {/* Regular Chapter View (when not searching) */}
         {!showSearchResults && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {chapters && chapters.length === 0 && (
-              <Typography variant="body1" color="text.secondary">
-                No chapters found for this book.
-              </Typography>
-            )}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', lg: '1fr 300px' },
+              gap: 4,
+              alignItems: 'start',
+            }}
+          >
+            {/* Main content - Highlights */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {chapters && chapters.length === 0 && (
+                <Typography variant="body1" color="text.secondary">
+                  No chapters found for this book.
+                </Typography>
+              )}
 
-            {chapters.map((chapter) => (
-              <Box key={chapter.id}>
-                {/* Chapter Header */}
-                <SectionTitle showDivider>{chapter.name}</SectionTitle>
+              {chapters.map((chapter) => (
+                <Box key={chapter.id}>
+                  {/* Chapter Header */}
+                  <SectionTitle showDivider>{chapter.name}</SectionTitle>
 
-                {/* Highlights in this chapter */}
-                {chapter.highlights && chapter.highlights.length > 0 ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                    {chapter.highlights.map((highlight) => (
-                      <HighlightCard key={highlight.id} highlight={highlight} bookId={book.id} />
-                    ))}
-                  </Box>
-                ) : (
-                  <Typography variant="body2" color="text.secondary" sx={{ pl: 0.5 }}>
-                    No highlights found in this chapter.
-                  </Typography>
-                )}
-              </Box>
-            ))}
+                  {/* Highlights in this chapter */}
+                  {chapter.highlights && chapter.highlights.length > 0 ? (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      {chapter.highlights.map((highlight) => (
+                        <HighlightCard key={highlight.id} highlight={highlight} bookId={book.id} />
+                      ))}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary" sx={{ pl: 0.5 }}>
+                      No highlights found in this chapter.
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Box>
+
+            {/* Sidebar - Tags (Desktop only) */}
+            <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+              <HighlightTags tags={book.highlight_tags || []} />
+            </Box>
           </Box>
         )}
       </Container>
