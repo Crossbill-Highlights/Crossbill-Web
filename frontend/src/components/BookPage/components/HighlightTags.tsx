@@ -21,11 +21,6 @@ export const HighlightTags = ({ tags, selectedTag, onTagClick }: HighlightTagsPr
       sx={{
         position: 'sticky',
         top: 24,
-        p: 3,
-        bgcolor: 'background.paper',
-        borderRadius: 2,
-        border: 1,
-        borderColor: 'divider',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -35,11 +30,16 @@ export const HighlightTags = ({ tags, selectedTag, onTagClick }: HighlightTagsPr
             Tags
           </Typography>
         </Box>
-        {selectedTag && (
-          <IconButton size="small" onClick={() => onTagClick(null)} title="Clear filter">
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        )}
+        <IconButton
+          size="small"
+          onClick={() => onTagClick(null)}
+          title="Clear filter"
+          sx={{
+            visibility: selectedTag ? 'visible' : 'hidden',
+          }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
       </Box>
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
