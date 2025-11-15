@@ -17,7 +17,14 @@ interface FooterProps {
 
 const Footer = ({ highlight }: FooterProps) => {
   return (
-    <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: 2,
+        mt: 1,
+      }}
+    >
       <Box
         sx={{
           display: 'flex',
@@ -52,7 +59,7 @@ const Footer = ({ highlight }: FooterProps) => {
         </Typography>
       </Box>
 
-      <Box>
+      <Box sx={{ pl: { xs: 4.5, sm: 0 } }}>
         <TagList tags={highlight.highlight_tags} />
       </Box>
     </Box>
