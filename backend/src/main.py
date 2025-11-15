@@ -12,9 +12,9 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import RequestResponseEndpoint
 
-from crossbill.config import configure_logging, get_settings
-from crossbill.exceptions import BookNotFoundError, CrossbillError, NotFoundError
-from crossbill.routers import books, highlights
+from src.config import configure_logging, get_settings
+from src.exceptions import BookNotFoundError, CrossbillError, NotFoundError
+from src.routers import books, highlights
 
 settings = get_settings()
 

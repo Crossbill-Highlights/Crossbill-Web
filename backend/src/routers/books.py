@@ -5,10 +5,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
-from crossbill import schemas
-from crossbill.database import DatabaseSession
-from crossbill.exceptions import CrossbillError
-from crossbill.services import BookService, HighlightTagService
+from src import schemas
+from src.database import DatabaseSession
+from src.exceptions import CrossbillError
+from src.services import BookService, HighlightTagService
+from src.repositories import HighlightTagRepository
 
 logger = logging.getLogger(__name__)
 
@@ -372,7 +373,6 @@ def add_tag_to_highlight(
         # Otherwise, create or get tag by name
         elif request.name is not None:
             # Try to get existing tag or create new one
-            from crossbill.repositories import HighlightTagRepository
             tag_repo = HighlightTagRepository(db)
             existing_tag = tag_repo.get_by_book_and_name(book_id, request.name)
             if existing_tag:

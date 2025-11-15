@@ -1,6 +1,6 @@
 """Pydantic schemas for API request/response validation."""
 
-from crossbill.schemas.book_schemas import (
+from src.schemas.book_schemas import (
     Book,
     BookBase,
     BookCreate,
@@ -8,8 +8,8 @@ from crossbill.schemas.book_schemas import (
     BookWithHighlightCount,
     CoverUploadResponse,
 )
-from crossbill.schemas.chapter_schemas import Chapter, ChapterBase
-from crossbill.schemas.highlight_schemas import (
+from src.schemas.chapter_schemas import Chapter, ChapterBase
+from src.schemas.highlight_schemas import (
     BookDetails,
     ChapterWithHighlights,
     Highlight,
@@ -22,7 +22,7 @@ from crossbill.schemas.highlight_schemas import (
     HighlightUploadRequest,
     HighlightUploadResponse,
 )
-from crossbill.schemas.highlight_tag_schemas import (
+from src.schemas.highlight_tag_schemas import (
     HighlightTag,
     HighlightTagAssociationRequest,
     HighlightTagBase,
@@ -30,7 +30,7 @@ from crossbill.schemas.highlight_tag_schemas import (
     HighlightTagInBook,
     HighlightTagsResponse,
 )
-from crossbill.schemas.tag_schemas import BookUpdateRequest, Tag
+from src.schemas.tag_schemas import BookUpdateRequest, Tag
 
 __all__ = [
     "Book",

@@ -9,9 +9,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from crossbill.database import Base, get_db
-from crossbill.main import app
-from crossbill.models import Book, Chapter, Highlight  # noqa: F401 - Import to register models
+from src.database import Base, get_db
+from src.main import app
+from src.models import Book, Chapter, Highlight  # noqa: F401 - Import to register models
 
 # Test database URL (in-memory SQLite)
 TEST_DATABASE_URL = "sqlite:///:memory:"

@@ -16,7 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from crossbill.database import Base
+from src.database import Base
 
 # Association table for many-to-many relationship between books and tags
 book_tags = Table(

@@ -4,8 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from crossbill.schemas.book_schemas import BookCreate, TagInBook
-from crossbill.schemas.highlight_tag_schemas import HighlightTagInBook
+from src.schemas.book_schemas import BookCreate, TagInBook
+from src.schemas.highlight_tag_schemas import HighlightTagInBook
 
 
 class HighlightBase(BaseModel):

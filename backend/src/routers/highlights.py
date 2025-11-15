@@ -4,9 +4,9 @@ import logging
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 
-from crossbill import schemas
-from crossbill.database import DatabaseSession
-from crossbill.services import HighlightService
+from src import schemas
+from src.database import DatabaseSession
+from src.services import HighlightService
 
 logger = logging.getLogger(__name__)
 

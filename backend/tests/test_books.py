@@ -7,7 +7,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from crossbill import models
+from src import models
 
 
 class TestDeleteBook:

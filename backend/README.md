@@ -64,7 +64,7 @@ poetry run alembic upgrade head
 ### 5. Run the development server
 
 ```bash
-poetry run uvicorn crossbill.main:app --reload --host 0.0.0.0 --port 8000 
+poetry run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000 
 ```
 
 The API will be available at http://localhost:8000
@@ -121,7 +121,7 @@ poetry run black .
 
 ### Type checking
 ```bash
-poetry run mypy crossbill
+poetry run mypy src
 ```
 
 ### Creating migrations

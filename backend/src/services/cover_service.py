@@ -7,7 +7,7 @@ from pathlib import Path
 import httpx
 from sqlalchemy.orm import Session
 
-from crossbill import models
+from src import models
 
 logger = logging.getLogger(__name__)
 

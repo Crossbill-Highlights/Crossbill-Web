@@ -40,7 +40,7 @@ RUN uv export --no-dev --no-hashes --no-emit-project -o requirements.txt && \
     uv pip install --system --no-cache -r requirements.txt
 
 # Copy backend source code
-COPY backend/crossbill ./crossbill
+COPY backend/src ./crossbill
 COPY backend/alembic.ini ./
 COPY backend/alembic ./alembic
 

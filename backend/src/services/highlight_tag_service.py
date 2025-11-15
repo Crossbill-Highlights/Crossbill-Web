@@ -3,8 +3,8 @@
 import structlog
 from sqlalchemy.orm import Session
 
-from crossbill import models, repositories
-from crossbill.exceptions import CrossbillError
+from src import models, repositories
+from src.exceptions import CrossbillError
 
 logger = structlog.get_logger(__name__)
 

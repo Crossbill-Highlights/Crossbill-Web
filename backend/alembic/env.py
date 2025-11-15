@@ -8,7 +8,7 @@ from alembic import context
 # add your model's MetaData object here
 # for 'autogenerate' support
 # Import your models here to enable autogenerate
-from crossbill.models import Base
+from src.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

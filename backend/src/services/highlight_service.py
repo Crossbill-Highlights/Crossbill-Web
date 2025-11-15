@@ -4,8 +4,8 @@ import structlog
 from fastapi import BackgroundTasks
 from sqlalchemy.orm import Session
 
-from crossbill import repositories, schemas
-from crossbill.services import cover_service
+from src import repositories, schemas
+from src.services import cover_service
 
 logger = structlog.get_logger(__name__)
 

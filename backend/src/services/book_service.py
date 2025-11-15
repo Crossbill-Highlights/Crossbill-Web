@@ -6,9 +6,9 @@ from pathlib import Path
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
-from crossbill import repositories, schemas
-from crossbill.exceptions import BookNotFoundError
-from crossbill.services.tag_service import TagService
+from src import repositories, schemas
+from src.exceptions import BookNotFoundError
+from src.services.tag_service import TagService
 
 logger = logging.getLogger(__name__)
 
