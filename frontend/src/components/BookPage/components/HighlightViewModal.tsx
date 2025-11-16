@@ -17,87 +17,39 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { CommonDialog } from '../../common/CommonDialog';
 
-interface HighlightViewModalProps {
-  highlight: Highlight;
+interface TagInputProps {
+  highlightId: number;
   bookId: number;
-  open: boolean;
-  onClose: () => void;
+  initialTags: HighlightTagInBook[];
   availableTags: HighlightTagInBook[];
-  allHighlights?: Highlight[];
-  currentIndex?: number;
-  onNavigate?: (newIndex: number) => void;
+  disabled?: boolean;
 }
 
-export const HighlightViewModal = ({
-  highlight,
+const TagInput = ({
+  highlightId,
   bookId,
-  open,
-  onClose,
+  initialTags,
   availableTags,
-  allHighlights,
-  currentIndex = 0,
-  onNavigate,
-}: HighlightViewModalProps) => {
+  disabled = false,
+}: TagInputProps) => {
   const queryClient = useQueryClient();
-  const [currentTags, setCurrentTags] = useState<HighlightTagInBook[]>([]);
+  const [currentTags, setCurrentTags] = useState<HighlightTagInBook[]>(initialTags);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const hasNavigation = allHighlights && allHighlights.length > 1 && onNavigate;
-  const hasPrevious = hasNavigation && currentIndex > 0;
-  const hasNext = hasNavigation && currentIndex < allHighlights.length - 1;
-
-  const startsWithLowercase =
-    highlight.text.length > 0 &&
-    highlight.text[0] === highlight.text[0].toLowerCase() &&
-    highlight.text[0] !== highlight.text[0].toUpperCase();
-  const formattedText = startsWithLowercase ? `...${highlight.text}` : highlight.text;
-
-  const handlePrevious = useCallback(() => {
-    if (hasPrevious && onNavigate) {
-      onNavigate(currentIndex - 1);
-    }
-  }, [currentIndex, hasPrevious, onNavigate]);
-
-  const handleNext = useCallback(() => {
-    if (hasNext && onNavigate) {
-      onNavigate(currentIndex + 1);
-    }
-  }, [currentIndex, hasNext, onNavigate]);
-
-  // Initialize current tags when dialog opens or highlight changes
+  // Update tags when initialTags changes
   useEffect(() => {
-    if (open && highlight.highlight_tags) {
-      setCurrentTags(highlight.highlight_tags);
-    }
-  }, [open, highlight.highlight_tags]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    if (!open || !hasNavigation) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft' && hasPrevious) {
-        e.preventDefault();
-        handlePrevious();
-      } else if (e.key === 'ArrowRight' && hasNext) {
-        e.preventDefault();
-        handleNext();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, hasNavigation, hasPrevious, hasNext, currentIndex, handlePrevious, handleNext]);
+    setCurrentTags(initialTags);
+  }, [initialTags]);
 
   // Mutation hooks
   const addTagMutation = useAddTagToHighlightApiV1BookBookIdHighlightHighlightIdTagPost({
     mutation: {
       onSuccess: (data) => {
         setCurrentTags(data.highlight_tags || []);
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: [`/api/v1/book/${bookId}`],
         });
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: [`/api/v1/book/${bookId}/highlight_tags`],
         });
       },
@@ -113,10 +65,10 @@ export const HighlightViewModal = ({
       mutation: {
         onSuccess: (data) => {
           setCurrentTags(data.highlight_tags || []);
-          queryClient.invalidateQueries({
+          void queryClient.invalidateQueries({
             queryKey: [`/api/v1/book/${bookId}`],
           });
-          queryClient.invalidateQueries({
+          void queryClient.invalidateQueries({
             queryKey: [`/api/v1/book/${bookId}/highlight_tags`],
           });
         },
@@ -127,28 +79,12 @@ export const HighlightViewModal = ({
       },
     });
 
-  const deleteHighlightMutation = useDeleteHighlightsApiV1BookBookIdHighlightDelete({
-    mutation: {
-      onSuccess: () => {
-        queryClient.refetchQueries({
-          queryKey: [`/api/v1/book/${bookId}`],
-          exact: true,
-        });
-        onClose();
-      },
-      onError: (error) => {
-        console.error('Failed to delete highlight:', error);
-        alert('Failed to delete highlight. Please try again.');
-      },
-    },
-  });
-
   const addTagToHighlight = async (tagName: string) => {
     setIsProcessing(true);
     try {
       await addTagMutation.mutateAsync({
         bookId,
-        highlightId: highlight.id,
+        highlightId,
         data: { name: tagName },
       });
     } finally {
@@ -161,7 +97,7 @@ export const HighlightViewModal = ({
     try {
       await removeTagMutation.mutateAsync({
         bookId,
-        highlightId: highlight.id,
+        highlightId,
         tagId,
       });
     } finally {
@@ -193,6 +129,132 @@ export const HighlightViewModal = ({
     }
   };
 
+  const isLoading = disabled || isProcessing;
+
+  return (
+    <Box>
+      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+        Tags
+      </Typography>
+      <Autocomplete
+        multiple
+        freeSolo
+        options={availableTags}
+        getOptionLabel={(option) => (typeof option === 'string' ? option : option.name)}
+        value={currentTags}
+        onChange={handleTagChange}
+        isOptionEqualToValue={(option, value) => {
+          if (typeof option === 'string' || typeof value === 'string') {
+            return option === value;
+          }
+          return option.id === value.id;
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Add tags..."
+            helperText="Press Enter to add a tag, click X to remove"
+            disabled={isLoading}
+          />
+        )}
+        renderValue={(tagValue, getTagProps) =>
+          tagValue.map((option, index) => {
+            const { key, ...tagProps } = getTagProps({ index });
+            return (
+              <Chip
+                key={key}
+                label={typeof option === 'string' ? option : option.name}
+                {...tagProps}
+                disabled={isLoading}
+              />
+            );
+          })
+        }
+        disabled={isLoading}
+      />
+    </Box>
+  );
+};
+
+interface HighlightViewModalProps {
+  highlight: Highlight;
+  bookId: number;
+  open: boolean;
+  onClose: () => void;
+  availableTags: HighlightTagInBook[];
+  allHighlights?: Highlight[];
+  currentIndex?: number;
+  onNavigate?: (newIndex: number) => void;
+}
+
+export const HighlightViewModal = ({
+  highlight,
+  bookId,
+  open,
+  onClose,
+  availableTags,
+  allHighlights,
+  currentIndex = 0,
+  onNavigate,
+}: HighlightViewModalProps) => {
+  const queryClient = useQueryClient();
+
+  const hasNavigation = allHighlights && allHighlights.length > 1 && onNavigate;
+  const hasPrevious = hasNavigation && currentIndex > 0;
+  const hasNext = hasNavigation && currentIndex < allHighlights.length - 1;
+
+  const startsWithLowercase =
+    highlight.text.length > 0 &&
+    highlight.text[0] === highlight.text[0].toLowerCase() &&
+    highlight.text[0] !== highlight.text[0].toUpperCase();
+  const formattedText = startsWithLowercase ? `...${highlight.text}` : highlight.text;
+
+  const handlePrevious = useCallback(() => {
+    if (hasPrevious && onNavigate) {
+      onNavigate(currentIndex - 1);
+    }
+  }, [currentIndex, hasPrevious, onNavigate]);
+
+  const handleNext = useCallback(() => {
+    if (hasNext && onNavigate) {
+      onNavigate(currentIndex + 1);
+    }
+  }, [currentIndex, hasNext, onNavigate]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!open || !hasNavigation) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && hasPrevious) {
+        e.preventDefault();
+        handlePrevious();
+      } else if (e.key === 'ArrowRight' && hasNext) {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, hasNavigation, hasPrevious, hasNext, currentIndex, handlePrevious, handleNext]);
+
+  const deleteHighlightMutation = useDeleteHighlightsApiV1BookBookIdHighlightDelete({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.refetchQueries({
+          queryKey: [`/api/v1/book/${bookId}`],
+          exact: true,
+        });
+        onClose();
+      },
+      onError: (error) => {
+        console.error('Failed to delete highlight:', error);
+        alert('Failed to delete highlight. Please try again.');
+      },
+    },
+  });
+
   const handleDelete = () => {
     if (
       confirm(
@@ -207,17 +269,17 @@ export const HighlightViewModal = ({
   };
 
   const handleClose = () => {
-    queryClient.invalidateQueries({
+    void queryClient.invalidateQueries({
       queryKey: [`/api/v1/book/${bookId}`],
     });
-    queryClient.invalidateQueries({
+    void queryClient.invalidateQueries({
       queryKey: [`/api/v1/book/${bookId}/highlight_tags`],
     });
     onClose();
   };
 
   const isDeleting = deleteHighlightMutation.isPending;
-  const isLoading = isProcessing || isDeleting;
+  const isLoading = isDeleting;
 
   return (
     <CommonDialog
@@ -307,47 +369,13 @@ export const HighlightViewModal = ({
             </Box>
           </FadeInOut>
           {/* Tags */}
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Tags
-            </Typography>
-            <Autocomplete
-              multiple
-              freeSolo
-              options={availableTags}
-              getOptionLabel={(option) => (typeof option === 'string' ? option : option.name)}
-              value={currentTags}
-              onChange={handleTagChange}
-              isOptionEqualToValue={(option, value) => {
-                if (typeof option === 'string' || typeof value === 'string') {
-                  return option === value;
-                }
-                return option.id === value.id;
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Add tags..."
-                  helperText="Press Enter to add a tag, click X to remove"
-                  disabled={isLoading}
-                />
-              )}
-              renderValue={(tagValue, getTagProps) =>
-                tagValue.map((option, index) => {
-                  const { key, ...tagProps } = getTagProps({ index });
-                  return (
-                    <Chip
-                      key={key}
-                      label={typeof option === 'string' ? option : option.name}
-                      {...tagProps}
-                      disabled={isLoading}
-                    />
-                  );
-                })
-              }
-              disabled={isLoading}
-            />
-          </Box>
+          <TagInput
+            highlightId={highlight.id}
+            bookId={bookId}
+            initialTags={highlight.highlight_tags || []}
+            availableTags={availableTags}
+            disabled={isLoading}
+          />
         </Box>
         {/* Next Button (Desktop) */}
         {hasNavigation && (
@@ -410,47 +438,13 @@ export const HighlightViewModal = ({
         </Box>
 
         {/* Tags */}
-        <Box>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            Tags
-          </Typography>
-          <Autocomplete
-            multiple
-            freeSolo
-            options={availableTags}
-            getOptionLabel={(option) => (typeof option === 'string' ? option : option.name)}
-            value={currentTags}
-            onChange={handleTagChange}
-            isOptionEqualToValue={(option, value) => {
-              if (typeof option === 'string' || typeof value === 'string') {
-                return option === value;
-              }
-              return option.id === value.id;
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder="Add tags..."
-                helperText="Press Enter to add a tag, click X to remove"
-                disabled={isLoading}
-              />
-            )}
-            renderValue={(tagValue, getTagProps) =>
-              tagValue.map((option, index) => {
-                const { key, ...tagProps } = getTagProps({ index });
-                return (
-                  <Chip
-                    key={key}
-                    label={typeof option === 'string' ? option : option.name}
-                    {...tagProps}
-                    disabled={isLoading}
-                  />
-                );
-              })
-            }
-            disabled={isLoading}
-          />
-        </Box>
+        <TagInput
+          highlightId={highlight.id}
+          bookId={bookId}
+          initialTags={highlight.highlight_tags || []}
+          availableTags={availableTags}
+          disabled={isLoading}
+        />
 
         {/* Navigation Buttons (Mobile) */}
         {hasNavigation && (
