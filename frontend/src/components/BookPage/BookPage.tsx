@@ -2,7 +2,7 @@ import { useGetBookDetailsApiV1BookBookIdGet } from '@/api/generated/books/books
 import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/highlights/highlights.ts';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import { Alert, Box, Container, Typography } from '@mui/material';
-import { useParams } from '@tanstack/react-router';
+import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { SearchBar } from '../common/SearchBar';
 import { SectionTitle } from '../common/SectionTitle';
@@ -14,12 +14,35 @@ import { SearchResults } from './components/SearchResults';
 
 export const BookPage = () => {
   const { bookId } = useParams({ from: '/book/$bookId' });
+  const { search, tagId } = useSearch({ from: '/book/$bookId' });
   const { data: book, isLoading, isError } = useGetBookDetailsApiV1BookBookIdGet(Number(bookId));
 
-  const [searchText, setSearchText] = useState('');
-  const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+  const navigate = useNavigate({ from: '/book/$bookId' });
+  const searchText = search || '';
 
-  // Search query - only enabled when there's search text
+  const [selectedTagId, setSelectedTagId] = useState<number | undefined>(tagId);
+
+  const handleSearch = (value: string) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        search: value || undefined,
+      }),
+      replace: true,
+    });
+  };
+
+  const handleTagClick = (tagId: number | null) => {
+    setSelectedTagId(tagId || undefined);
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        tagId: tagId || undefined,
+      }),
+      replace: true,
+    });
+  };
+
   const { data: searchResults, isLoading: isSearching } =
     useSearchHighlightsApiV1HighlightsSearchGet(
       {
@@ -92,10 +115,6 @@ export const BookPage = () => {
   // Show search results or regular chapter view
   const showSearchResults = searchText.length > 0;
 
-  const handleTagClick = (tagId: number | null) => {
-    setSelectedTagId(tagId);
-  };
-
   return (
     <Box
       sx={{
@@ -121,7 +140,11 @@ export const BookPage = () => {
             maxWidth: { xs: '100%', lg: 'calc(100% - 300px - 32px)' }, // Subtract sidebar width + gap
           }}
         >
-          <SearchBar onSearch={setSearchText} placeholder="Search highlights..." />
+          <SearchBar
+            onSearch={handleSearch}
+            placeholder="Search highlights..."
+            initialValue={searchText}
+          />
         </Box>
 
         {/* Search Results */}
