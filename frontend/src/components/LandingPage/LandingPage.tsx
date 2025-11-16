@@ -1,11 +1,16 @@
 import { Alert, Box, Container, Typography } from '@mui/material';
+import { useState } from 'react';
 import { useGetBooksApiV1HighlightsBooksGet } from '../../api/generated/highlights/highlights';
+import { SearchBar } from '../common/SearchBar';
 import { SectionTitle } from '../common/SectionTitle';
 import { Spinner } from '../common/Spinner';
 import { BookList } from './components/BookList';
 
 export const LandingPage = () => {
-  const { data, isLoading, isError } = useGetBooksApiV1HighlightsBooksGet();
+  const [searchText, setSearchText] = useState('');
+  const { data, isLoading, isError } = useGetBooksApiV1HighlightsBooksGet({
+    search: searchText || undefined,
+  });
 
   return (
     <Container maxWidth="lg">
@@ -20,6 +25,8 @@ export const LandingPage = () => {
 
       <Box sx={{ mb: 4 }}>
         <SectionTitle showDivider>Books</SectionTitle>
+
+        <SearchBar onSearch={setSearchText} placeholder="Search books by title or author..." />
 
         {isLoading && <Spinner />}
 

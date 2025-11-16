@@ -39,6 +39,7 @@ Args:
     db: Database session
     offset: Number of books to skip (for pagination)
     limit: Maximum number of books to return (for pagination)
+    search: Optional search text to filter books by title or author
 
 Returns:
     BooksListResponse with list of books and pagination info

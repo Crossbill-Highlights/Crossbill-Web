@@ -147,18 +147,23 @@ class HighlightService:
 
         return schemas.HighlightSearchResponse(highlights=search_results, total=len(search_results))
 
-    def get_books_with_counts(self, offset: int = 0, limit: int = 100) -> schemas.BooksListResponse:
+    def get_books_with_counts(
+        self, offset: int = 0, limit: int = 100, search_text: str | None = None
+    ) -> schemas.BooksListResponse:
         """
         Get all books with their highlight counts, sorted alphabetically by title.
 
         Args:
             offset: Number of books to skip (for pagination)
             limit: Maximum number of books to return (for pagination)
+            search_text: Optional text to search for in book title or author
 
         Returns:
             BooksListResponse with list of books and pagination info
         """
-        books_with_counts, total = self.book_repo.get_books_with_highlight_count(offset, limit)
+        books_with_counts, total = self.book_repo.get_books_with_highlight_count(
+            offset, limit, search_text
+        )
 
         # Convert to response schema
         books_list = [

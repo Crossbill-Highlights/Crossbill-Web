@@ -17,4 +17,8 @@ export type GetBooksApiV1HighlightsBooksGetParams = {
    * @maximum 1000
    */
   limit?: number;
+  /**
+   * Search text to filter books by title or author
+   */
+  search?: string | null;
 };

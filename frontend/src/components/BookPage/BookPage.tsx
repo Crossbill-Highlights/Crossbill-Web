@@ -3,12 +3,12 @@ import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/hig
 import { Alert, Box, Container, Typography } from '@mui/material';
 import { useParams } from '@tanstack/react-router';
 import { useState } from 'react';
+import { SearchBar } from '../common/SearchBar';
 import { SectionTitle } from '../common/SectionTitle';
 import { Spinner } from '../common/Spinner';
 import { BookTitle } from './components/BookTitle';
 import { HighlightCard } from './components/HighlightCard';
 import { HighlightTags } from './components/HighlightTags';
-import { SearchBar } from './components/SearchBar';
 import { SearchResults } from './components/SearchResults';
 
 export const BookPage = () => {
@@ -120,7 +120,7 @@ export const BookPage = () => {
             maxWidth: { xs: '100%', lg: 'calc(100% - 300px - 32px)' }, // Subtract sidebar width + gap
           }}
         >
-          <SearchBar onSearch={setSearchText} />
+          <SearchBar onSearch={setSearchText} placeholder="Search highlights..." />
         </Box>
 
         {/* Search Results */}

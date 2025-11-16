@@ -54,7 +54,7 @@ class BookRepository:
         return self.create(book_data)
 
     def get_books_with_highlight_count(
-        self, offset: int = 0, limit: int = 100
+        self, offset: int = 0, limit: int = 100, search_text: str | None = None
     ) -> tuple[Sequence[tuple[models.Book, int]], int]:
         """
         Get books with their highlight counts, sorted alphabetically by title.
@@ -62,12 +62,24 @@ class BookRepository:
         Args:
             offset: Number of books to skip (default: 0)
             limit: Maximum number of books to return (default: 100)
+            search_text: Optional text to search for in book title or author (case-insensitive)
 
         Returns:
             tuple[Sequence[tuple[Book, int]], int]: (list of (book, count) tuples, total count)
         """
+        # Build base filter conditions
+        filters = []
+        if search_text:
+            search_pattern = f"%{search_text}%"
+            filters.append(
+                (models.Book.title.ilike(search_pattern))
+                | (models.Book.author.ilike(search_pattern))
+            )
+
         # Count query for total number of books
         total_stmt = select(func.count(models.Book.id))
+        if filters:
+            total_stmt = total_stmt.where(*filters)
         total = self.db.execute(total_stmt).scalar() or 0
 
         # Main query for books with highlight counts (excluding soft-deleted highlights)
@@ -83,6 +95,9 @@ class BookRepository:
             .offset(offset)
             .limit(limit)
         )
+
+        if filters:
+            stmt = stmt.where(*filters)
 
         result = self.db.execute(stmt).all()
         return result, total

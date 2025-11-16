@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 interface SearchBarProps {
   onSearch: (searchText: string) => void;
+  placeholder?: string;
 }
 
-export const SearchBar = ({ onSearch }: SearchBarProps) => {
+export const SearchBar = ({ onSearch, placeholder = 'Search...' }: SearchBarProps) => {
   const [searchInput, setSearchInput] = useState('');
 
   const debouncedSearch = useMemo(
@@ -40,7 +41,7 @@ export const SearchBar = ({ onSearch }: SearchBarProps) => {
     <Box sx={{ mb: 3 }}>
       <TextField
         fullWidth
-        placeholder="Search highlights..."
+        placeholder={placeholder}
         value={searchInput}
         onChange={handleChange}
         onKeyDown={(e) => {

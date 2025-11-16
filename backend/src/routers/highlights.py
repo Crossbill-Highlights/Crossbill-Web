@@ -18,6 +18,7 @@ def get_books(
     db: DatabaseSession,
     offset: int = Query(0, ge=0, description="Number of books to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of books to return"),
+    search: str | None = Query(None, description="Search text to filter books by title or author"),
 ) -> schemas.BooksListResponse:
     """
     Get all books with their highlight counts, sorted alphabetically by title.
@@ -26,6 +27,7 @@ def get_books(
         db: Database session
         offset: Number of books to skip (for pagination)
         limit: Maximum number of books to return (for pagination)
+        search: Optional search text to filter books by title or author
 
     Returns:
         BooksListResponse with list of books and pagination info
@@ -35,7 +37,7 @@ def get_books(
     """
     try:
         service = HighlightService(db)
-        return service.get_books_with_counts(offset, limit)
+        return service.get_books_with_counts(offset, limit, search)
     except Exception as e:
         logger.error(f"Failed to fetch books: {e!s}", exc_info=True)
         raise HTTPException(
