@@ -102,9 +102,11 @@ export const HighlightCard = ({ highlight, bookId }: HighlightCardProps) => {
           borderLeftColor: 'transparent',
           transition: 'all 0.2s',
           cursor: 'pointer',
-          '&:hover': {
-            bgcolor: 'action.hover',
-            borderLeftColor: 'primary.main',
+          '@media (hover: hover)': {
+            '&:hover': {
+              bgcolor: 'action.hover',
+              borderLeftColor: 'primary.main',
+            },
           },
           '&:last-child': {
             borderBottom: 0,
