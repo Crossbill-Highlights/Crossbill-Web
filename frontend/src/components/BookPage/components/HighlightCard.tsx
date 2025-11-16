@@ -1,9 +1,13 @@
+import { useGetHighlightTagsApiV1BookBookIdHighlightTagsGet } from '@/api/generated/books/books.ts';
 import type { Highlight } from '@/api/generated/model';
 import { TagList } from '@/components/BookPage/components/TagList.tsx';
-import { CalendarMonth as CalendarIcon, FormatQuote as QuoteIcon } from '@mui/icons-material';
+import {
+  CalendarMonth as CalendarIcon,
+  Notes as NotesIcon,
+  FormatQuote as QuoteIcon,
+} from '@mui/icons-material';
 import { Box, Typography } from '@mui/material';
 import { useState } from 'react';
-import { useGetHighlightTagsApiV1BookBookIdHighlightTagsGet } from '../../../api/generated/books/books';
 import { HighlightViewModal } from './HighlightViewModal';
 
 export interface HighlightCardProps {
@@ -57,7 +61,13 @@ const Footer = ({ highlight }: FooterProps) => {
               day: 'numeric',
             })}
           </span>
-          <span>{highlight.page && ` • Page ${highlight.page}`}</span>
+          {highlight.page && <span>&nbsp;&nbsp;•&nbsp;&nbsp;Page {highlight.page}</span>}
+          {highlight.note && (
+            <span>
+              &nbsp;&nbsp;•
+              <NotesIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
+            </span>
+          )}
         </Typography>
       </Box>
 
@@ -70,7 +80,12 @@ const Footer = ({ highlight }: FooterProps) => {
 
 const previewWordCount = 40;
 
-export const HighlightCard = ({ highlight, bookId, allHighlights, currentIndex }: HighlightCardProps) => {
+export const HighlightCard = ({
+  highlight,
+  bookId,
+  allHighlights,
+  currentIndex,
+}: HighlightCardProps) => {
   const startsWithLowercase =
     highlight.text.length > 0 &&
     highlight.text[0] === highlight.text[0].toLowerCase() &&
