@@ -175,3 +175,17 @@ class HighlightSearchResponse(BaseModel):
         default_factory=list, description="List of matching highlights"
     )
     total: int = Field(..., ge=0, description="Total number of results")
+
+
+class HighlightNoteUpdate(BaseModel):
+    """Schema for updating a highlight's note."""
+
+    note: str | None = Field(None, description="Note/annotation text (null to clear)")
+
+
+class HighlightNoteUpdateResponse(BaseModel):
+    """Schema for highlight note update response."""
+
+    success: bool = Field(..., description="Whether the update was successful")
+    message: str = Field(..., description="Response message")
+    highlight: Highlight = Field(..., description="Updated highlight")

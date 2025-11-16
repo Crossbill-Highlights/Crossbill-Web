@@ -183,6 +183,34 @@ class HighlightService:
 
         return schemas.BooksListResponse(books=books_list, total=total, offset=offset, limit=limit)
 
+    def update_highlight_note(
+        self, highlight_id: int, note_data: schemas.HighlightNoteUpdate
+    ) -> schemas.Highlight | None:
+        """
+        Update the note field of a highlight.
+
+        Args:
+            highlight_id: ID of the highlight to update
+            note_data: Note update data
+
+        Returns:
+            Updated highlight or None if not found
+        """
+        # Update the note using repository
+        highlight = self.highlight_repo.update_note(highlight_id, note_data.note)
+
+        if highlight is None:
+            return None
+
+        # Commit the changes
+        self.db.commit()
+        self.db.refresh(highlight)
+
+        logger.info("highlight_note_updated", highlight_id=highlight_id)
+
+        # Convert to response schema
+        return schemas.Highlight.model_validate(highlight)
+
 
 # Keep the old name for backwards compatibility
 HighlightUploadService = HighlightService

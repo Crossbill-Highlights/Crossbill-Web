@@ -202,3 +202,31 @@ class HighlightRepository:
         self.db.flush()
         logger.info(f"Soft deleted {count} highlights for book_id={book_id}")
         return count
+
+    def update_note(self, highlight_id: int, note: str | None) -> models.Highlight | None:
+        """
+        Update the note field of a highlight.
+
+        Args:
+            highlight_id: ID of the highlight to update
+            note: New note text (or None to clear)
+
+        Returns:
+            Updated highlight or None if not found or already deleted
+        """
+        # Get the highlight (excluding soft-deleted ones)
+        stmt = select(models.Highlight).where(
+            models.Highlight.id == highlight_id, models.Highlight.deleted_at.is_(None)
+        )
+        highlight = self.db.execute(stmt).scalar_one_or_none()
+
+        if highlight is None:
+            return None
+
+        # Update the note
+        highlight.note = note
+        self.db.flush()
+        self.db.refresh(highlight)
+
+        logger.info(f"Updated note for highlight_id={highlight_id}")
+        return highlight

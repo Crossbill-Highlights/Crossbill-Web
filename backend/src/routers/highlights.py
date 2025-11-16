@@ -121,3 +121,52 @@ def search_highlights(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Search failed: {e!s}",
         ) from e
+
+
+@router.post(
+    "/{highlight_id}/note",
+    response_model=schemas.HighlightNoteUpdateResponse,
+    status_code=status.HTTP_200_OK,
+)
+def update_highlight_note(
+    highlight_id: int,
+    request: schemas.HighlightNoteUpdate,
+    db: DatabaseSession,
+) -> schemas.HighlightNoteUpdateResponse:
+    """
+    Update the note field of a highlight.
+
+    Args:
+        highlight_id: ID of the highlight to update
+        request: Note update request
+        db: Database session
+
+    Returns:
+        HighlightNoteUpdateResponse with the updated highlight
+
+    Raises:
+        HTTPException: If highlight not found or update fails
+    """
+    try:
+        service = HighlightService(db)
+        highlight = service.update_highlight_note(highlight_id, request)
+
+        if highlight is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Highlight with id {highlight_id} not found",
+            )
+
+        return schemas.HighlightNoteUpdateResponse(
+            success=True,
+            message="Note updated successfully",
+            highlight=highlight,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update highlight note: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update note: {e!s}",
+        ) from e
