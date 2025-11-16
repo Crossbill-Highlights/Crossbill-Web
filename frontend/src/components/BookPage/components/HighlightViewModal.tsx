@@ -4,6 +4,7 @@ import {
   useRemoveTagFromHighlightApiV1BookBookIdHighlightHighlightIdTagTagIdDelete,
 } from '@/api/generated/books/books';
 import type { Highlight, HighlightTagInBook } from '@/api/generated/model';
+import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import {
   ArrowBack as ArrowBackIcon,
   ArrowForward as ArrowForwardIcon,
@@ -261,47 +262,50 @@ export const HighlightViewModal = ({
         {/* Main Content */}
         <Box display="flex" flexDirection="column" gap={3} flex={1}>
           {/* Highlight Text */}
-          <Box sx={{ display: 'flex', alignItems: 'start', gap: 2 }}>
-            <QuoteIcon
-              sx={{
-                fontSize: 28,
-                color: 'primary.main',
-                flexShrink: 0,
-                mt: 0.5,
-                opacity: 0.7,
-              }}
-            />
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 500,
-                color: 'text.primary',
-                lineHeight: 1.7,
-                fontSize: '1.25rem',
-              }}
-            >
-              {formattedText}
-            </Typography>
-          </Box>
+          <FadeInOut ekey={highlight.id}>
+            <Box display="flex" flexDirection="column" gap={3} flex={1}>
+              <Box sx={{ display: 'flex', alignItems: 'start', gap: 2 }}>
+                <QuoteIcon
+                  sx={{
+                    fontSize: 28,
+                    color: 'primary.main',
+                    flexShrink: 0,
+                    mt: 0.5,
+                    opacity: 0.7,
+                  }}
+                />
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 500,
+                    color: 'text.primary',
+                    lineHeight: 1.7,
+                    fontSize: '1.25rem',
+                  }}
+                >
+                  {formattedText}
+                </Typography>
+              </Box>
 
-          {/* Metadata */}
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', opacity: 0.8 }}>
-            <CalendarIcon
-              sx={{
-                fontSize: 20,
-                color: 'text.secondary',
-              }}
-            />
-            <Typography variant="body2" color="text.secondary">
-              {new Date(highlight.datetime).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-              {highlight.page && ` • Page ${highlight.page}`}
-            </Typography>
-          </Box>
-
+              {/* Metadata */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', opacity: 0.8 }}>
+                <CalendarIcon
+                  sx={{
+                    fontSize: 20,
+                    color: 'text.secondary',
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {new Date(highlight.datetime).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                  {highlight.page && ` • Page ${highlight.page}`}
+                </Typography>
+              </Box>
+            </Box>
+          </FadeInOut>
           {/* Tags */}
           <Box>
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
@@ -345,7 +349,6 @@ export const HighlightViewModal = ({
             />
           </Box>
         </Box>
-
         {/* Next Button (Desktop) */}
         {hasNavigation && (
           <IconButton
