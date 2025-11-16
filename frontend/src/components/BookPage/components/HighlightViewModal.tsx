@@ -332,7 +332,7 @@ export const HighlightViewModal = ({
                   disabled={isLoading}
                 />
               )}
-              renderTags={(tagValue, getTagProps) =>
+              renderValue={(tagValue, getTagProps) =>
                 tagValue.map((option, index) => {
                   const { key, ...tagProps } = getTagProps({ index });
                   return (
@@ -435,7 +435,7 @@ export const HighlightViewModal = ({
                 disabled={isLoading}
               />
             )}
-            renderTags={(tagValue, getTagProps) =>
+            renderValue={(tagValue, getTagProps) =>
               tagValue.map((option, index) => {
                 const { key, ...tagProps } = getTagProps({ index });
                 return (
