@@ -20,7 +20,7 @@ export const SectionTitle = ({
   }
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, px: 0.5 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5, px: 0.5 }}>
       <Typography variant="h3" component={component} sx={{ color: 'primary.main' }}>
         {children}
       </Typography>

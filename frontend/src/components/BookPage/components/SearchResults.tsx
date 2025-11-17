@@ -74,7 +74,7 @@ export const SearchResults = ({
                       <SectionTitle showDivider>{chapter.chapterName}</SectionTitle>
 
                       {/* Highlights in this chapter */}
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                         {chapter.highlights.map((highlight) => {
                           const highlightIndex = allHighlights.findIndex(
                             (h) => h.id === highlight.id

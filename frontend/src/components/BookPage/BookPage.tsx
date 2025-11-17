@@ -207,7 +207,7 @@ export const BookPage = () => {
 
                     {/* Highlights in this chapter */}
                     {chapter.highlights && chapter.highlights.length > 0 ? (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                         {chapter.highlights.map((highlight) => {
                           const highlightIndex = allFilteredHighlights.findIndex(
                             (h) => h.id === highlight.id

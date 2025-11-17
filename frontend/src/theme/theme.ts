@@ -52,14 +52,18 @@ export const theme = createTheme({
     h1: {
       fontSize: '2rem',
       fontWeight: 700,
+      letterSpacing: '-0.02em',
+      lineHeight: 1.2,
     },
     h2: {
       fontSize: '1.4rem',
-      fontWeight: 700,
+      fontWeight: 400,
+      lineHeight: 1.3,
     },
     h3: {
-      fontSize: '1.2rem',
+      fontSize: '1.1rem',
       fontWeight: 700,
+      letterSpacing: '0.01em',
     },
     h4: {
       fontSize: '1.0rem',
@@ -72,6 +76,15 @@ export const theme = createTheme({
     h6: {
       fontSize: '1.0rem',
       fontWeight: 500,
+    },
+    body1: {
+      fontSize: '1.05rem',
+      fontWeight: 400,
+      lineHeight: 1.75,
+      letterSpacing: '0.01em',
+    },
+    body2: {
+      lineHeight: 1.6,
     },
   },
   shape: {

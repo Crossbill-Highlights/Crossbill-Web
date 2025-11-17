@@ -59,8 +59,14 @@ export const HighlightTags = ({ tags, selectedTag, onTagClick }: HighlightTagsPr
               onClick={() => onTagClick(selectedTag === tag.id ? null : tag.id)}
               sx={{
                 cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                py: 0.25,
+                px: 0.5,
+                borderColor: selectedTag === tag.id ? undefined : 'divider',
                 '&:hover': {
                   bgcolor: selectedTag === tag.id ? 'primary.dark' : 'action.hover',
+                  borderColor: selectedTag === tag.id ? undefined : 'secondary.light',
+                  transform: 'translateY(-1px)',
                 },
               }}
             />

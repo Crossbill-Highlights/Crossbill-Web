@@ -122,19 +122,22 @@ export const HighlightCard = ({
         onClick={handleOpenModal}
         sx={{
           position: 'relative',
-          py: 3,
-          px: 2,
+          py: 3.5,
+          px: 2.5,
           borderBottom: 1,
           borderColor: 'divider',
           borderLeft: 3,
           borderLeftStyle: 'solid',
           borderLeftColor: 'transparent',
-          transition: 'all 0.2s',
+          borderRadiusTopRight: 1.5,
+          borderRadiusBottomRight: 1.5,
+          transition: 'all 0.2s ease',
           cursor: 'pointer',
           '@media (hover: hover)': {
             '&:hover': {
               bgcolor: 'action.hover',
               borderLeftColor: 'primary.main',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
             },
           },
           '&:last-child': {
@@ -147,7 +150,7 @@ export const HighlightCard = ({
           <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5, mb: 2 }}>
             <QuoteIcon
               sx={{
-                fontSize: 18,
+                fontSize: 22,
                 color: 'primary.main',
                 flexShrink: 0,
                 mt: 0.3,
@@ -157,9 +160,7 @@ export const HighlightCard = ({
             <Typography
               variant="body1"
               sx={{
-                fontWeight: 600,
                 color: 'text.primary',
-                lineHeight: 1.5,
               }}
             >
               {previewText}

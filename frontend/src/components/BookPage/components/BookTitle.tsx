@@ -22,7 +22,7 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
     <>
       <Box
         sx={{
-          mb: 4,
+          mb: 5,
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           gap: { xs: 2, md: 3 },
@@ -43,7 +43,11 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
             height="100%"
             width="100%"
             objectFit="cover"
-            sx={{ boxShadow: 3, borderRadius: 1 }}
+            sx={{
+              boxShadow: 3,
+              borderRadius: 1,
+              transition: 'box-shadow 0.3s ease, transform 0.3s ease',
+            }}
           />
         </Box>
 
@@ -71,7 +75,7 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
               width: '100%',
             }}
           >
-            <Typography variant="h1" component="h1" sx={{ lineHeight: 1.3 }}>
+            <Typography variant="h1" component="h1">
               {book.title}
             </Typography>
           </Box>
@@ -80,7 +84,6 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
             variant="h2"
             sx={{
               color: 'primary.main',
-              fontWeight: 500,
               mb: { xs: 1, md: 2 },
               width: '100%',
             }}
