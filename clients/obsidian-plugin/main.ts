@@ -21,6 +21,11 @@ interface BooksListResponse {
   limit: number;
 }
 
+interface HighlightTag {
+  id: number;
+  name: string;
+}
+
 interface Highlight {
   id: number;
   book_id: number;
@@ -30,6 +35,7 @@ interface Highlight {
   page: number | null;
   note: string | null;
   datetime: string;
+  highlight_tags: HighlightTag[];
   created_at: string;
   updated_at: string;
 }
@@ -230,6 +236,12 @@ export default class CrossbillPlugin extends Plugin {
 
     if (highlight.page !== null) {
       content += `*Page ${highlight.page}*\n\n`;
+    }
+
+    // Add tags in Obsidian format (#tagname)
+    if (highlight.highlight_tags && highlight.highlight_tags.length > 0) {
+      const tags = highlight.highlight_tags.map((tag) => `#${tag.name}`).join(' ');
+      content += `${tags}\n\n`;
     }
 
     content += '---\n\n';
