@@ -18,12 +18,11 @@ export function formatHighlight(highlight: Highlight, bookTitle?: string): strin
     content += `**Note:** ${highlight.note}\n\n`;
   }
 
+  if (bookTitle) {
+    content += `*${bookTitle}* - `;
+  }
   if (highlight.page !== null) {
     content += `*Page ${highlight.page}*\n\n`;
-  }
-
-  if (bookTitle) {
-    content += `*${bookTitle}*\n\n`;
   }
 
   // Add tags in Obsidian format (#tagname)
