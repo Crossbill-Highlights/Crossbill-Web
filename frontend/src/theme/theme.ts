@@ -41,49 +41,46 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: [
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
+      '"Lora"',
+      'Georgia',
+      'serif',
     ].join(','),
     h1: {
       fontSize: '2rem',
-      fontWeight: 700,
+      fontWeight: 900, // Extreme weight for impact
       letterSpacing: '-0.02em',
       lineHeight: 1.2,
     },
     h2: {
       fontSize: '1.4rem',
-      fontWeight: 400,
+      fontWeight: 200, // Light weight for contrast
       lineHeight: 1.3,
     },
     h3: {
       fontSize: '1.1rem',
-      fontWeight: 700,
+      fontWeight: 800, // Heavy weight
       letterSpacing: '0.01em',
     },
     h4: {
       fontSize: '1.0rem',
-      fontWeight: 600,
+      fontWeight: 700,
     },
     h5: {
       fontSize: '1.0rem',
-      fontWeight: 600,
+      fontWeight: 700,
     },
     h6: {
       fontSize: '1.0rem',
-      fontWeight: 500,
+      fontWeight: 600,
     },
     body1: {
-      fontSize: '1.05rem',
-      fontWeight: 400,
+      fontSize: '1.0rem',
+      fontWeight: 400, // Light for readability
       lineHeight: 1.75,
       letterSpacing: '0.01em',
     },
     body2: {
+      fontWeight: 200, // Very light
       lineHeight: 1.6,
     },
   },
