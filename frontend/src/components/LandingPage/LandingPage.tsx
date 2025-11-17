@@ -27,11 +27,11 @@ export const LandingPage = () => {
 
   return (
     <Container maxWidth="lg">
-      <Box sx={{ mt: 4, mb: 6 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
+      <Box sx={{ mt: { xs: 6, md: 8 }, mb: 6, textAlign: 'center' }}>
+        <Typography variant="h2" component="h1" gutterBottom>
           Welcome to Crossbill
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem' }}>
           Your highlights management application
         </Typography>
       </Box>
@@ -39,20 +39,28 @@ export const LandingPage = () => {
       <Box sx={{ mb: 4 }}>
         <SectionTitle showDivider>Books</SectionTitle>
 
-        <SearchBar
-          onSearch={handleSearch}
-          placeholder="Search books by title or author..."
-          initialValue={searchText}
-        />
+        <Box sx={{ mb: 3 }}>
+          <SearchBar
+            onSearch={handleSearch}
+            placeholder="Search books by title or author..."
+            initialValue={searchText}
+          />
+        </Box>
 
         {isLoading && <Spinner />}
 
-        {isError && <Alert severity="error">Failed to load books. Please try again later.</Alert>}
+        {isError && (
+          <Box sx={{ py: 3 }}>
+            <Alert severity="error">Failed to load books. Please try again later.</Alert>
+          </Box>
+        )}
 
         {data?.books && data.books.length === 0 && (
-          <Typography variant="body1" color="text.secondary">
-            No books found. Upload some highlights to get started!
-          </Typography>
+          <Box sx={{ py: 4, textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary">
+              No books found. Upload some highlights to get started!
+            </Typography>
+          </Box>
         )}
 
         {data?.books && data.books.length > 0 && <BookList books={data.books} />}

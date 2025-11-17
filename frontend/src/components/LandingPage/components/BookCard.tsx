@@ -28,9 +28,12 @@ export const BookCard = ({ book }: BookCardProps) => {
             display: 'flex',
             flexDirection: 'column',
             width: 'fit-content',
-            transition: 'transform 0.2s',
+            transition: 'transform 0.3s ease',
             '&:hover': {
               transform: 'translateY(-4px)',
+              '& .book-cover': {
+                boxShadow: 4,
+              },
             },
           }}
         >
@@ -42,6 +45,12 @@ export const BookCard = ({ book }: BookCardProps) => {
               width={150}
               height={220}
               objectFit="cover"
+              className="book-cover"
+              sx={{
+                boxShadow: 3,
+                borderRadius: 1,
+                transition: 'box-shadow 0.3s ease',
+              }}
             />
 
             {/* Highlight count chip */}
@@ -54,9 +63,10 @@ export const BookCard = ({ book }: BookCardProps) => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
-                py: 0.5,
-                px: 1,
-                borderRadius: 2,
+                py: 0.75,
+                px: 1.25,
+                borderRadius: 1.5,
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
               }}
             >
               <BookmarkIcon sx={{ fontSize: 16, color: 'white' }} />
@@ -77,9 +87,9 @@ export const BookCard = ({ book }: BookCardProps) => {
             variant="body1"
             component="h3"
             sx={{
-              fontWeight: 700,
+              fontWeight: 600,
               color: 'text.primary',
-              mt: 1,
+              mt: 1.5,
               maxWidth: 150,
             }}
             title={book.title}
@@ -93,6 +103,7 @@ export const BookCard = ({ book }: BookCardProps) => {
             color="text.secondary"
             sx={{
               maxWidth: 150,
+              mt: 0.5,
             }}
             title={book.author || 'Unknown Author'}
           >

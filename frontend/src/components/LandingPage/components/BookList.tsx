@@ -18,7 +18,7 @@ export const BookList = ({ books }: BookListProps) => {
           md: 'repeat(auto-fill, minmax(150px, 1fr))',
           lg: 'repeat(auto-fill, minmax(150px, 1fr))',
         },
-        gap: 3,
+        gap: 4,
         justifyItems: 'start',
       }}
     >
