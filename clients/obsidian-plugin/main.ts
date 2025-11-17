@@ -161,6 +161,60 @@ class ChapterSuggestModal extends SuggestModal<ChapterWithHighlights> {
   }
 }
 
+// Highlight with Chapter Info for better display in modal
+interface HighlightWithChapterInfo extends Highlight {
+  chapterName: string;
+}
+
+// Single Highlight Selection Modal
+class HighlightSuggestModal extends SuggestModal<HighlightWithChapterInfo> {
+  private highlights: HighlightWithChapterInfo[];
+  private onSelect: (highlight: HighlightWithChapterInfo) => void;
+
+  constructor(
+    app: App,
+    highlights: HighlightWithChapterInfo[],
+    onSelect: (highlight: HighlightWithChapterInfo) => void
+  ) {
+    super(app);
+    this.highlights = highlights;
+    this.onSelect = onSelect;
+    this.setPlaceholder('Search highlights...');
+  }
+
+  getSuggestions(query: string): HighlightWithChapterInfo[] {
+    const lowerQuery = query.toLowerCase();
+    return this.highlights.filter((highlight) => {
+      const text = highlight.text.toLowerCase();
+      const chapter = highlight.chapterName.toLowerCase();
+      const note = highlight.note?.toLowerCase() || '';
+      return text.includes(lowerQuery) || chapter.includes(lowerQuery) || note.includes(lowerQuery);
+    });
+  }
+
+  renderSuggestion(highlight: HighlightWithChapterInfo, el: HTMLElement) {
+    // Truncate highlight text if too long
+    const maxLength = 80;
+    const truncatedText =
+      highlight.text.length > maxLength
+        ? highlight.text.substring(0, maxLength) + '...'
+        : highlight.text;
+
+    el.createEl('div', { text: truncatedText, cls: 'crossbill-highlight-text' });
+
+    // Show chapter and page info
+    let metadata = highlight.chapterName;
+    if (highlight.page !== null) {
+      metadata += ` • Page ${highlight.page}`;
+    }
+    el.createEl('small', { text: metadata, cls: 'crossbill-highlight-metadata' });
+  }
+
+  onChooseSuggestion(highlight: HighlightWithChapterInfo) {
+    this.onSelect(highlight);
+  }
+}
+
 // Settings Tab
 class CrossbillSettingTab extends PluginSettingTab {
   plugin: CrossbillPlugin;
@@ -215,6 +269,15 @@ export default class CrossbillPlugin extends Plugin {
       name: 'Import all highlights from a book',
       editorCallback: (editor: Editor) => {
         this.importAllChapters(editor);
+      },
+    });
+
+    // Add command to import a single highlight from a book
+    this.addCommand({
+      id: 'import-single-highlight',
+      name: 'Import a single highlight from a book',
+      editorCallback: (editor: Editor) => {
+        this.importSingleHighlight(editor);
       },
     });
 
@@ -373,6 +436,45 @@ export default class CrossbillPlugin extends Plugin {
         new Notice(`Error inserting highlights: ${error.message}`);
         console.error('Error inserting highlights:', error);
       }
+    });
+  }
+
+  /**
+   * Import a single highlight from a book
+   */
+  async importSingleHighlight(editor: Editor) {
+    await this.selectBook((bookDetails) => {
+      // Collect all highlights from all chapters with chapter info
+      const allHighlights: HighlightWithChapterInfo[] = [];
+
+      bookDetails.chapters.forEach((chapter) => {
+        chapter.highlights.forEach((highlight) => {
+          allHighlights.push({
+            ...highlight,
+            chapterName: chapter.name,
+          });
+        });
+      });
+
+      if (allHighlights.length === 0) {
+        new Notice('No highlights found in this book');
+        return;
+      }
+
+      // Show highlight selection modal
+      new HighlightSuggestModal(this.app, allHighlights, (selectedHighlight) => {
+        try {
+          const content = this.formatBookHeader(bookDetails) + this.formatHighlight(selectedHighlight);
+
+          const cursor = editor.getCursor();
+          editor.replaceRange(content, cursor);
+
+          new Notice(`Imported highlight from "${selectedHighlight.chapterName}"`);
+        } catch (error) {
+          new Notice(`Error inserting highlight: ${error.message}`);
+          console.error('Error inserting highlight:', error);
+        }
+      }).open();
     });
   }
 
