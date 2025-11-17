@@ -189,7 +189,7 @@ export const BookPage = () => {
               alignItems: 'start',
             }}
           >
-            <FadeInOut ekey="chapters-view">
+            <FadeInOut ekey={`chapters-view-${selectedTagId ?? 'all'}`}>
               {/* Main content - Highlights */}
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 {filteredChapters && filteredChapters.length === 0 && (
