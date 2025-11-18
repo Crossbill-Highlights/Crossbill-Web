@@ -97,6 +97,9 @@ class Book(Base):
     highlight_tags: Mapped[list["HighlightTag"]] = relationship(
         back_populates="book", cascade="all, delete-orphan"
     )
+    highlight_tag_groups: Mapped[list["HighlightTagGroup"]] = relationship(
+        back_populates="book", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         """String representation of Book."""
@@ -210,10 +213,10 @@ class Tag(Base):
         return f"<Tag(id={self.id}, name='{self.name}')>"
 
 
-class HighlightTag(Base):
-    """HighlightTag model for categorizing highlights within a book."""
+class HighlightTagGroup(Base):
+    """HighlightTagGroup model for grouping highlight tags within a book."""
 
-    __tablename__ = "highlight_tags"
+    __tablename__ = "highlight_tag_groups"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     book_id: Mapped[int] = mapped_column(
@@ -231,7 +234,45 @@ class HighlightTag(Base):
     )
 
     # Relationships
+    book: Mapped["Book"] = relationship(back_populates="highlight_tag_groups")
+    highlight_tags: Mapped[list["HighlightTag"]] = relationship(
+        back_populates="tag_group"
+    )
+
+    # Unique constraint: tag group names are unique within a book
+    __table_args__ = (UniqueConstraint("book_id", "name", name="uq_highlight_tag_group_book_name"),)
+
+    def __repr__(self) -> str:
+        """String representation of HighlightTagGroup."""
+        return f"<HighlightTagGroup(id={self.id}, name='{self.name}', book_id={self.book_id})>"
+
+
+class HighlightTag(Base):
+    """HighlightTag model for categorizing highlights within a book."""
+
+    __tablename__ = "highlight_tags"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("books.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    tag_group_id: Mapped[int | None] = mapped_column(
+        ForeignKey("highlight_tag_groups.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+    name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relationships
     book: Mapped["Book"] = relationship(back_populates="highlight_tags")
+    tag_group: Mapped["HighlightTagGroup | None"] = relationship(back_populates="highlight_tags")
     highlights: Mapped[list["Highlight"]] = relationship(
         secondary=highlight_highlight_tags, back_populates="highlight_tags", lazy="selectin"
     )
