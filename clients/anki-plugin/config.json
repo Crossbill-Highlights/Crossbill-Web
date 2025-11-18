@@ -1,0 +1,13 @@
+{
+  "server_host": "http://localhost:8000",
+  "default_deck": "Default",
+  "default_note_type": "Basic",
+  "auto_tag": true,
+  "tag_prefix": "crossbill",
+  "last_sync": null,
+  "ui_preferences": {
+    "dialog_width": 900,
+    "dialog_height": 600,
+    "last_selected_book": null
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "package": "crossbill",
+  "name": "Crossbill Highlights Importer",
+  "version": "0.1.0",
+  "author": "Crossbill Contributors",
+  "description": "Import your reading highlights from Crossbill server into Anki as flashcards. Browse, search, and convert highlights into study notes.",
+  "homepage": "https://github.com/Tumetsu/Crossbill",
+  "min_anki_version": "2.1.50",
+  "max_anki_version": "2.1.66"
+}
