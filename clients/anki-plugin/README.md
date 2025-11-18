@@ -6,25 +6,34 @@ Import your reading highlights from Crossbill server into Anki as flashcards for
 
 - 🔍 Browse and search highlights from your Crossbill library
 - 📚 View highlights organized by books and chapters
-- 🎴 Convert highlights into Anki flashcards (Coming in Stage 2)
+- 🎴 Convert highlights into Anki flashcards ✓
 - ⚙️ Configurable server connection
-- 🏷️ Tag support for organization (Coming in Stage 2)
+- 🏷️ Auto-tagging with book metadata ✓
+- ✅ Duplicate detection and prevention ✓
+- 🎯 Custom deck and note type selection ✓
 
 ## Current Status
 
 **Stage 1: Foundation & Basic Setup** ✓
+**Stage 2: Note Creation & Import** ✓
 
 The plugin currently supports:
 - ✅ Browsing books from your Crossbill server
 - ✅ Viewing highlights with full details (text, notes, tags, page numbers)
-- ✅ Configurable server URL
-- ✅ Connection testing
+- ✅ Configurable server URL and connection testing
+- ✅ Creating Anki notes from highlights
+- ✅ Multi-select highlights with checkboxes
+- ✅ Deck and note type selection
+- ✅ Duplicate detection (prevents re-importing)
+- ✅ Auto-tagging with book, author, and highlight tags
+- ✅ Visual import status (shows which highlights are imported)
+- ✅ Batch import with progress tracking
 
-**Coming Soon** (Stage 2):
-- Creating Anki notes from highlights
-- Duplicate detection
-- Deck selection
-- Note type customization
+**Coming Soon** (Stage 3):
+- Search and filter highlights
+- Batch import entire books/chapters
+- Custom note type field mapping
+- Sync tracking
 
 ## Installation
 
@@ -83,13 +92,32 @@ See [config.md](config.md) for detailed configuration documentation.
 ### Browse Highlights
 
 1. Go to **Tools → Browse Crossbill Highlights**
-2. Select a book from the left panel
-3. Browse highlights in the right panel
-4. Click on a highlight to see full details
+2. Select a book from the books list at the top
+3. Browse highlights in the middle section
+4. Click on a highlight to see full details in the bottom section
 
-### Create Flashcards (Coming in Stage 2)
+### Create Flashcards
 
-This feature is planned for the next release.
+1. Open the highlights browser (**Tools → Browse Crossbill Highlights**)
+2. Select a book to see its highlights
+3. Use checkboxes to select highlights you want to import:
+   - Click individual checkboxes, or
+   - Use "Select All" to select all highlights, or
+   - Use "Deselect All" to clear selections
+4. Choose your target **Deck** from the dropdown
+5. Choose your **Note Type** (e.g., "Basic", "Basic (and reversed card)")
+6. Click **Import Selected Highlights**
+7. Confirm the import
+8. Wait for the import to complete (progress dialog will show)
+
+**Notes:**
+- Already imported highlights are marked with "✓ Imported" and grayed out
+- Duplicate detection prevents re-importing the same highlight
+- Each highlight creates one note with:
+  - **Front**: The highlight text
+  - **Back**: Book title, author, chapter, page, and your notes
+- Tags are automatically added (book name, author, Crossbill tags)
+- You can import to any deck and use any note type in your collection
 
 ## Prerequisites
 
@@ -182,16 +210,16 @@ This plugin uses the Crossbill API:
 
 See [implementation_plan.md](implementation_plan.md) for the complete development roadmap.
 
-### Stage 2: Note Creation (Next)
-- [ ] Create Anki notes from highlights
-- [ ] Basic note type support
-- [ ] Duplicate prevention
-- [ ] Deck selection
+### Stage 2: Note Creation ✓
+- [x] Create Anki notes from highlights
+- [x] Basic note type support
+- [x] Duplicate prevention
+- [x] Deck selection
 
-### Stage 3: Enhanced Features
+### Stage 3: Enhanced Features (Next)
 - [ ] Search and filter highlights
-- [ ] Batch import
-- [ ] Custom note type mapping
+- [ ] Batch import entire books/chapters
+- [ ] Custom note type field mapping
 - [ ] Sync tracking
 
 ### Stage 4: Polish
@@ -220,16 +248,30 @@ For issues and feature requests, please visit the [Crossbill repository](https:/
 
 ## Changelog
 
-### v0.1.0 (Stage 1) - Current
+### v0.2.0 (Stage 2) - Current
+
+- ✅ Create Anki notes from highlights
+- ✅ Multi-select highlights with checkboxes
+- ✅ Deck and note type selection
+- ✅ Duplicate detection and prevention
+- ✅ Auto-tagging (book, author, highlight tags)
+- ✅ Visual import status (shows imported highlights)
+- ✅ Batch import with progress tracking
+- ✅ Support for Basic and custom note types
+- ✅ Import statistics (created/skipped/failed)
+
+### v0.1.0 (Stage 1)
 
 - ✅ Initial plugin structure
 - ✅ Server configuration dialog
 - ✅ Browse books and highlights
 - ✅ View highlight details
 - ✅ Connection testing
+- ✅ Vertical layout with full-width sections
 
-### Planned for v0.2.0 (Stage 2)
+### Planned for v0.3.0 (Stage 3)
 
-- Create Anki notes from highlights
-- Duplicate detection
-- Deck selection
+- Search and filter highlights
+- Batch import entire books/chapters
+- Custom note type field mapping
+- Sync tracking

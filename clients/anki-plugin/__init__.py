@@ -9,7 +9,7 @@ from aqt.qt import QAction
 from aqt.utils import showInfo, qconnect
 
 # Plugin metadata
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "Crossbill Contributors"
 
 
