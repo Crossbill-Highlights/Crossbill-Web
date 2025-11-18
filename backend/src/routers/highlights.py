@@ -6,7 +6,8 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 
 from src import schemas
 from src.database import DatabaseSession
-from src.services import HighlightService
+from src.exceptions import CrossbillError
+from src.services import HighlightService, HighlightTagService
 
 logger = logging.getLogger(__name__)
 
@@ -169,4 +170,95 @@ def update_highlight_note(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update note: {e!s}",
+        ) from e
+
+
+@router.post(
+    "/tag_group",
+    response_model=schemas.HighlightTagGroup,
+    status_code=status.HTTP_200_OK,
+)
+def create_or_update_tag_group(
+    request: schemas.HighlightTagGroupCreateRequest,
+    db: DatabaseSession,
+) -> schemas.HighlightTagGroup:
+    """
+    Create a new tag group or update an existing one.
+
+    Args:
+        request: Tag group creation/update request
+        db: Database session
+
+    Returns:
+        Created or updated HighlightTagGroup
+
+    Raises:
+        HTTPException: If creation/update fails
+    """
+    try:
+        service = HighlightTagService(db)
+        tag_group = service.upsert_tag_group(
+            book_id=request.book_id,
+            name=request.name,
+            tag_group_id=request.id,
+        )
+        return tag_group
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        ) from e
+    except CrossbillError as e:
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=str(e),
+        ) from e
+    except Exception as e:
+        logger.error(f"Failed to create/update tag group: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create/update tag group: {e!s}",
+        ) from e
+
+
+@router.delete(
+    "/tag_group/{tag_group_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_tag_group(
+    tag_group_id: int,
+    db: DatabaseSession,
+    book_id: int = Query(..., alias="bookId", description="ID of the book for validation"),
+) -> None:
+    """
+    Delete a tag group.
+
+    Args:
+        tag_group_id: ID of the tag group to delete
+        book_id: ID of the book (for validation)
+        db: Database session
+
+    Raises:
+        HTTPException: If tag group not found or deletion fails
+    """
+    try:
+        service = HighlightTagService(db)
+        success = service.delete_tag_group(book_id, tag_group_id)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Tag group with id {tag_group_id} not found",
+            )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete tag group: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete tag group: {e!s}",
         ) from e

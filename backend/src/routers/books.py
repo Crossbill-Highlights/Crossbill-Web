@@ -335,6 +335,63 @@ def delete_highlight_tag(
 
 
 @router.post(
+    "/{book_id}/highlight_tag/{tag_id}",
+    response_model=schemas.HighlightTag,
+    status_code=status.HTTP_200_OK,
+)
+def update_highlight_tag(
+    book_id: int,
+    tag_id: int,
+    request: schemas.HighlightTagUpdateRequest,
+    db: DatabaseSession,
+) -> schemas.HighlightTag:
+    """
+    Update a highlight tag's name and/or tag group association.
+
+    Args:
+        book_id: ID of the book
+        tag_id: ID of the tag to update
+        request: Request containing updated tag information
+        db: Database session
+
+    Returns:
+        Updated HighlightTag
+
+    Raises:
+        HTTPException: If tag not found, doesn't belong to book, or update fails
+    """
+    try:
+        service = HighlightTagService(db)
+        tag = service.update_tag(
+            book_id=book_id,
+            tag_id=tag_id,
+            name=request.name,
+            tag_group_id=request.tag_group_id,
+        )
+        return tag
+    except CrossbillError as e:
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=str(e),
+        ) from e
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Failed to update highlight tag {tag_id} for book {book_id}: {e!s}", exc_info=True
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update highlight tag: {e!s}",
+        ) from e
+
+
+@router.post(
     "/{book_id}/highlight/{highlight_id}/tag",
     response_model=schemas.Highlight,
     status_code=status.HTTP_200_OK,
