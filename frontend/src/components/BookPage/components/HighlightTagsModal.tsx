@@ -175,9 +175,11 @@ export const HighlightTagsModal = ({
       isLoading={isProcessing}
       title="Manage Tag Groups"
       footerActions={
-        <Button onClick={onClose} disabled={isProcessing}>
-          Close
-        </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+          <Button onClick={onClose} disabled={isProcessing}>
+            Close
+          </Button>
+        </Box>
       }
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
