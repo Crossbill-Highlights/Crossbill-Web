@@ -1,9 +1,9 @@
 {
   "package": "crossbill",
   "name": "Crossbill Highlights Importer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Crossbill Contributors",
-  "description": "Import your reading highlights from Crossbill server into Anki as flashcards. Browse, select, and convert highlights into study notes with automatic tagging and duplicate detection.",
+  "description": "Import your reading highlights from Crossbill server into Anki as flashcards. Search, filter by tags/chapters, and batch import highlights with automatic tagging and duplicate detection.",
   "homepage": "https://github.com/Tumetsu/Crossbill",
   "min_anki_version": "2.1.50",
   "max_anki_version": "2.1.66"
