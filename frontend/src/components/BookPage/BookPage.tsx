@@ -132,6 +132,8 @@ export const BookPage = () => {
         <Box sx={{ display: { xs: 'block', lg: 'none' }, mb: 3 }}>
           <HighlightTags
             tags={book.highlight_tags || []}
+            tagGroups={book.highlight_tag_groups || []}
+            bookId={book.id}
             selectedTag={selectedTagId}
             onTagClick={handleTagClick}
           />
@@ -172,6 +174,8 @@ export const BookPage = () => {
             <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
               <HighlightTags
                 tags={book.highlight_tags || []}
+                tagGroups={book.highlight_tag_groups || []}
+                bookId={book.id}
                 selectedTag={selectedTagId}
                 onTagClick={handleTagClick}
               />
@@ -237,6 +241,8 @@ export const BookPage = () => {
             <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
               <HighlightTags
                 tags={book.highlight_tags || []}
+                tagGroups={book.highlight_tag_groups || []}
+                bookId={book.id}
                 selectedTag={selectedTagId}
                 onTagClick={handleTagClick}
               />
