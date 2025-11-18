@@ -309,15 +309,8 @@ class HighlightTagService:
             book_id: ID of the book
 
         Returns:
-            List of HighlightTagGroup models
-
-        Raises:
-            ValueError: If book not found
+            List of HighlightTagGroup models (empty list if book doesn't exist)
         """
-        book = self.book_repo.get_by_id(book_id)
-        if not book:
-            raise ValueError(f"Book with id {book_id} not found")
-
         return self.highlight_tag_repo.get_tag_groups_by_book_id(book_id)
 
     def upsert_tag_group(
