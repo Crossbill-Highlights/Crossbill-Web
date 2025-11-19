@@ -5,7 +5,18 @@ import {
 import type { HighlightTagGroupInBook } from '@/api/generated/model';
 import { CommonDialog } from '@/components/common/CommonDialog';
 import { Delete as DeleteIcon } from '@mui/icons-material';
-import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { sortBy } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -27,13 +38,34 @@ interface HighlightTagsModalProps {
 }
 
 const extractErrorMessage = (error: unknown): string => {
+  // Handle Axios errors
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const axiosError = error as {
+      response?: {
+        data?: {
+          detail?: string;
+        };
+        status?: number;
+      };
+      message?: string;
+    };
+
+    // Extract detail from response data (FastAPI format)
+    if (axiosError.response?.data?.detail) {
+      return axiosError.response.data.detail;
+    }
+
+    // Fallback to error message
+    if (axiosError.message) {
+      return axiosError.message;
+    }
+  }
+
+  // Handle generic Error objects
   if (error instanceof Error) {
     return error.message;
   }
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail || 'Unknown error';
-  }
+
   return 'Unknown error';
 };
 
@@ -45,6 +77,8 @@ export const HighlightTagsModal = ({
 }: HighlightTagsModalProps) => {
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const { control, reset, watch } = useForm<TagGroupFormData>({
     defaultValues: {
@@ -80,10 +114,15 @@ export const HighlightTagsModal = ({
         void queryClient.invalidateQueries({
           queryKey: [`/api/v1/book/${bookId}`],
         });
+        // Clear any previous errors on success
+        setErrorDialogOpen(false);
+        setErrorMessage('');
       },
       onError: (error: unknown) => {
         console.error('Failed to create/update tag group:', error);
-        alert(`Failed to save tag group: ${extractErrorMessage(error)}`);
+        const message = extractErrorMessage(error);
+        setErrorMessage(message);
+        setErrorDialogOpen(true);
       },
     },
   });
@@ -97,7 +136,9 @@ export const HighlightTagsModal = ({
       },
       onError: (error: unknown) => {
         console.error('Failed to delete tag group:', error);
-        alert(`Failed to delete tag group: ${extractErrorMessage(error)}`);
+        const message = extractErrorMessage(error);
+        setErrorMessage(message);
+        setErrorDialogOpen(true);
       },
     },
   });
@@ -247,6 +288,26 @@ export const HighlightTagsModal = ({
           </Typography>
         )}
       </Box>
+
+      {/* Error Dialog */}
+      <Dialog
+        open={errorDialogOpen}
+        onClose={() => setErrorDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Error Saving Tag Group</DialogTitle>
+        <DialogContent>
+          <Alert severity="error" sx={{ mt: 1 }}>
+            {errorMessage}
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorDialogOpen(false)} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </CommonDialog>
   );
 };
