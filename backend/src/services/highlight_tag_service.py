@@ -284,7 +284,9 @@ class HighlightTagService:
             if name != tag.name:
                 existing_tag = self.highlight_tag_repo.get_by_book_and_name(book_id, name)
                 if existing_tag:
-                    raise CrossbillError(f"Tag '{name}' already exists for this book", status_code=409)
+                    raise CrossbillError(
+                        f"Tag '{name}' already exists for this book", status_code=409
+                    )
             update_data["name"] = name
 
         # Allow explicit None to remove tag group association
@@ -294,7 +296,9 @@ class HighlightTagService:
         updated_tag = self.highlight_tag_repo.update(tag_id, **update_data)
         if updated_tag:
             self.db.commit()
-            logger.info("updated_highlight_tag", tag_id=tag_id, book_id=book_id, updates=update_data)
+            logger.info(
+                "updated_highlight_tag", tag_id=tag_id, book_id=book_id, updates=update_data
+            )
             return updated_tag
 
         raise ValueError(f"Failed to update tag {tag_id}")

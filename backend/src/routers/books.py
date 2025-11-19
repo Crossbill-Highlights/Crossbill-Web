@@ -362,13 +362,12 @@ def update_highlight_tag(
     """
     try:
         service = HighlightTagService(db)
-        tag = service.update_tag(
+        return service.update_tag(
             book_id=book_id,
             tag_id=tag_id,
             name=request.name,
             tag_group_id=request.tag_group_id,
         )
-        return tag
     except CrossbillError as e:
         raise HTTPException(
             status_code=e.status_code,

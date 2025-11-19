@@ -235,9 +235,7 @@ class HighlightTagGroup(Base):
 
     # Relationships
     book: Mapped["Book"] = relationship(back_populates="highlight_tag_groups")
-    highlight_tags: Mapped[list["HighlightTag"]] = relationship(
-        back_populates="tag_group"
-    )
+    highlight_tags: Mapped[list["HighlightTag"]] = relationship(back_populates="tag_group")
 
     # Unique constraint: tag group names are unique within a book
     __table_args__ = (UniqueConstraint("book_id", "name", name="uq_highlight_tag_group_book_name"),)

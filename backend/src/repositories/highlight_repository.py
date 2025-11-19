@@ -90,8 +90,7 @@ class HighlightRepository:
                 skipped += 1
 
         logger.info(
-            f"Bulk created highlights for book_id={book_id}: "
-            f"{created} created, {skipped} skipped"
+            f"Bulk created highlights for book_id={book_id}: {created} created, {skipped} skipped"
         )
         return created, skipped
 

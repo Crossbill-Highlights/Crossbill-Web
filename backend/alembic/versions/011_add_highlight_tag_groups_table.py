@@ -43,7 +43,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("book_id", "name", name="uq_highlight_tag_group_book_name"),
     )
-    op.create_index(op.f("ix_highlight_tag_groups_id"), "highlight_tag_groups", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_highlight_tag_groups_id"), "highlight_tag_groups", ["id"], unique=False
+    )
     op.create_index(
         op.f("ix_highlight_tag_groups_book_id"), "highlight_tag_groups", ["book_id"], unique=False
     )
