@@ -3,9 +3,11 @@
 import logging
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from src import models
+from src.exceptions import CrossbillError
 
 logger = logging.getLogger(__name__)
 
@@ -124,10 +126,32 @@ class HighlightTagRepository:
         return list(self.db.execute(stmt).scalars().all())
 
     def create_tag_group(self, book_id: int, name: str) -> models.HighlightTagGroup:
-        """Create a new highlight tag group."""
+        """Create a new highlight tag group.
+
+        Raises:
+            CrossbillError: If a tag group with the same name already exists for this book
+        """
         tag_group = models.HighlightTagGroup(book_id=book_id, name=name)
         self.db.add(tag_group)
-        self.db.flush()
+        try:
+            self.db.flush()
+        except IntegrityError as e:
+            self.db.rollback()
+            # Check if it's the unique constraint violation for tag group name
+            error_msg = str(e).lower()
+            if "highlight_tag_groups.book_id" in error_msg and "highlight_tag_groups.name" in error_msg:
+                raise CrossbillError(
+                    f"A tag group with the name '{name}' already exists for this book",
+                    status_code=409
+                ) from e
+            if "uq_highlight_tag_group_book_name" in error_msg:
+                raise CrossbillError(
+                    f"A tag group with the name '{name}' already exists for this book",
+                    status_code=409
+                ) from e
+            # Re-raise if it's a different integrity error
+            raise
+
         self.db.refresh(tag_group)
         logger.info(f"Created highlight tag group: {tag_group.name} (id={tag_group.id}, book_id={book_id})")
         return tag_group
@@ -135,13 +159,35 @@ class HighlightTagRepository:
     def update_tag_group(
         self, tag_group_id: int, name: str
     ) -> models.HighlightTagGroup | None:
-        """Update a highlight tag group's name."""
+        """Update a highlight tag group's name.
+
+        Raises:
+            CrossbillError: If a tag group with the same name already exists for this book
+        """
         tag_group = self.get_tag_group_by_id(tag_group_id)
         if not tag_group:
             return None
 
         tag_group.name = name
-        self.db.flush()
+        try:
+            self.db.flush()
+        except IntegrityError as e:
+            self.db.rollback()
+            # Check if it's the unique constraint violation for tag group name
+            error_msg = str(e).lower()
+            if "highlight_tag_groups.book_id" in error_msg and "highlight_tag_groups.name" in error_msg:
+                raise CrossbillError(
+                    f"A tag group with the name '{name}' already exists for this book",
+                    status_code=409
+                ) from e
+            if "uq_highlight_tag_group_book_name" in error_msg:
+                raise CrossbillError(
+                    f"A tag group with the name '{name}' already exists for this book",
+                    status_code=409
+                ) from e
+            # Re-raise if it's a different integrity error
+            raise
+
         self.db.refresh(tag_group)
         logger.info(f"Updated highlight tag group: {tag_group.name} (id={tag_group_id})")
         return tag_group

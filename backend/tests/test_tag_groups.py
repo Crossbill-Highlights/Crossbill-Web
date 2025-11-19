@@ -118,6 +118,35 @@ class TestCreateTagGroup:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST or response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
+    def test_update_tag_group_to_duplicate_name(
+        self, client: TestClient, db_session: Session
+    ) -> None:
+        """Test updating tag group to a name that already exists."""
+        # Create a book and two tag groups
+        book = models.Book(title="Test Book", author="Test Author")
+        db_session.add(book)
+        db_session.commit()
+        db_session.refresh(book)
+
+        tag_group1 = models.HighlightTagGroup(book_id=book.id, name="Aivelo")
+        tag_group2 = models.HighlightTagGroup(book_id=book.id, name="Different Name")
+        db_session.add_all([tag_group1, tag_group2])
+        db_session.commit()
+        db_session.refresh(tag_group1)
+        db_session.refresh(tag_group2)
+
+        # Try to update tag_group2 to have the same name as tag_group1
+        response = client.post(
+            "/api/v1/highlights/tag_group",
+            json={"id": tag_group2.id, "book_id": book.id, "name": "Aivelo"},
+        )
+
+        assert response.status_code == status.HTTP_409_CONFLICT
+        data = response.json()
+        assert "detail" in data
+        assert "already exists" in data["detail"].lower()
+        assert "Aivelo" in data["detail"]
+
 
 class TestDeleteTagGroup:
     """Test suite for DELETE /highlights/tag_group/:id endpoint."""
