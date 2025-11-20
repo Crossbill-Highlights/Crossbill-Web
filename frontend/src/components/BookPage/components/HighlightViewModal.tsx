@@ -1,14 +1,18 @@
 import {
   useAddTagToHighlightApiV1BookBookIdHighlightHighlightIdTagPost,
+  useCreateBookmarkApiV1BookBookIdBookmarkPost,
+  useDeleteBookmarkApiV1BookBookIdBookmarkBookmarkIdDelete,
   useDeleteHighlightsApiV1BookBookIdHighlightDelete,
   useRemoveTagFromHighlightApiV1BookBookIdHighlightHighlightIdTagTagIdDelete,
 } from '@/api/generated/books/books';
 import { useUpdateHighlightNoteApiV1HighlightsHighlightIdNotePost } from '@/api/generated/highlights/highlights';
-import type { Highlight, HighlightTagInBook } from '@/api/generated/model';
+import type { Bookmark, Highlight, HighlightTagInBook } from '@/api/generated/model';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import {
   ArrowBack as ArrowBackIcon,
   ArrowForward as ArrowForwardIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
   CalendarMonth as CalendarIcon,
   Delete as DeleteIcon,
   ExpandMore as ExpandMoreIcon,
@@ -311,12 +315,101 @@ const TagInput = ({
   );
 };
 
+interface ToolbarProps {
+  highlightId: number;
+  bookId: number;
+  bookmarks: Bookmark[];
+  onDelete: () => void;
+  disabled?: boolean;
+}
+
+const Toolbar = ({ highlightId, bookId, bookmarks, onDelete, disabled = false }: ToolbarProps) => {
+  const queryClient = useQueryClient();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Find if there's a bookmark for this highlight
+  const currentBookmark = bookmarks.find((b) => b.highlight_id === highlightId);
+
+  const createBookmarkMutation = useCreateBookmarkApiV1BookBookIdBookmarkPost({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: [`/api/v1/book/${bookId}`],
+        });
+      },
+      onError: (error) => {
+        console.error('Failed to create bookmark:', error);
+        alert('Failed to create bookmark. Please try again.');
+      },
+    },
+  });
+
+  const deleteBookmarkMutation = useDeleteBookmarkApiV1BookBookIdBookmarkBookmarkIdDelete({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: [`/api/v1/book/${bookId}`],
+        });
+      },
+      onError: (error) => {
+        console.error('Failed to delete bookmark:', error);
+        alert('Failed to delete bookmark. Please try again.');
+      },
+    },
+  });
+
+  const handleBookmarkToggle = async () => {
+    setIsProcessing(true);
+    try {
+      if (currentBookmark) {
+        // Remove bookmark
+        await deleteBookmarkMutation.mutateAsync({
+          bookId,
+          bookmarkId: currentBookmark.id,
+        });
+      } else {
+        // Create bookmark
+        await createBookmarkMutation.mutateAsync({
+          bookId,
+          data: { highlight_id: highlightId },
+        });
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const isLoading = disabled || isProcessing;
+
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+      <IconButton
+        onClick={handleBookmarkToggle}
+        disabled={isLoading}
+        aria-label={currentBookmark ? 'Remove bookmark' : 'Add bookmark'}
+        size="small"
+      >
+        {currentBookmark ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+      </IconButton>
+      <IconButton
+        onClick={onDelete}
+        disabled={isLoading}
+        aria-label="Delete highlight"
+        size="small"
+      >
+        <DeleteIcon />
+      </IconButton>
+    </Box>
+  );
+};
+
 interface HighlightViewModalProps {
   highlight: Highlight;
   bookId: number;
   open: boolean;
   onClose: () => void;
   availableTags: HighlightTagInBook[];
+  bookmarks?: Bookmark[];
   allHighlights?: Highlight[];
   currentIndex?: number;
   onNavigate?: (newIndex: number) => void;
@@ -328,6 +421,7 @@ export const HighlightViewModal = ({
   open,
   onClose,
   availableTags,
+  bookmarks = [],
   allHighlights,
   currentIndex = 0,
   onNavigate,
@@ -463,19 +557,9 @@ export const HighlightViewModal = ({
       isLoading={isLoading}
       title="View Highlight"
       footerActions={
-        <>
-          <Button
-            onClick={handleDelete}
-            color="error"
-            startIcon={<DeleteIcon />}
-            disabled={isLoading}
-          >
-            {isDeleting ? 'Deleting...' : 'Delete'}
-          </Button>
-          <Button onClick={handleClose} disabled={isLoading}>
-            Close
-          </Button>
-        </>
+        <Button onClick={handleClose} disabled={isLoading}>
+          Close
+        </Button>
       }
     >
       {/* Desktop Layout: Navigation buttons on sides */}
@@ -532,6 +616,13 @@ export const HighlightViewModal = ({
               </Box>
             </Box>
           </FadeInOut>
+          <Toolbar
+            highlightId={highlight.id}
+            bookId={bookId}
+            bookmarks={bookmarks}
+            onDelete={handleDelete}
+            disabled={isLoading}
+          />
           <TagInput
             highlightId={highlight.id}
             bookId={bookId}
@@ -599,6 +690,13 @@ export const HighlightViewModal = ({
           </Typography>
         </Box>
 
+        <Toolbar
+          highlightId={highlight.id}
+          bookId={bookId}
+          bookmarks={bookmarks}
+          onDelete={handleDelete}
+          disabled={isLoading}
+        />
         <TagInput
           highlightId={highlight.id}
           bookId={bookId}

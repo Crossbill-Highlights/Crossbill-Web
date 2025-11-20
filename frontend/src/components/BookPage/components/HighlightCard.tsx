@@ -1,5 +1,5 @@
 import { useGetHighlightTagsApiV1BookBookIdHighlightTagsGet } from '@/api/generated/books/books.ts';
-import type { Highlight } from '@/api/generated/model';
+import type { Bookmark, Highlight } from '@/api/generated/model';
 import { TagList } from '@/components/BookPage/components/TagList.tsx';
 import {
   CalendarMonth as CalendarIcon,
@@ -13,6 +13,7 @@ import { HighlightViewModal } from './HighlightViewModal';
 export interface HighlightCardProps {
   highlight: Highlight;
   bookId: number;
+  bookmarks?: Bookmark[];
   allHighlights?: Highlight[];
   currentIndex?: number;
 }
@@ -83,6 +84,7 @@ const previewWordCount = 40;
 export const HighlightCard = ({
   highlight,
   bookId,
+  bookmarks = [],
   allHighlights,
   currentIndex,
 }: HighlightCardProps) => {
@@ -178,6 +180,7 @@ export const HighlightCard = ({
         open={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
         availableTags={tagsResponse?.tags || []}
+        bookmarks={bookmarks}
         allHighlights={allHighlights}
         currentIndex={currentHighlightIndex}
         onNavigate={handleNavigate}

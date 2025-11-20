@@ -168,6 +168,7 @@ export const BookPage = () => {
                 highlights={filteredSearchResults}
                 searchText={searchText}
                 bookId={book.id}
+                bookmarks={book.bookmarks}
                 selectedTagId={selectedTagId}
               />
 
@@ -222,6 +223,7 @@ export const BookPage = () => {
                                 key={highlight.id}
                                 highlight={highlight}
                                 bookId={book.id}
+                                bookmarks={book.bookmarks}
                                 allHighlights={allFilteredHighlights}
                                 currentIndex={highlightIndex}
                               />
