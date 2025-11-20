@@ -121,14 +121,6 @@ export const BookmarkList = ({ bookmarks, allHighlights, onBookmarkClick }: Book
                       },
                     }}
                   >
-                    <BookmarkIcon
-                      sx={{
-                        fontSize: 14,
-                        color: 'primary.main',
-                        flexShrink: 0,
-                        mt: 0.1,
-                      }}
-                    />
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography
                         variant="body2"
