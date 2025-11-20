@@ -1,5 +1,5 @@
 import type { Bookmark, Highlight } from '@/api/generated/model';
-  import { Bookmark as BookmarkIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
+import { Bookmark as BookmarkIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { Box, IconButton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';

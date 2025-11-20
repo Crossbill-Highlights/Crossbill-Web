@@ -11,22 +11,14 @@ import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import {
   ArrowBack as ArrowBackIcon,
   ArrowForward as ArrowForwardIcon,
-  Bookmark as BookmarkIcon,
   BookmarkBorder as BookmarkBorderIcon,
+  Bookmark as BookmarkIcon,
   CalendarMonth as CalendarIcon,
   Delete as DeleteIcon,
-  FormatQuote as QuoteIcon,
   Notes as NotesIcon,
+  FormatQuote as QuoteIcon,
 } from '@mui/icons-material';
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Autocomplete, Box, Button, Chip, IconButton, TextField, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -100,7 +92,9 @@ const HighlightNote = ({
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               Note
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start' }}>
+            <Box
+              sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start' }}
+            >
               <TextField
                 fullWidth
                 multiline
