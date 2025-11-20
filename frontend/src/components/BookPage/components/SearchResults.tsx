@@ -1,4 +1,4 @@
-import { HighlightSearchResult } from '@/api/generated/model';
+import { Bookmark, HighlightSearchResult } from '@/api/generated/model';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import { SectionTitle } from '@/components/common/SectionTitle';
 import { Box, Typography } from '@mui/material';
@@ -11,6 +11,7 @@ interface SearchResultsProps {
   highlights: HighlightSearchResult[] | undefined;
   searchText: string;
   bookId: number;
+  bookmarks?: Bookmark[];
   selectedTagId?: number | null;
 }
 
@@ -19,6 +20,7 @@ export const SearchResults = ({
   highlights,
   searchText,
   bookId,
+  bookmarks = [],
   selectedTagId,
 }: SearchResultsProps) => {
   // Loading state
@@ -84,6 +86,7 @@ export const SearchResults = ({
                               key={highlight.id}
                               highlight={highlight}
                               bookId={bookId}
+                              bookmarks={bookmarks}
                               allHighlights={allHighlights}
                               currentIndex={highlightIndex}
                             />
