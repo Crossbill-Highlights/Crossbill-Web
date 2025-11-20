@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { SearchBar } from '../common/SearchBar';
 import { SectionTitle } from '../common/SectionTitle';
 import { Spinner } from '../common/Spinner';
+import { BookmarkList } from './components/BookmarkList';
 import { BookTitle } from './components/BookTitle';
 import { HighlightCard } from './components/HighlightCard';
 import { HighlightTags } from './components/HighlightTags';
@@ -41,6 +42,33 @@ export const BookPage = () => {
       }),
       replace: true,
     });
+  };
+
+  const handleBookmarkClick = (highlightId: number) => {
+    // Clear search to ensure the highlight is visible
+    if (searchText) {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          search: undefined,
+        }),
+        replace: true,
+      });
+    }
+
+    // Scroll to the highlight after a short delay to ensure DOM is ready
+    setTimeout(() => {
+      const element = document.getElementById(`highlight-${highlightId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Add a brief highlight effect
+        element.style.transition = 'background-color 0.3s ease';
+        element.style.backgroundColor = 'rgba(25, 118, 210, 0.08)';
+        setTimeout(() => {
+          element.style.backgroundColor = '';
+        }, 2000);
+      }
+    }, 100);
   };
 
   const { data: searchResults, isLoading: isSearching } =
@@ -131,13 +159,20 @@ export const BookPage = () => {
 
           {/* Tags (Mobile only - above search bar) */}
           <Box sx={{ display: { xs: 'block', lg: 'none' }, mb: 3 }}>
-            <HighlightTags
-              tags={book.highlight_tags || []}
-              tagGroups={book.highlight_tag_groups || []}
-              bookId={book.id}
-              selectedTag={selectedTagId}
-              onTagClick={handleTagClick}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <HighlightTags
+                tags={book.highlight_tags || []}
+                tagGroups={book.highlight_tag_groups || []}
+                bookId={book.id}
+                selectedTag={selectedTagId}
+                onTagClick={handleTagClick}
+              />
+              <BookmarkList
+                bookmarks={book.bookmarks || []}
+                allHighlights={allFilteredHighlights}
+                onBookmarkClick={handleBookmarkClick}
+              />
+            </Box>
           </Box>
 
           {/* Search Bar - Aligned with content column on desktop */}
@@ -174,13 +209,20 @@ export const BookPage = () => {
 
               {/* Sidebar - Tags (Desktop only) */}
               <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-                <HighlightTags
-                  tags={book.highlight_tags || []}
-                  tagGroups={book.highlight_tag_groups || []}
-                  bookId={book.id}
-                  selectedTag={selectedTagId}
-                  onTagClick={handleTagClick}
-                />
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <HighlightTags
+                    tags={book.highlight_tags || []}
+                    tagGroups={book.highlight_tag_groups || []}
+                    bookId={book.id}
+                    selectedTag={selectedTagId}
+                    onTagClick={handleTagClick}
+                  />
+                  <BookmarkList
+                    bookmarks={book.bookmarks || []}
+                    allHighlights={filteredSearchResults || []}
+                    onBookmarkClick={handleBookmarkClick}
+                  />
+                </Box>
               </Box>
             </Box>
           )}
@@ -242,13 +284,20 @@ export const BookPage = () => {
 
               {/* Sidebar - Tags (Desktop only) */}
               <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-                <HighlightTags
-                  tags={book.highlight_tags || []}
-                  tagGroups={book.highlight_tag_groups || []}
-                  bookId={book.id}
-                  selectedTag={selectedTagId}
-                  onTagClick={handleTagClick}
-                />
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <HighlightTags
+                    tags={book.highlight_tags || []}
+                    tagGroups={book.highlight_tag_groups || []}
+                    bookId={book.id}
+                    selectedTag={selectedTagId}
+                    onTagClick={handleTagClick}
+                  />
+                  <BookmarkList
+                    bookmarks={book.bookmarks || []}
+                    allHighlights={allFilteredHighlights}
+                    onBookmarkClick={handleBookmarkClick}
+                  />
+                </Box>
               </Box>
             </Box>
           )}

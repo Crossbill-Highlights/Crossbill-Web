@@ -2,6 +2,7 @@ import { useGetHighlightTagsApiV1BookBookIdHighlightTagsGet } from '@/api/genera
 import type { Bookmark, Highlight } from '@/api/generated/model';
 import { TagList } from '@/components/BookPage/components/TagList.tsx';
 import {
+  Bookmark as BookmarkIcon,
   CalendarMonth as CalendarIcon,
   Notes as NotesIcon,
   FormatQuote as QuoteIcon,
@@ -20,9 +21,12 @@ export interface HighlightCardProps {
 
 interface FooterProps {
   highlight: Highlight;
+  bookmarks: Bookmark[];
 }
 
-const Footer = ({ highlight }: FooterProps) => {
+const Footer = ({ highlight, bookmarks }: FooterProps) => {
+  const hasBookmark = bookmarks.some((b) => b.highlight_id === highlight.id);
+
   return (
     <Box
       sx={{
@@ -63,6 +67,12 @@ const Footer = ({ highlight }: FooterProps) => {
             })}
           </span>
           {highlight.page && <span>&nbsp;&nbsp;•&nbsp;&nbsp;Page {highlight.page}</span>}
+          {hasBookmark && (
+            <span>
+              &nbsp;&nbsp;•
+              <BookmarkIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
+            </span>
+          )}
           {highlight.note && (
             <span>
               &nbsp;&nbsp;•
@@ -121,6 +131,7 @@ export const HighlightCard = ({
   return (
     <>
       <Box
+        id={`highlight-${highlight.id}`}
         onClick={handleOpenModal}
         sx={{
           position: 'relative',
@@ -169,7 +180,7 @@ export const HighlightCard = ({
             </Typography>
           </Box>
 
-          <Footer highlight={highlight} />
+          <Footer highlight={highlight} bookmarks={bookmarks} />
         </Box>
       </Box>
 
