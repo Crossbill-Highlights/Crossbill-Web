@@ -15,13 +15,10 @@ import {
   BookmarkBorder as BookmarkBorderIcon,
   CalendarMonth as CalendarIcon,
   Delete as DeleteIcon,
-  ExpandMore as ExpandMoreIcon,
   FormatQuote as QuoteIcon,
+  Notes as NotesIcon,
 } from '@mui/icons-material';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Autocomplete,
   Box,
   Button,
@@ -39,6 +36,7 @@ interface HighlightNoteProps {
   highlightId: number;
   bookId: number;
   initialNote: string | null | undefined;
+  visible: boolean;
   disabled?: boolean;
 }
 
@@ -46,17 +44,16 @@ const HighlightNote = ({
   highlightId,
   bookId,
   initialNote,
+  visible,
   disabled = false,
 }: HighlightNoteProps) => {
   const queryClient = useQueryClient();
   const [noteText, setNoteText] = useState<string>(initialNote || '');
   const [isSaving, setIsSaving] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(!!initialNote);
 
   // Update note when initialNote changes
   useEffect(() => {
     setNoteText(initialNote || '');
-    setIsExpanded(!!initialNote);
   }, [initialNote]);
 
   const updateNoteMutation = useUpdateHighlightNoteApiV1HighlightsHighlightIdNotePost({
@@ -88,71 +85,39 @@ const HighlightNote = ({
   const hasChanges = (noteText.trim() || null) !== (initialNote || null);
   const isLoading = disabled || isSaving;
 
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <Accordion
-      expanded={isExpanded}
-      onChange={(_, expanded) => setIsExpanded(expanded)}
-      sx={{
-        backgroundColor: 'transparent',
-        boxShadow: 'none',
-        '&:before': { display: 'none' },
-        '&.Mui-expanded': { margin: 0 },
-      }}
-    >
-      <AccordionSummary
-        sx={{
-          minHeight: 'auto',
-          padding: 0,
-          '&.Mui-expanded': { minHeight: 'auto' },
-          '& .MuiAccordionSummary-content': {
-            margin: '8px 0',
-            '&.Mui-expanded': { margin: '8px 0' },
-          },
-          '& .MuiAccordionSummary-expandIconWrapper': {
-            display: 'none',
-          },
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Typography variant="subtitle2" color="text.secondary">
-            Note
-          </Typography>
-          <ExpandMoreIcon
-            sx={{
-              fontSize: 20,
-              color: 'text.secondary',
-              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s',
-            }}
-          />
+    <Box>
+      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+        Note
+      </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start' }}>
+        <TextField
+          fullWidth
+          multiline
+          minRows={2}
+          maxRows={6}
+          value={noteText}
+          onChange={(e) => setNoteText(e.target.value)}
+          placeholder="Add a note about this highlight..."
+          disabled={isLoading}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+          <Button
+            variant="text"
+            size={'small'}
+            onClick={handleSave}
+            disabled={isLoading || !hasChanges}
+            sx={{ flexShrink: 0, height: 'fit-content', mt: 0.5 }}
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
         </Box>
-      </AccordionSummary>
-      <AccordionDetails sx={{ padding: 0, paddingTop: 1 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start' }}>
-          <TextField
-            fullWidth
-            multiline
-            minRows={2}
-            maxRows={6}
-            value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            placeholder="Add a note about this highlight..."
-            disabled={isLoading}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-            <Button
-              variant="text"
-              size={'small'}
-              onClick={handleSave}
-              disabled={isLoading || !hasChanges}
-              sx={{ flexShrink: 0, height: 'fit-content', mt: 0.5 }}
-            >
-              {isSaving ? 'Saving...' : 'Save'}
-            </Button>
-          </Box>
-        </Box>
-      </AccordionDetails>
-    </Accordion>
+      </Box>
+    </Box>
   );
 };
 
@@ -319,11 +284,23 @@ interface ToolbarProps {
   highlightId: number;
   bookId: number;
   bookmarks: Bookmark[];
+  hasNote: boolean;
+  noteVisible: boolean;
+  onNoteToggle: () => void;
   onDelete: () => void;
   disabled?: boolean;
 }
 
-const Toolbar = ({ highlightId, bookId, bookmarks, onDelete, disabled = false }: ToolbarProps) => {
+const Toolbar = ({
+  highlightId,
+  bookId,
+  bookmarks,
+  hasNote,
+  noteVisible,
+  onNoteToggle,
+  onDelete,
+  disabled = false,
+}: ToolbarProps) => {
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -392,6 +369,17 @@ const Toolbar = ({ highlightId, bookId, bookmarks, onDelete, disabled = false }:
         {currentBookmark ? <BookmarkIcon /> : <BookmarkBorderIcon />}
       </IconButton>
       <IconButton
+        onClick={onNoteToggle}
+        disabled={isLoading}
+        aria-label={noteVisible ? 'Hide note' : 'Show note'}
+        size="small"
+        sx={{
+          color: hasNote || noteVisible ? 'primary.main' : 'inherit',
+        }}
+      >
+        <NotesIcon />
+      </IconButton>
+      <IconButton
         onClick={onDelete}
         disabled={isLoading}
         aria-label="Delete highlight"
@@ -427,10 +415,24 @@ export const HighlightViewModal = ({
   onNavigate,
 }: HighlightViewModalProps) => {
   const queryClient = useQueryClient();
+  const [noteVisible, setNoteVisible] = useState(false);
 
   const hasNavigation = allHighlights && allHighlights.length > 1 && onNavigate;
   const hasPrevious = hasNavigation && currentIndex > 0;
   const hasNext = hasNavigation && currentIndex < allHighlights.length - 1;
+
+  const hasNote = !!highlight.note;
+
+  // Update note visibility when highlight changes
+  useEffect(() => {
+    // If the highlight has a note, always show it
+    // Otherwise, keep the current visibility state
+    setNoteVisible(!!highlight.note);
+  }, [highlight.id, highlight.note]);
+
+  const handleNoteToggle = () => {
+    setNoteVisible((prev) => !prev);
+  };
 
   const startsWithLowercase =
     highlight.text.length > 0 &&
@@ -620,6 +622,9 @@ export const HighlightViewModal = ({
             highlightId={highlight.id}
             bookId={bookId}
             bookmarks={bookmarks}
+            hasNote={hasNote}
+            noteVisible={noteVisible}
+            onNoteToggle={handleNoteToggle}
             onDelete={handleDelete}
             disabled={isLoading}
           />
@@ -634,6 +639,7 @@ export const HighlightViewModal = ({
             highlightId={highlight.id}
             bookId={bookId}
             initialNote={highlight.note}
+            visible={noteVisible}
             disabled={isLoading}
           />
         </Box>
@@ -694,6 +700,9 @@ export const HighlightViewModal = ({
           highlightId={highlight.id}
           bookId={bookId}
           bookmarks={bookmarks}
+          hasNote={hasNote}
+          noteVisible={noteVisible}
+          onNoteToggle={handleNoteToggle}
           onDelete={handleDelete}
           disabled={isLoading}
         />
@@ -708,6 +717,7 @@ export const HighlightViewModal = ({
           highlightId={highlight.id}
           bookId={bookId}
           initialNote={highlight.note}
+          visible={noteVisible}
           disabled={isLoading}
         />
 
