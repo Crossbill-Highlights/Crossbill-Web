@@ -72,7 +72,6 @@ export * from './highlightTagUpdateRequestTagGroupId';
 export * from './highlightUploadRequest';
 export * from './highlightUploadResponse';
 export * from './hTTPValidationError';
-export * from './rootGet200';
 export * from './searchHighlightsApiV1HighlightsSearchGetParams';
 export * from './tagInBook';
 export * from './validationError';
