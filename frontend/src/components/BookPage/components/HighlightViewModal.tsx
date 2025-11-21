@@ -685,6 +685,7 @@ export const HighlightViewModal = ({
             disabled={isLoading}
           />
           <Toolbar
+            key={highlight.id}
             highlightId={highlight.id}
             bookId={bookId}
             bookmark={bookmark}
@@ -749,6 +750,7 @@ export const HighlightViewModal = ({
         </Box>
 
         <TagInput
+          key={`tags-${highlight.id}`}
           highlightId={highlight.id}
           bookId={bookId}
           initialTags={highlight.highlight_tags || []}
@@ -756,6 +758,7 @@ export const HighlightViewModal = ({
           disabled={isLoading}
         />
         <HighlightNote
+          key={`note-${highlight.id}`}
           highlightId={highlight.id}
           bookId={bookId}
           initialNote={highlight.note}
@@ -763,6 +766,7 @@ export const HighlightViewModal = ({
           disabled={isLoading}
         />
         <Toolbar
+          key={highlight.id}
           highlightId={highlight.id}
           bookId={bookId}
           bookmark={bookmark}
