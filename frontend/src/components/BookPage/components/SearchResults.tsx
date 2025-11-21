@@ -87,6 +87,7 @@ export const SearchResults = ({
                               highlight={highlight}
                               bookId={bookId}
                               bookmark={bookmarksByHighlightId[highlight.id]}
+                              bookmarksByHighlightId={bookmarksByHighlightId}
                               allHighlights={allHighlights}
                               currentIndex={highlightIndex}
                             />

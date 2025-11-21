@@ -270,6 +270,7 @@ export const BookPage = () => {
                                 highlight={highlight}
                                 bookId={book.id}
                                 bookmark={bookmarksByHighlightId[highlight.id]}
+                                bookmarksByHighlightId={bookmarksByHighlightId}
                                 allHighlights={allFilteredHighlights}
                                 currentIndex={highlightIndex}
                               />

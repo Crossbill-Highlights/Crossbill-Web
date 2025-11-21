@@ -430,6 +430,7 @@ interface HighlightViewModalProps {
   onClose: () => void;
   availableTags: HighlightTagInBook[];
   bookmark?: Bookmark;
+  bookmarksByHighlightId?: Record<number, Bookmark>;
   allHighlights?: Highlight[];
   currentIndex?: number;
   onNavigate?: (newIndex: number) => void;
@@ -442,12 +443,18 @@ export const HighlightViewModal = ({
   onClose,
   availableTags,
   bookmark,
+  bookmarksByHighlightId,
   allHighlights,
   currentIndex = 0,
   onNavigate,
 }: HighlightViewModalProps) => {
   const queryClient = useQueryClient();
   const [noteVisibleWhenEmpty, setNoteVisibleWhenEmpty] = useState(false);
+
+  // Use bookmarksByHighlightId if available, otherwise fall back to bookmark prop
+  const currentBookmark = bookmarksByHighlightId
+    ? bookmarksByHighlightId[highlight.id]
+    : bookmark;
 
   const hasNavigation = allHighlights && allHighlights.length > 1 && onNavigate;
   const hasPrevious = hasNavigation && currentIndex > 0;
@@ -688,7 +695,7 @@ export const HighlightViewModal = ({
             key={highlight.id}
             highlightId={highlight.id}
             bookId={bookId}
-            bookmark={bookmark}
+            bookmark={currentBookmark}
             hasNote={hasNote}
             noteVisible={noteVisible}
             onNoteToggle={handleNoteToggle}
@@ -769,7 +776,7 @@ export const HighlightViewModal = ({
           key={highlight.id}
           highlightId={highlight.id}
           bookId={bookId}
-          bookmark={bookmark}
+          bookmark={currentBookmark}
           hasNote={hasNote}
           noteVisible={noteVisible}
           onNoteToggle={handleNoteToggle}
