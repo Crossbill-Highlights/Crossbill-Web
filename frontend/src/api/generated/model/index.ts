@@ -6,6 +6,10 @@
  */
 
 export * from './apiRootApiV1Get200';
+export * from './bodyLoginApiV1AuthLoginPost';
+export * from './bodyLoginApiV1AuthLoginPostClientId';
+export * from './bodyLoginApiV1AuthLoginPostClientSecret';
+export * from './bodyLoginApiV1AuthLoginPostGrantType';
 export * from './bodyUploadBookCoverApiV1BookBookIdMetadataCoverPost';
 export * from './bookCreate';
 export * from './bookCreateAuthor';
@@ -74,5 +78,7 @@ export * from './highlightUploadResponse';
 export * from './hTTPValidationError';
 export * from './searchHighlightsApiV1HighlightsSearchGetParams';
 export * from './tagInBook';
+export * from './token';
+export * from './userDetailsResponse';
 export * from './validationError';
 export * from './validationErrorLocItem';
