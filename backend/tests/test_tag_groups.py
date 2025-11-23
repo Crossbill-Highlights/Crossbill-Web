@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 
 from src import models
 
+# Default user ID used by services (matches conftest default user)
+DEFAULT_USER_ID = 1
+
 
 class TestCreateTagGroup:
     """Test suite for POST /highlights/tag_group endpoint."""
@@ -13,7 +16,7 @@ class TestCreateTagGroup:
     def test_create_tag_group_success(self, client: TestClient, db_session: Session) -> None:
         """Test successful creation of a tag group."""
         # Create a book
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -41,7 +44,7 @@ class TestCreateTagGroup:
     def test_update_tag_group_success(self, client: TestClient, db_session: Session) -> None:
         """Test successful update of a tag group."""
         # Create a book and tag group
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -70,7 +73,7 @@ class TestCreateTagGroup:
     def test_create_tag_group_duplicate_name(self, client: TestClient, db_session: Session) -> None:
         """Test creating tag group with duplicate name returns 409 error."""
         # Create a book and tag group
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -105,7 +108,7 @@ class TestCreateTagGroup:
 
     def test_create_tag_group_empty_name(self, client: TestClient, db_session: Session) -> None:
         """Test creating tag group with empty name."""
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -125,7 +128,7 @@ class TestCreateTagGroup:
     ) -> None:
         """Test updating tag group to a name that already exists."""
         # Create a book and two tag groups
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -156,7 +159,7 @@ class TestDeleteTagGroup:
     def test_delete_tag_group_success(self, client: TestClient, db_session: Session) -> None:
         """Test successful deletion of a tag group."""
         # Create a book and tag group
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -180,7 +183,7 @@ class TestDeleteTagGroup:
     def test_delete_tag_group_with_tags(self, client: TestClient, db_session: Session) -> None:
         """Test deleting tag group sets tags' tag_group_id to NULL."""
         # Create a book, tag group, and tags
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -190,8 +193,8 @@ class TestDeleteTagGroup:
         db_session.commit()
         db_session.refresh(tag_group)
 
-        tag1 = models.HighlightTag(book_id=book.id, name="Tag 1", tag_group_id=tag_group.id)
-        tag2 = models.HighlightTag(book_id=book.id, name="Tag 2", tag_group_id=tag_group.id)
+        tag1 = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Tag 1", tag_group_id=tag_group.id)
+        tag2 = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Tag 2", tag_group_id=tag_group.id)
         db_session.add_all([tag1, tag2])
         db_session.commit()
         db_session.refresh(tag1)
@@ -221,7 +224,7 @@ class TestUpdateTag:
     def test_update_tag_add_to_group(self, client: TestClient, db_session: Session) -> None:
         """Test adding a tag to a tag group."""
         # Create a book, tag group, and tag
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -231,7 +234,7 @@ class TestUpdateTag:
         db_session.commit()
         db_session.refresh(tag_group)
 
-        tag = models.HighlightTag(book_id=book.id, name="Important")
+        tag = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Important")
         db_session.add(tag)
         db_session.commit()
         db_session.refresh(tag)
@@ -254,7 +257,7 @@ class TestUpdateTag:
     def test_update_tag_remove_from_group(self, client: TestClient, db_session: Session) -> None:
         """Test removing a tag from a tag group."""
         # Create a book, tag group, and tag
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -264,7 +267,7 @@ class TestUpdateTag:
         db_session.commit()
         db_session.refresh(tag_group)
 
-        tag = models.HighlightTag(book_id=book.id, name="Important", tag_group_id=tag_group.id)
+        tag = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Important", tag_group_id=tag_group.id)
         db_session.add(tag)
         db_session.commit()
         db_session.refresh(tag)
@@ -287,12 +290,12 @@ class TestUpdateTag:
     def test_update_tag_rename(self, client: TestClient, db_session: Session) -> None:
         """Test renaming a tag."""
         # Create a book and tag
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
 
-        tag = models.HighlightTag(book_id=book.id, name="Old Name")
+        tag = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Old Name")
         db_session.add(tag)
         db_session.commit()
         db_session.refresh(tag)
@@ -317,7 +320,7 @@ class TestUpdateTag:
     ) -> None:
         """Test renaming a tag and adding it to a group."""
         # Create a book, tag group, and tag
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -327,7 +330,7 @@ class TestUpdateTag:
         db_session.commit()
         db_session.refresh(tag_group)
 
-        tag = models.HighlightTag(book_id=book.id, name="Old Name")
+        tag = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Old Name")
         db_session.add(tag)
         db_session.commit()
         db_session.refresh(tag)
@@ -352,14 +355,14 @@ class TestUpdateTag:
     def test_update_tag_wrong_book(self, client: TestClient, db_session: Session) -> None:
         """Test updating tag with wrong book_id."""
         # Create two books and a tag
-        book1 = models.Book(title="Book 1", author="Author 1")
-        book2 = models.Book(title="Book 2", author="Author 2")
+        book1 = models.Book(title="Book 1", author="Author 1", user_id=DEFAULT_USER_ID)
+        book2 = models.Book(title="Book 2", author="Author 2", user_id=DEFAULT_USER_ID)
         db_session.add_all([book1, book2])
         db_session.commit()
         db_session.refresh(book1)
         db_session.refresh(book2)
 
-        tag = models.HighlightTag(book_id=book1.id, name="Tag")
+        tag = models.HighlightTag(book_id=book1.id, user_id=DEFAULT_USER_ID, name="Tag")
         db_session.add(tag)
         db_session.commit()
         db_session.refresh(tag)
@@ -375,12 +378,12 @@ class TestUpdateTag:
     def test_update_tag_nonexistent_group(self, client: TestClient, db_session: Session) -> None:
         """Test updating tag with non-existent tag group."""
         # Create a book and tag
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
 
-        tag = models.HighlightTag(book_id=book.id, name="Tag")
+        tag = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Tag")
         db_session.add(tag)
         db_session.commit()
         db_session.refresh(tag)
@@ -402,7 +405,7 @@ class TestBookDetailsWithTagGroups:
     ) -> None:
         """Test that book details include tag groups."""
         # Create a book with tag groups
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -430,7 +433,7 @@ class TestBookDetailsWithTagGroups:
     ) -> None:
         """Test that tags in book details include tag_group_id."""
         # Create a book with tag group and tags
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)
@@ -440,14 +443,15 @@ class TestBookDetailsWithTagGroups:
         db_session.commit()
         db_session.refresh(tag_group)
 
-        tag1 = models.HighlightTag(book_id=book.id, name="Tag 1", tag_group_id=tag_group.id)
-        tag2 = models.HighlightTag(book_id=book.id, name="Tag 2", tag_group_id=None)
+        tag1 = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Tag 1", tag_group_id=tag_group.id)
+        tag2 = models.HighlightTag(book_id=book.id, user_id=DEFAULT_USER_ID, name="Tag 2", tag_group_id=None)
         db_session.add_all([tag1, tag2])
         db_session.commit()
 
         # Create a highlight with tags to ensure they appear
         highlight = models.Highlight(
             book_id=book.id,
+            user_id=DEFAULT_USER_ID,
             text="Test highlight",
             page=1,
             datetime="2024-01-15 14:30:22",
@@ -481,7 +485,7 @@ class TestCascadeDelete:
     def test_delete_book_deletes_tag_groups(self, client: TestClient, db_session: Session) -> None:
         """Test that deleting a book also deletes its tag groups."""
         # Create a book with tag groups
-        book = models.Book(title="Test Book", author="Test Author")
+        book = models.Book(title="Test Book", author="Test Author", user_id=DEFAULT_USER_ID)
         db_session.add(book)
         db_session.commit()
         db_session.refresh(book)

@@ -17,6 +17,7 @@ from src.models import (  # noqa: F401 - Import to register models
     Highlight,
     HighlightTag,
     HighlightTagGroup,
+    User,
 )
 
 # Test database URL (in-memory SQLite)
@@ -41,6 +42,10 @@ def db_session() -> Generator[Session, None, None]:
 
     session = TestSessionLocal()
     try:
+        # Create the default user that services expect
+        default_user = User(id=1, name="admin")
+        session.add(default_user)
+        session.commit()
         yield session
     finally:
         session.close()
