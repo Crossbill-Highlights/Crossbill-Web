@@ -17,6 +17,8 @@ class Settings:
         "DATABASE_URL", "postgresql://crossbill:crossbill_dev_password@localhost:5432/crossbill"
     )
 
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
+
     # API
     API_V1_PREFIX: str = "/api/v1"
     PROJECT_NAME: str = "crossbill API"

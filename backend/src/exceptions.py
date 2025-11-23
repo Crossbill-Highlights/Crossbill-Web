@@ -1,5 +1,8 @@
 """Custom exception hierarchy for Crossbill application."""
 
+from fastapi import HTTPException
+from starlette import status
+
 
 class CrossbillError(Exception):
     """Base exception for all Crossbill errors."""
@@ -30,3 +33,10 @@ class ValidationError(CrossbillError):
 
 class ServiceError(CrossbillError):
     """Service layer error."""
+
+
+CredentialsException = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"},
+)

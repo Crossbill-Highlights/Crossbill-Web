@@ -130,6 +130,11 @@ poetry run alembic revision --autogenerate -m "description"
 poetry run alembic upgrade head
 ```
 
+## Create password hash to be saved to the database from password:
+```
+ poetry run python -c "from argon2 import PasswordHasher; ph = PasswordHasher(); print(ph.hash('your_password_here'))"
+```
+
 ## API Documentation
 
 Once the server is running, visit:

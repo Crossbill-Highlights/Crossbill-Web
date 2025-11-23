@@ -1,12 +1,13 @@
 import logging
+from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from starlette import status
 
+from src.auth import ACCESS_TOKEN_EXPIRE_MINUTES, Token, authenticate_user, create_access_token
 from src.database import DatabaseSession
-from src.repositories import UserRepository
-from src.schemas.auth_schemas import LoginResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -15,21 +16,17 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/login")
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: DatabaseSession
-) -> LoginResponse:
-    # TODO: move to service
-    user_repository = UserRepository(db)
-    user = user_repository.get_by_name(form_data.username)
-
+) -> Token:
+    user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
-        logger.error("Login failed for user: %s", form_data.username)
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(user.id)}, expires_delta=access_token_expires
+    )
 
-    # TODO: HASH PASSWORD!
-    hashed_password = form_data.password
-    if hashed_password != user.hashed_password:
-        logger.error("Invalid password for user: %s", form_data.username)
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-
-    logger.info("User %s logged in successfully", form_data.username)
-    # TODO: Generate unique token for this login
-    return LoginResponse(access_token= user.name, token_type= "bearer")
+    return Token(access_token=access_token, token_type="bearer") # noqa: S106
