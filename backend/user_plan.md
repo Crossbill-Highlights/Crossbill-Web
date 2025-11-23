@@ -10,6 +10,39 @@ This document outlines the implementation plan for adding multi-user support to 
 3. Update unique constraints to be user-scoped
 4. Migrate existing data to the default admin user
 
+### Temporary Single-User Mode
+
+Until authentication is implemented, the app will continue to work as single-user by explicitly passing the admin user ID through the service layer.
+
+**Important rules:**
+- **NO default parameters** for `user_id` in repository methods - all must be required
+- **Explicit passing** of admin user ID from services/controllers
+- Use a **constant** `DEFAULT_USER_ID = 1` defined in a central location (e.g., `config.py` or `constants.py`)
+- This makes it easy to **grep and replace** when authentication is added
+
+**Example pattern:**
+```python
+# constants.py (or config.py)
+DEFAULT_USER_ID = 1  # TODO: Remove when authentication is implemented
+
+# services/highlight_service.py
+from src.constants import DEFAULT_USER_ID
+
+class HighlightService:
+    def upload_highlights(self, request: UploadHighlightsRequest) -> UploadHighlightsResponse:
+        # Explicitly use DEFAULT_USER_ID - easy to find and replace later
+        user_id = DEFAULT_USER_ID
+
+        book, _ = self.book_repo.get_or_create(book_data, user_id=user_id)
+        # ... rest of logic using user_id
+```
+
+This approach ensures:
+1. App continues to work as single-user
+2. All code paths are ready for multi-user
+3. Easy to search for `DEFAULT_USER_ID` usages when adding auth
+4. No hidden default behavior in repository layer
+
 ### Current State
 - 7 models: Book, Chapter, Highlight, Tag, HighlightTag, HighlightTagGroup, Bookmark
 - No user model exists
@@ -530,61 +563,71 @@ def downgrade() -> None:
 
 ### Step-by-Step Implementation
 
-1. **Create User model** (`models.py`)
+1. **Create constants file** (`constants.py`)
+   - Add `DEFAULT_USER_ID = 1` constant with TODO comment
+   - This will be the single source of truth for temporary single-user mode
+
+2. **Create User model** (`models.py`)
    - Add User class with id, name, timestamps
    - Add relationships to Book, Tag, Highlight, and HighlightTag
 
-2. **Update Book model** (`models.py`)
+3. **Update Book model** (`models.py`)
    - Add user_id foreign key
    - Add user relationship
 
-3. **Update Highlight model** (`models.py`)
+4. **Update Highlight model** (`models.py`)
    - Add user_id foreign key
    - Add user relationship
 
-4. **Update HighlightTag model** (`models.py`)
+5. **Update HighlightTag model** (`models.py`)
    - Add user_id foreign key
    - Add user relationship
    - Update __table_args__ with new unique constraint `(user_id, book_id, name)`
 
-5. **Update Tag model** (`models.py`)
+6. **Update Tag model** (`models.py`)
    - Add user_id foreign key
    - Add user relationship
    - Update __table_args__ with new unique constraint `(user_id, name)`
 
-6. **Create migration file** (`alembic/versions/013_add_users_table.py`)
+7. **Create migration file** (`alembic/versions/013_add_users_table.py`)
    - Follow the migration strategy above
 
-7. **Create UserRepository** (`repositories/user_repository.py`)
+8. **Create UserRepository** (`repositories/user_repository.py`)
    - Basic CRUD operations
    - get_or_create_default_admin method
 
-8. **Update BookRepository** (`repositories/book_repository.py`)
-   - Add user_id parameter to all methods
+9. **Update BookRepository** (`repositories/book_repository.py`)
+   - Add user_id as **required parameter** (no defaults) to all methods
    - Update queries to filter by user_id
 
-9. **Update HighlightRepository** (`repositories/highlight_repository.py`)
-   - Add user_id parameter to create and query methods
-   - Update queries to filter by user_id directly
+10. **Update HighlightRepository** (`repositories/highlight_repository.py`)
+    - Add user_id as **required parameter** to create and query methods
+    - Update queries to filter by user_id directly
 
-10. **Update HighlightTagRepository** (`repositories/highlight_tag_repository.py`)
-    - Add user_id parameter to all methods
+11. **Update HighlightTagRepository** (`repositories/highlight_tag_repository.py`)
+    - Add user_id as **required parameter** to all methods
     - Update queries to filter by user_id
 
-11. **Update TagRepository** (`repositories/tag_repository.py`)
-    - Add user_id parameter to all methods
+12. **Update TagRepository** (`repositories/tag_repository.py`)
+    - Add user_id as **required parameter** to all methods
     - Update queries to filter by user_id
 
-12. **Update other repositories** (ChapterRepository, BookmarkRepository)
+13. **Update other repositories** (ChapterRepository, BookmarkRepository)
     - Add user ownership verification through book joins
 
-13. **Update Pydantic schemas** (`schemas/`)
+14. **Update Services** (`services/`)
+    - Import `DEFAULT_USER_ID` from constants
+    - Pass `user_id=DEFAULT_USER_ID` explicitly to all repository calls
+    - Add comment marking these for future replacement with authenticated user
+
+15. **Update Pydantic schemas** (`schemas/`)
     - Add UserCreate, UserResponse schemas
 
-14. **Run and test migration**
+16. **Run and test migration**
     - `alembic upgrade head`
     - Verify existing data is associated with admin user
     - Verify unique constraints work correctly
+    - Verify app works in single-user mode with DEFAULT_USER_ID
 
 ---
 
@@ -623,16 +666,18 @@ def downgrade() -> None:
 ## Summary
 
 ### Files to Create
+- `backend/src/constants.py` (DEFAULT_USER_ID for temporary single-user mode)
 - `backend/src/repositories/user_repository.py`
 - `backend/alembic/versions/013_add_users_table.py`
 
 ### Files to Modify
 - `backend/src/models.py` (add User model, update Book, Highlight, HighlightTag, and Tag)
 - `backend/src/repositories/__init__.py` (export UserRepository)
-- `backend/src/repositories/book_repository.py` (add user_id)
-- `backend/src/repositories/highlight_repository.py` (add user_id)
-- `backend/src/repositories/highlight_tag_repository.py` (add user_id)
-- `backend/src/repositories/tag_repository.py` (add user_id)
+- `backend/src/repositories/book_repository.py` (add user_id as required param)
+- `backend/src/repositories/highlight_repository.py` (add user_id as required param)
+- `backend/src/repositories/highlight_tag_repository.py` (add user_id as required param)
+- `backend/src/repositories/tag_repository.py` (add user_id as required param)
+- `backend/src/services/*.py` (pass DEFAULT_USER_ID to repository calls)
 - `backend/src/schemas/` (add user schemas if needed)
 
 ### Database Changes
