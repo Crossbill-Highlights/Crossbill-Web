@@ -33,29 +33,25 @@ password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+def _verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
 
 
-def get_password_hash(password: str) -> str:
-    return password_hash.hash(password)
-
-
-def get_user(db: DatabaseSession, username: str) -> User | None:
+def _get_user_by_name(db: DatabaseSession, username: str) -> User | None:
     user_repository = UserRepository(db)
     return user_repository.get_by_name(username)
 
 
-def get_user_by_id(db: DatabaseSession, id: int) -> User | None:
+def _get_user_by_id(db: DatabaseSession, id: int) -> User | None:
     user_repository = UserRepository(db)
     return user_repository.get_by_id(id)
 
 
 def authenticate_user(username: str, password: str, db: DatabaseSession) -> User | bool:
-    user = get_user(db, username)
+    user = _get_user_by_name(db, username)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not _verify_password(password, user.hashed_password):
         return False
     return user
 
@@ -82,7 +78,7 @@ async def get_current_user(
     except InvalidTokenError:
         raise CredentialsException from InvalidTokenError
 
-    user = get_user_by_id(db, int(token_data.user_id))
+    user = _get_user_by_id(db, int(token_data.user_id))
     if user is None:
         raise CredentialsException
     return user
