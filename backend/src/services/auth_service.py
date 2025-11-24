@@ -37,6 +37,16 @@ def _verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
 
 
+def hash_password(plain_password: str) -> str:
+    """Hash a plain password for storage."""
+    return password_hash.hash(plain_password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a plain password against a hashed password."""
+    return password_hash.verify(plain_password, hashed_password)
+
+
 def _get_user_by_name(db: DatabaseSession, username: str) -> User | None:
     user_repository = UserRepository(db)
     return user_repository.get_by_name(username)
