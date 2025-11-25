@@ -13,8 +13,8 @@ interface AuthContextType {
   user: UserDetailsResponse | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -75,9 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     validateToken();
   }, []);
 
-  const login = async (username: string, password: string) => {
+  const login = async (email: string, password: string) => {
     const response = await loginMutation.mutateAsync({
-      data: { username, password },
+      data: { username: email, password },
     });
 
     localStorage.setItem(AUTH_TOKEN_KEY, response.access_token);
@@ -88,9 +88,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
   };
 
-  const register = async (username: string, password: string) => {
+  const register = async (email: string, password: string) => {
     const response = await registerMutation.mutateAsync({
-      data: { username, password },
+      data: { email, password },
     });
 
     localStorage.setItem(AUTH_TOKEN_KEY, response.access_token);

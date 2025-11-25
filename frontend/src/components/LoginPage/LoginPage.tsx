@@ -4,7 +4,7 @@ import { Link as RouterLink, useNavigate } from '@tanstack/react-router';
 import { FormEvent, useState } from 'react';
 
 export const LoginPage = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,10 +17,10 @@ export const LoginPage = () => {
     setIsSubmitting(true);
 
     try {
-      await login(username, password);
+      await login(email, password);
       navigate({ to: '/' });
     } catch {
-      setError('Invalid username or password');
+      setError('Invalid email or password');
     } finally {
       setIsSubmitting(false);
     }
@@ -64,12 +64,12 @@ export const LoginPage = () => {
 
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
-              label="Username"
+              label="Email"
               fullWidth
               margin="normal"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               autoFocus
               required
             />

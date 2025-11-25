@@ -6,10 +6,10 @@ import { FormEvent, useState } from 'react';
 export const SettingsPage = () => {
   const { user, refreshUser } = useAuth();
 
-  // Name form state
-  const [name, setName] = useState(user?.name || '');
-  const [nameError, setNameError] = useState<string | null>(null);
-  const [nameSuccess, setNameSuccess] = useState(false);
+  // Email form state
+  const [email, setEmail] = useState(user?.email || '');
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSuccess, setEmailSuccess] = useState(false);
 
   // Password form state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -20,22 +20,22 @@ export const SettingsPage = () => {
 
   const updateMutation = useUpdateMeApiV1UsersMePost();
 
-  const handleNameSubmit = async (e: FormEvent) => {
+  const handleEmailSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setNameError(null);
-    setNameSuccess(false);
+    setEmailError(null);
+    setEmailSuccess(false);
 
-    if (!name.trim()) {
-      setNameError('Name cannot be empty');
+    if (!email.trim()) {
+      setEmailError('Email cannot be empty');
       return;
     }
 
     try {
-      await updateMutation.mutateAsync({ data: { name: name.trim() } });
+      await updateMutation.mutateAsync({ data: { email: email.trim() } });
       await refreshUser();
-      setNameSuccess(true);
+      setEmailSuccess(true);
     } catch {
-      setNameError('Failed to update name');
+      setEmailError('Failed to update email');
     }
   };
 
@@ -114,26 +114,26 @@ export const SettingsPage = () => {
 
         <Divider sx={{ mb: 3 }} />
 
-        {nameSuccess && (
+        {emailSuccess && (
           <Alert severity="success" sx={{ mb: 2 }}>
-            Name updated successfully
+            Email updated successfully
           </Alert>
         )}
 
-        {nameError && (
+        {emailError && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {nameError}
+            {emailError}
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleNameSubmit}>
+        <Box component="form" onSubmit={handleEmailSubmit}>
           <TextField
-            label="Display Name"
+            label="Email"
             fullWidth
-            value={name}
+            value={email}
             onChange={(e) => {
-              setName(e.target.value);
-              setNameSuccess(false);
+              setEmail(e.target.value);
+              setEmailSuccess(false);
             }}
             margin="normal"
             inputProps={{ maxLength: 100 }}
@@ -141,10 +141,10 @@ export const SettingsPage = () => {
           <Button
             type="submit"
             variant="contained"
-            disabled={updateMutation.isPending || name === user?.name}
+            disabled={updateMutation.isPending || email === user?.email}
             sx={{ mt: 2 }}
           >
-            {updateMutation.isPending ? 'Saving...' : 'Update Name'}
+            {updateMutation.isPending ? 'Saving...' : 'Update Email'}
           </Button>
         </Box>
       </Box>

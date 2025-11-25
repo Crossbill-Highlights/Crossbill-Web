@@ -4,7 +4,7 @@ import { Link as RouterLink, useNavigate } from '@tanstack/react-router';
 import { FormEvent, useState } from 'react';
 
 export const RegistrationPage = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export const RegistrationPage = () => {
     setIsSubmitting(true);
 
     try {
-      await register(username, password);
+      await register(email, password);
       navigate({ to: '/' });
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { detail?: string } } };
@@ -81,12 +81,12 @@ export const RegistrationPage = () => {
 
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
-              label="Username"
+              label="Email"
               fullWidth
               margin="normal"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               autoFocus
               required
             />
