@@ -47,9 +47,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
 
 
-def _get_user_by_name(db: DatabaseSession, username: str) -> User | None:
+def _get_user_by_email(db: DatabaseSession, email: str) -> User | None:
     user_repository = UserRepository(db)
-    return user_repository.get_by_name(username)
+    return user_repository.get_by_email(email)
 
 
 def _get_user_by_id(db: DatabaseSession, id: int) -> User | None:
@@ -57,8 +57,8 @@ def _get_user_by_id(db: DatabaseSession, id: int) -> User | None:
     return user_repository.get_by_id(id)
 
 
-def authenticate_user(username: str, password: str, db: DatabaseSession) -> User | bool:
-    user = _get_user_by_name(db, username)
+def authenticate_user(email: str, password: str, db: DatabaseSession) -> User | bool:
+    user = _get_user_by_email(db, email)
     if not user:
         return False
     if not _verify_password(password, user.hashed_password):

@@ -25,23 +25,23 @@ async def register(register_data: UserRegisterRequest, db: DatabaseSession) -> T
     """
     Register a new user account.
 
-    Creates a new user with the provided username and password.
+    Creates a new user with the provided email and password.
     Returns an access token for immediate login after registration.
     """
     user_repository = UserRepository(db)
 
-    # Check if username already exists
-    existing_user = user_repository.get_by_name(register_data.username)
+    # Check if email already exists
+    existing_user = user_repository.get_by_email(register_data.email)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
+            detail="Email already registered",
         )
 
     # Hash the password and create the user
     hashed_password = hash_password(register_data.password)
     user = user_repository.create_with_password(
-        name=register_data.username, hashed_password=hashed_password
+        email=register_data.email, hashed_password=hashed_password
     )
 
     db.commit()
@@ -58,7 +58,7 @@ async def register(register_data: UserRegisterRequest, db: DatabaseSession) -> T
 @router.get("/me")
 async def get_me(current_user: Annotated[User, Depends(get_current_user)]) -> UserDetailsResponse:
     """Get the current user's profile information."""
-    return UserDetailsResponse(name=current_user.name, id=current_user.id)
+    return UserDetailsResponse(email=current_user.email, id=current_user.id)
 
 
 @router.post("/me")
@@ -70,7 +70,7 @@ async def update_me(
     """
     Update the current user's profile.
 
-    - To change name: provide `name` field
+    - To change email: provide `email` field
     - To change password: provide both `current_password` and `new_password` fields
     """
     # Validate password change request
@@ -89,9 +89,9 @@ async def update_me(
                 detail="Current password is incorrect",
             )
 
-    # Update name if provided
-    if update_data.name is not None:
-        current_user.name = update_data.name
+    # Update email if provided
+    if update_data.email is not None:
+        current_user.email = update_data.email
 
     # Update password if provided
     if update_data.new_password is not None:
@@ -100,4 +100,4 @@ async def update_me(
     db.commit()
     db.refresh(current_user)
 
-    return UserDetailsResponse(name=current_user.name, id=current_user.id)
+    return UserDetailsResponse(email=current_user.email, id=current_user.id)

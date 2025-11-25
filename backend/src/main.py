@@ -48,7 +48,7 @@ def _initialize_admin_password() -> None:
 
     try:
         user_repo = UserRepository(db)
-        admin_user = user_repo.get_by_name(settings.ADMIN_USERNAME)
+        admin_user = user_repo.get_by_email(settings.ADMIN_USERNAME)
 
         if not admin_user:
             logger.warning(

@@ -22,37 +22,37 @@ class UserRepository:
         stmt = select(models.User).where(models.User.id == user_id)
         return self.db.execute(stmt).scalar_one_or_none()
 
-    def get_by_name(self, name: str) -> models.User | None:
-        """Get a user by its name."""
-        stmt = select(models.User).where(models.User.name == name)
+    def get_by_email(self, email: str) -> models.User | None:
+        """Get a user by email."""
+        stmt = select(models.User).where(models.User.email == email)
         return self.db.execute(stmt).scalar_one_or_none()
 
-    def create(self, name: str) -> models.User:
+    def create(self, email: str) -> models.User:
         """Create a new user."""
-        user = models.User(name=name)
+        user = models.User(email=email)
         self.db.add(user)
         self.db.flush()
         self.db.refresh(user)
-        logger.info(f"Created user: {user.name} (id={user.id})")
+        logger.info(f"Created user: {user.email} (id={user.id})")
         return user
 
-    def create_with_password(self, name: str, hashed_password: str) -> models.User:
+    def create_with_password(self, email: str, hashed_password: str) -> models.User:
         """Create a new user with a hashed password."""
-        user = models.User(name=name, hashed_password=hashed_password)
+        user = models.User(email=email, hashed_password=hashed_password)
         self.db.add(user)
         self.db.flush()
         self.db.refresh(user)
-        logger.info(f"Created user with password: {user.name} (id={user.id})")
+        logger.info(f"Created user with password: {user.email} (id={user.id})")
         return user
 
-    def get_or_create(self, name: str) -> models.User:
-        """Get existing user by name or create a new one."""
-        user = self.get_by_name(name)
+    def get_or_create(self, email: str) -> models.User:
+        """Get existing user by email or create a new one."""
+        user = self.get_by_email(email)
         if user:
             return user
-        return self.create(name)
+        return self.create(email)
 
     def get_all(self) -> list[models.User]:
         """Get all users."""
-        stmt = select(models.User).order_by(models.User.name)
+        stmt = select(models.User).order_by(models.User.email)
         return list(self.db.execute(stmt).scalars().all())
