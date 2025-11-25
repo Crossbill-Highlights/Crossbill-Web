@@ -83,7 +83,7 @@ export * from './userDetailsResponse';
 export * from './userRegisterRequest';
 export * from './userUpdateRequest';
 export * from './userUpdateRequestCurrentPassword';
-export * from './userUpdateRequestName';
+export * from './userUpdateRequestEmail';
 export * from './userUpdateRequestNewPassword';
 export * from './validationError';
 export * from './validationErrorLocItem';

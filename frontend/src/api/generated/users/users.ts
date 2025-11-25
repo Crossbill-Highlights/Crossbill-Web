@@ -33,7 +33,7 @@ import { axiosInstance } from '../../axios-instance';
 /**
  * Register a new user account.
 
-Creates a new user with the provided username and password.
+Creates a new user with the provided email and password.
 Returns an access token for immediate login after registration.
  * @summary Register
  */
@@ -229,7 +229,7 @@ export function useGetMeApiV1UsersMeGet<
 /**
  * Update the current user's profile.
 
-- To change name: provide `name` field
+- To change email: provide `email` field
 - To change password: provide both `current_password` and `new_password` fields
  * @summary Update Me
  */

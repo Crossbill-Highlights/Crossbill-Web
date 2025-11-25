@@ -6,6 +6,6 @@
  */
 
 /**
- * New user name
+ * New user email
  */
-export type UserUpdateRequestName = string | null;
+export type UserUpdateRequestEmail = string | null;

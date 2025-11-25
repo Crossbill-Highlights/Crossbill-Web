@@ -12,9 +12,9 @@ export interface UserDetailsResponse {
   /** User id */
   id: number;
   /**
-   * User name
+   * User email
    * @minLength 1
    * @maxLength 100
    */
-  name: string;
+  email: string;
 }

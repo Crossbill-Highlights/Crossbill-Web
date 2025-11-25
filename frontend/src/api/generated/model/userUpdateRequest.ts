@@ -5,15 +5,15 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { UserUpdateRequestCurrentPassword } from './userUpdateRequestCurrentPassword';
-import type { UserUpdateRequestName } from './userUpdateRequestName';
+import type { UserUpdateRequestEmail } from './userUpdateRequestEmail';
 import type { UserUpdateRequestNewPassword } from './userUpdateRequestNewPassword';
 
 /**
  * Schema for updating user profile.
  */
 export interface UserUpdateRequest {
-  /** New user name */
-  name?: UserUpdateRequestName;
+  /** New user email */
+  email?: UserUpdateRequestEmail;
   /** Current password (required when changing password) */
   current_password?: UserUpdateRequestCurrentPassword;
   /** New password (min 8 characters) */

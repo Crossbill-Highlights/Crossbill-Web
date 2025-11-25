@@ -10,11 +10,11 @@
  */
 export interface UserRegisterRequest {
   /**
-   * Username for the new account
+   * Email for the new account
    * @minLength 1
    * @maxLength 100
    */
-  username: string;
+  email: string;
   /**
    * Password (min 8 characters)
    * @minLength 8
