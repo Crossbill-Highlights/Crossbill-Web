@@ -3,15 +3,17 @@ import { Navigate, Outlet, createRootRoute, useLocation } from '@tanstack/react-
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { AppBar } from '../components/layout/AppBar';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { SettingsProvider, useSettings } from '../context/SettingsContext';
 
 function AuthenticatedRoutes() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { settings, isLoading: isSettingsLoading } = useSettings();
   const location = useLocation();
 
   const isPublicPage = location.pathname === '/login' || location.pathname === '/register';
 
-  // Show loading spinner while checking auth
-  if (isLoading) {
+  // Show loading spinner while checking auth or loading settings
+  if (isAuthLoading || isSettingsLoading) {
     return (
       <Box
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}
@@ -19,6 +21,11 @@ function AuthenticatedRoutes() {
         <CircularProgress />
       </Box>
     );
+  }
+
+  // Redirect to login if trying to access registration when it's disabled
+  if (location.pathname === '/register' && !settings?.allow_user_registrations) {
+    return <Navigate to="/login" />;
   }
 
   // Redirect to login if not authenticated (except on public pages)
@@ -42,9 +49,11 @@ function AuthenticatedRoutes() {
 
 function RootComponent() {
   return (
-    <AuthProvider>
-      <AuthenticatedRoutes />
-    </AuthProvider>
+    <SettingsProvider>
+      <AuthProvider>
+        <AuthenticatedRoutes />
+      </AuthProvider>
+    </SettingsProvider>
   );
 }
 

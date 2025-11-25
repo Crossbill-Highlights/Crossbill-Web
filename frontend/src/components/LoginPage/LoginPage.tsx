@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 import { Alert, Box, Button, Container, Link, Paper, TextField, Typography } from '@mui/material';
 import { Link as RouterLink, useNavigate } from '@tanstack/react-router';
 import { FormEvent, useState } from 'react';
@@ -9,6 +10,7 @@ export const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
+  const { settings } = useSettings();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -95,14 +97,16 @@ export const LoginPage = () => {
             </Button>
           </Box>
 
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              Don't have an account?{' '}
-              <Link component={RouterLink} to="/register" underline="hover">
-                Create one
-              </Link>
-            </Typography>
-          </Box>
+          {settings?.allow_user_registrations && (
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Don't have an account?{' '}
+                <Link component={RouterLink} to="/register" underline="hover">
+                  Create one
+                </Link>
+              </Typography>
+            </Box>
+          )}
         </Paper>
       </Box>
     </Container>
