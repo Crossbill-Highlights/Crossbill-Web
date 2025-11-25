@@ -64,8 +64,14 @@ export interface HighlightWithChapterInfo extends Highlight {
 
 export interface CrossbillSettings {
   serverHost: string;
+  email: string;
+  password: string;
+  bearerToken: string;
 }
 
 export const DEFAULT_SETTINGS: CrossbillSettings = {
   serverHost: 'http://localhost:8000',
+  email: '',
+  password: '',
+  bearerToken: '',
 };

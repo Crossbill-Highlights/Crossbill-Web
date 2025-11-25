@@ -21,7 +21,18 @@ export default class CrossbillPlugin extends Plugin {
 
   async onload() {
     await this.loadSettings();
-    this.api = new CrossbillAPI(this.settings.serverHost);
+    this.api = new CrossbillAPI(
+      this.settings.serverHost,
+      this.settings.bearerToken,
+      this.settings.email,
+      this.settings.password
+    );
+
+    // Setup callback to save token when it's updated
+    this.api.setOnTokenUpdate(async (token: string) => {
+      this.settings.bearerToken = token;
+      await this.saveSettings();
+    });
 
     // Add command to import highlights from a single chapter
     this.addCommand({
@@ -178,11 +189,22 @@ export default class CrossbillPlugin extends Plugin {
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-    this.api = new CrossbillAPI(this.settings.serverHost);
+    this.api = new CrossbillAPI(
+      this.settings.serverHost,
+      this.settings.bearerToken,
+      this.settings.email,
+      this.settings.password
+    );
+    this.api.setOnTokenUpdate(async (token: string) => {
+      this.settings.bearerToken = token;
+      await this.saveSettings();
+    });
   }
 
   async saveSettings() {
     await this.saveData(this.settings);
-    this.api = new CrossbillAPI(this.settings.serverHost);
+    // Update API with new credentials
+    this.api.setCredentials(this.settings.email, this.settings.password);
+    this.api.setBearerToken(this.settings.bearerToken);
   }
 }

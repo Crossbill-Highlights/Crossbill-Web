@@ -31,5 +31,39 @@ export class CrossbillSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+    containerEl.createEl('h3', { text: 'Authentication' });
+
+    containerEl.createEl('p', {
+      text: 'Enter your Crossbill credentials.',
+      cls: 'setting-item-description',
+    });
+
+    new Setting(containerEl)
+      .setName('Email')
+      .setDesc('Your Crossbill account email')
+      .addText((text) =>
+        text
+          .setPlaceholder('email@example.com')
+          .setValue(this.plugin.settings.email)
+          .onChange(async (value) => {
+            this.plugin.settings.email = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName('Password')
+      .setDesc('Your Crossbill account password')
+      .addText((text) => {
+        text
+          .setPlaceholder('Enter password')
+          .setValue(this.plugin.settings.password)
+          .onChange(async (value) => {
+            this.plugin.settings.password = value;
+            await this.plugin.saveSettings();
+          });
+        text.inputEl.type = 'password';
+      });
   }
 }
