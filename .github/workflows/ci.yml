@@ -25,30 +25,12 @@ jobs:
       - name: Cache npm dependencies
         uses: actions/cache@v4
         with:
-          path: frontend/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Debug - Check directory before npm ci
-        working-directory: frontend
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Contents of current directory:"
-          ls -la
-          echo "Checking for package-lock.json in current directory:"
-          if [ -f package-lock.json ]; then
-            echo "✓ package-lock.json found"
-            head -n 5 package-lock.json
-          else
-            echo "✗ package-lock.json NOT found"
-          fi
-          echo "Checking parent directory:"
-          ls -la ../frontend/ 2>/dev/null || echo "No ../frontend directory"
-
       - name: Install dependencies
-        working-directory: frontend
         run: npm ci
 
       - name: Check formatting with Prettier
