@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "npm run routes:generate && vite",
     "build": "npm run routes:generate && npm run api:generate && tsc && vite build",
+    "build:ci": "npm run routes:generate && tsc && vite build",
     "preview": "vite preview",
     "routes:generate": "tsr generate",
     "routes:watch": "tsr watch",

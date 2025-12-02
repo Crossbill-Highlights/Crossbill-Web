@@ -47,7 +47,7 @@ jobs:
 
       - name: Build frontend
         working-directory: frontend
-        run: npm run build
+        run: npm run build:ci
 
   backend:
     name: Backend Checks
