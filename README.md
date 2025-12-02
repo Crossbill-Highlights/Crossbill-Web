@@ -1,6 +1,13 @@
+
+
+<img width="96" height="96" alt="image" src="https://github.com/user-attachments/assets/6461072f-2265-443b-a018-db7ae26cb42f" />
+
+
 # Crossbill
+[![CI](https://github.com/Tumetsu/Crossbill/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Tumetsu/Crossbill/actions/workflows/ci.yml)
 
 A self-hosted web application for syncing, managing, and viewing book highlights from KOReader.
+
 
 ## Overview
 
@@ -18,6 +25,12 @@ Crossbill helps you centralize and manage your ebook highlights by providing:
 - Organize highlights with notes and metadata
 - Export highlights to various formats
 - Self-hosted - your data stays on your server
+
+## Screenshots
+<img width="295" height="640" alt="image" src="https://github.com/user-attachments/assets/262ba290-ed79-47ff-a8b3-aa6b3f3b59a3" />
+<img width="295" height="640" alt="image" src="https://github.com/user-attachments/assets/397be7cd-541d-49be-975b-d5db3caab2c3" />
+<img width="295" height="640" alt="image" src="https://github.com/user-attachments/assets/de548aa4-c721-4ff7-b008-3c6aa8de0bdd" />
+
 
 ## Installation
 
