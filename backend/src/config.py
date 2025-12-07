@@ -37,9 +37,7 @@ class Settings:
 
     # CORS
     CORS_ORIGINS: ClassVar[list[str]] = (
-        os.getenv("CORS_ORIGINS", "*").split(",")
-        if os.getenv("CORS_ORIGINS") != "*"
-        else ["*"]
+        os.getenv("CORS_ORIGINS", "*").split(",") if os.getenv("CORS_ORIGINS") != "*" else ["*"]
     )
 
     # Admin setup (for first-time initialization)
@@ -47,14 +45,10 @@ class Settings:
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin").strip()
 
     # Auth
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
-        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
-    )
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
     # Registration
-    ALLOW_USER_REGISTRATIONS: bool = os.getenv(
-        "ALLOW_USER_REGISTRATIONS", "true"
-    ).lower() in (
+    ALLOW_USER_REGISTRATIONS: bool = os.getenv("ALLOW_USER_REGISTRATIONS", "true").lower() in (
         "true",
         "1",
         "yes",
