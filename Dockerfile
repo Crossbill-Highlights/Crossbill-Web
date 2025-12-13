@@ -1,13 +1,19 @@
 # Stage 1: Build frontend
-FROM node:24-alpine AS frontend-builder
+FROM node:25-alpine AS frontend-builder
 
-WORKDIR /app/frontend
+WORKDIR /app
 
-# Copy package files
-COPY frontend/package*.json ./
+# Copy workspace root package files
+COPY package.json package-lock.json ./
 
-# Install dependencies
+# Copy frontend package file
+COPY frontend/package.json ./frontend/
+
+# Install dependencies (this will install the workspace)
 RUN npm ci
+
+# Change to frontend directory for build
+WORKDIR /app/frontend
 
 # Copy frontend source (including pre-generated API client)
 COPY frontend/ ./
@@ -25,8 +31,8 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+  curl \
+  && rm -rf /var/lib/apt/lists/*
 
 # Install uv for faster dependency installation
 RUN pip install --no-cache-dir uv
@@ -37,7 +43,7 @@ COPY backend/pyproject.toml backend/uv.lock ./
 # Export dependencies to requirements.txt and install
 # This works with package-mode = false
 RUN uv export --no-dev --no-hashes --no-emit-project -o requirements.txt && \
-    uv pip install --system --no-cache -r requirements.txt
+  uv pip install --system --no-cache -r requirements.txt
 
 # Copy backend source code
 COPY backend/src ./src
