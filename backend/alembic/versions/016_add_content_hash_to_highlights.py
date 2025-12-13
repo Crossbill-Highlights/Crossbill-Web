@@ -3,7 +3,8 @@
 This migration:
 1. Adds a content_hash column for hash-based highlight deduplication
 2. Computes hashes for all existing highlights based on text + book_title + book_author
-3. Replaces the old unique constraint (book_id, text, datetime) with (user_id, content_hash)
+3. Removes duplicate highlights (keeping the oldest non-deleted one)
+4. Replaces the old unique constraint (book_id, text, datetime) with (user_id, content_hash)
 
 Revision ID: 016
 Revises: 015
@@ -70,16 +71,64 @@ def upgrade() -> None:
             {"hash": content_hash, "id": highlight_id},
         )
 
-    # Step 3: Make content_hash non-nullable now that all rows have values
+    # Step 3: Remove duplicate highlights (keep the oldest non-deleted, or just oldest)
+    # Find all duplicates and delete all but the one to keep
+    # We keep: prefer non-deleted, then oldest (smallest id)
+    duplicates_result = connection.execute(
+        text("""
+            SELECT user_id, content_hash, COUNT(*) as cnt
+            FROM highlights
+            GROUP BY user_id, content_hash
+            HAVING COUNT(*) > 1
+        """)
+    ).fetchall()
+
+    for dup_row in duplicates_result:
+        user_id = dup_row[0]
+        dup_content_hash = dup_row[1]
+
+        # Get all highlight IDs with this user_id + content_hash, ordered to pick the best one
+        # Prefer: non-deleted first (deleted_at IS NULL), then oldest (smallest id)
+        highlights_to_check = connection.execute(
+            text("""
+                SELECT id, deleted_at
+                FROM highlights
+                WHERE user_id = :user_id AND content_hash = :content_hash
+                ORDER BY (CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END), id
+            """),
+            {"user_id": user_id, "content_hash": dup_content_hash},
+        ).fetchall()
+
+        # Keep the first one (best candidate), delete the rest
+        ids_to_delete = [h[0] for h in highlights_to_check[1:]]
+
+        for highlight_id in ids_to_delete:
+            # Delete from join table (highlight_highlight_tags)
+            connection.execute(
+                text("DELETE FROM highlight_highlight_tags WHERE highlight_id = :id"),
+                {"id": highlight_id},
+            )
+            # Delete bookmarks referencing this highlight
+            connection.execute(
+                text("DELETE FROM bookmarks WHERE highlight_id = :id"),
+                {"id": highlight_id},
+            )
+            # Delete the duplicate highlight
+            connection.execute(
+                text("DELETE FROM highlights WHERE id = :id"),
+                {"id": highlight_id},
+            )
+
+    # Step 4: Make content_hash non-nullable now that all rows have values
     op.alter_column("highlights", "content_hash", nullable=False)
 
-    # Step 4: Add index on content_hash for efficient lookups
+    # Step 5: Add index on content_hash for efficient lookups
     op.create_index("ix_highlights_content_hash", "highlights", ["content_hash"])
 
-    # Step 5: Drop the old unique constraint
+    # Step 6: Drop the old unique constraint
     op.drop_constraint("uq_highlight_dedup", "highlights", type_="unique")
 
-    # Step 6: Add new unique constraint on (user_id, content_hash)
+    # Step 7: Add new unique constraint on (user_id, content_hash)
     op.create_unique_constraint(
         "uq_highlight_content_hash", "highlights", ["user_id", "content_hash"]
     )
