@@ -192,12 +192,20 @@ class TestHighlightsUpload:
         assert data2["highlights_created"] == 1
         assert data2["highlights_skipped"] == 1
 
-    def test_upload_updates_book_metadata(self, client: TestClient, db_session: Session) -> None:
-        """Test that uploading to existing book updates its metadata."""
-        # First upload
+    def test_upload_preserves_edited_book_metadata(
+        self, client: TestClient, db_session: Session
+    ) -> None:
+        """Test that user edits to book metadata are preserved during re-sync.
+
+        When a user edits a book's title/author in the app, subsequent syncs from
+        the device should NOT overwrite those edits. The book is identified by
+        its content_hash (computed from original title+author), allowing metadata
+        to be edited independently.
+        """
+        # First upload - creates the book with original metadata
         payload1 = {
             "book": {
-                "title": "Update Test Book",
+                "title": "Original Title",
                 "author": "Original Author",
                 "isbn": "1111111111",
             },
@@ -213,12 +221,20 @@ class TestHighlightsUpload:
         assert response1.status_code == status.HTTP_200_OK
         book_id = response1.json()["book_id"]
 
-        # Second upload with updated metadata (same title and author means same book)
+        # Simulate user editing the book metadata in the app
+        book = db_session.query(models.Book).filter_by(id=book_id).first()
+        book.title = "User Edited Title"
+        book.author = "User Edited Author"
+        book.isbn = "9999999999"
+        db_session.commit()
+
+        # Second upload from device with original metadata (same hash)
+        # This should NOT overwrite the user's edits
         payload2 = {
             "book": {
-                "title": "Update Test Book",
-                "author": "Original Author",
-                "isbn": "2222222222",  # Updated ISBN
+                "title": "Original Title",  # Original title from device
+                "author": "Original Author",  # Original author from device
+                "isbn": "1111111111",
             },
             "highlights": [
                 {
@@ -230,15 +246,15 @@ class TestHighlightsUpload:
 
         response2 = client.post("/api/v1/highlights/upload", json=payload2)
         assert response2.status_code == status.HTTP_200_OK
-        assert response2.json()["book_id"] == book_id  # Same book
+        assert response2.json()["book_id"] == book_id  # Same book (matched by hash)
 
-        # Verify book metadata was updated
-        book = db_session.query(models.Book).filter_by(id=book_id).first()
-        assert book.title == "Update Test Book"
-        assert book.author == "Original Author"
-        assert book.isbn == "2222222222"
+        # Verify user's metadata edits were PRESERVED (not overwritten)
+        db_session.refresh(book)
+        assert book.title == "User Edited Title"
+        assert book.author == "User Edited Author"
+        assert book.isbn == "9999999999"
 
-        # Verify both highlights exist
+        # Verify both highlights exist on the same book
         highlights = db_session.query(models.Highlight).filter_by(book_id=book_id).all()
         assert len(highlights) == 2
 

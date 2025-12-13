@@ -65,12 +65,17 @@ class BookRepository:
         The content_hash is computed from the original title and author at upload time.
         This allows book metadata (title, author) to be edited later without breaking
         deduplication - the hash identifies the same book across uploads.
+
+        Note: When an existing book is found, its metadata is NOT updated. This preserves
+        any edits the user has made to the book's title/author in the app.
         """
         book = self.find_by_content_hash(content_hash, user_id)
 
         if book:
-            # Update metadata in case it changed (but preserve the original hash)
-            return self.update(book, book_data)
+            # Return existing book without updating metadata
+            # This preserves any user edits to the book's title/author
+            logger.debug(f"Found existing book by hash: {book.title} (id={book.id})")
+            return book
 
         # Create new book with the computed hash
         return self.create(book_data, content_hash, user_id)
