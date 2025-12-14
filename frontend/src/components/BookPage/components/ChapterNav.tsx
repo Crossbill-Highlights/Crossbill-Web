@@ -57,7 +57,16 @@ export const ChapterNav = ({ chapters, onChapterClick }: ChapterNavProps) => {
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             style={{ overflow: 'hidden' }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0.5,
+                maxHeight: 'calc(100vh - 550px)',
+                overflow: 'visible',
+                overflowY: 'auto',
+              }}
+            >
               {chapters.map((chapter) => (
                 <Box
                   key={chapter.id}
@@ -96,7 +105,8 @@ export const ChapterNav = ({ chapters, onChapterClick }: ChapterNavProps) => {
                       color="text.secondary"
                       sx={{ fontSize: '0.75rem', mt: 0.25, display: 'block' }}
                     >
-                      {chapter.highlights.length} highlight{chapter.highlights.length !== 1 ? 's' : ''}
+                      {chapter.highlights.length} highlight
+                      {chapter.highlights.length !== 1 ? 's' : ''}
                     </Typography>
                   </Box>
                 </Box>
