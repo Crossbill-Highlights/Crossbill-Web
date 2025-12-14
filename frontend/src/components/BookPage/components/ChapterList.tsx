@@ -49,7 +49,7 @@ export const ChapterList = ({
           </Typography>
         ) : (
           chapters.map((chapter) => (
-            <Box key={chapter.id}>
+            <Box key={chapter.id} id={`chapter-${chapter.id}`}>
               <SectionTitle showDivider>{chapter.name}</SectionTitle>
 
               {chapter.highlights.length > 0 ? (
