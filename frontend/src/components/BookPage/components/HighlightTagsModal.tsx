@@ -112,7 +112,7 @@ export const HighlightTagsModal = ({
     mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: [`/api/v1/book/${bookId}`],
+          queryKey: [`/api/v1/books/${bookId}`],
         });
         // Clear any previous errors on success
         setErrorDialogOpen(false);
@@ -131,7 +131,7 @@ export const HighlightTagsModal = ({
     mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: [`/api/v1/book/${bookId}`],
+          queryKey: [`/api/v1/books/${bookId}`],
         });
       },
       onError: (error: unknown) => {
