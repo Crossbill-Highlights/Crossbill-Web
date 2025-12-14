@@ -17,42 +17,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/highlights", tags=["highlights"])
 
 
-@router.get("/books", response_model=schemas.BooksListResponse, status_code=status.HTTP_200_OK)
-def get_books(
-    db: DatabaseSession,
-    current_user: Annotated[User, Depends(get_current_user)],
-    offset: int = Query(0, ge=0, description="Number of books to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of books to return"),
-    search: str | None = Query(None, description="Search text to filter books by title or author"),
-) -> schemas.BooksListResponse:
-    """
-    Get all books with their highlight counts, sorted alphabetically by title.
-
-    Args:
-        db: Database session
-        offset: Number of books to skip (for pagination)
-        limit: Maximum number of books to return (for pagination)
-        search: Optional search text to filter books by title or author
-
-    Returns:
-        BooksListResponse with list of books and pagination info
-
-    Raises:
-        HTTPException: If fetching books fails due to server error
-    """
-    try:
-        service = HighlightService(db)
-        return service.get_books_with_counts(current_user.id, offset, limit, search)
-    except Exception as e:
-        logger.error(f"Failed to fetch books: {e!s}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch books: {e!s}",
-        ) from e
-
-
 @router.post(
-    "/upload", response_model=schemas.HighlightUploadResponse, status_code=status.HTTP_200_OK
+    "/upload",
+    response_model=schemas.HighlightUploadResponse,
+    status_code=status.HTTP_200_OK,
 )
 async def upload_highlights(
     request: schemas.HighlightUploadRequest,
@@ -88,13 +56,18 @@ async def upload_highlights(
 
 
 @router.get(
-    "/search", response_model=schemas.HighlightSearchResponse, status_code=status.HTTP_200_OK
+    "/search",
+    response_model=schemas.HighlightSearchResponse,
+    status_code=status.HTTP_200_OK,
 )
 def search_highlights(
     db: DatabaseSession,
     current_user: Annotated[User, Depends(get_current_user)],
     search_text: str = Query(
-        ..., alias="searchText", min_length=1, description="Text to search for in highlights"
+        ...,
+        alias="searchText",
+        min_length=1,
+        description="Text to search for in highlights",
     ),
     book_id: int | None = Query(
         None, alias="bookId", ge=1, description="Optional book ID to filter results"

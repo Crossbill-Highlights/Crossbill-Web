@@ -3,7 +3,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 
 from src import schemas
 from src.database import DatabaseSession
@@ -11,15 +11,52 @@ from src.exceptions import CrossbillError
 from src.models import User
 from src.services import BookmarkService, BookService, HighlightTagService
 from src.services.auth_service import get_current_user
+from src.services.highlight_service import HighlightService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/book", tags=["books"])
 
 
+@router.get("/books", response_model=schemas.BooksListResponse, status_code=status.HTTP_200_OK)
+def get_books(
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
+    offset: int = Query(0, ge=0, description="Number of books to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of books to return"),
+    search: str | None = Query(None, description="Search text to filter books by title or author"),
+) -> schemas.BooksListResponse:
+    """
+    Get all books with their highlight counts, sorted alphabetically by title.
+
+    Args:
+        db: Database session
+        offset: Number of books to skip (for pagination)
+        limit: Maximum number of books to return (for pagination)
+        search: Optional search text to filter books by title or author
+
+    Returns:
+        BooksListResponse with list of books and pagination info
+
+    Raises:
+        HTTPException: If fetching books fails due to server error
+    """
+    try:
+        service = HighlightService(db)
+        return service.get_books_with_counts(current_user.id, offset, limit, search)
+    except Exception as e:
+        logger.error(f"Failed to fetch books: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch books: {e!s}",
+        ) from e
+
+
 @router.get("/{book_id}", response_model=schemas.BookDetails, status_code=status.HTTP_200_OK)
 def get_book_details(
-    book_id: int, db: DatabaseSession, current_user: Annotated[User, Depends(get_current_user)]
+    book_id: int,
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> schemas.BookDetails:
     """
     Get detailed information about a book including its chapters and highlights.
@@ -50,7 +87,9 @@ def get_book_details(
 
 @router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_book(
-    book_id: int, db: DatabaseSession, current_user: Annotated[User, Depends(get_current_user)]
+    book_id: int,
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> None:
     """
     Delete a book and all its contents (hard delete).
@@ -213,7 +252,9 @@ def update_book(
     status_code=status.HTTP_200_OK,
 )
 def get_highlight_tags(
-    book_id: int, db: DatabaseSession, current_user: Annotated[User, Depends(get_current_user)]
+    book_id: int,
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> schemas.HighlightTagsResponse:
     """
     Get all highlight tags for a book.
@@ -333,7 +374,8 @@ def delete_highlight_tag(
         raise
     except Exception as e:
         logger.error(
-            f"Failed to delete highlight tag {tag_id} for book {book_id}: {e!s}", exc_info=True
+            f"Failed to delete highlight tag {tag_id} for book {book_id}: {e!s}",
+            exc_info=True,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -392,7 +434,8 @@ def update_highlight_tag(
         raise
     except Exception as e:
         logger.error(
-            f"Failed to update highlight tag {tag_id} for book {book_id}: {e!s}", exc_info=True
+            f"Failed to update highlight tag {tag_id} for book {book_id}: {e!s}",
+            exc_info=True,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -590,7 +633,8 @@ def delete_bookmark(
         raise
     except Exception as e:
         logger.error(
-            f"Failed to delete bookmark {bookmark_id} for book {book_id}: {e!s}", exc_info=True
+            f"Failed to delete bookmark {bookmark_id} for book {book_id}: {e!s}",
+            exc_info=True,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
