@@ -218,6 +218,14 @@ end
 function CrossbillSync:performSync(is_autosync)
     -- The actual sync logic (separated so it can be called after WiFi is enabled)
     -- is_autosync: if true, don't show result popup (silent mode)
+
+    -- Safety check: ensure document is available
+    -- This prevents crashes when switching books (especially on Pocketbook)
+    if not self.ui.document then
+        logger.warn("Crossbill: Cannot sync - no document available")
+        return
+    end
+
     if not is_autosync then
         UIManager:show(InfoMessage:new{
             text = _("Syncing highlights..."),
@@ -637,11 +645,8 @@ function CrossbillSync:registerEventHandlers()
 end
 
 function CrossbillSync:onCloseDocument()
-    -- Called when user closes the current book
-    if self.settings.autosync_enabled then
-        logger.info("Crossbill: Auto-syncing on document close")
-        self:syncCurrentBook(true)  -- true = autosync (silent mode)
-    end
+    -- Don't auto-sync on document close to avoid nil document errors
+    -- when switching between books (especially on Pocketbook)
     return false  -- Allow other handlers to process this event
 end
 
