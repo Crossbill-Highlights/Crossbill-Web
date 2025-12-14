@@ -41,7 +41,7 @@ export function AppBar() {
         backgroundColor: 'primary.main',
       }}
     >
-      <Container maxWidth="lg" disableGutters>
+      <Container maxWidth="xl" disableGutters>
         <Toolbar sx={{ gap: 2 }}>
           {/* Crossbill Icon and Title - Clickable */}
           <Box

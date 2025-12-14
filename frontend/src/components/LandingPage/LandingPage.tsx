@@ -48,7 +48,7 @@ export const LandingPage = () => {
   const totalPages = data?.total ? Math.ceil(data.total / BOOKS_PER_PAGE) : 0;
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Box sx={{ mt: { xs: 6, md: 8 }, mb: 6, textAlign: 'center' }}>
         <Typography variant="h2" component="h1" gutterBottom>
           Welcome to Crossbill
