@@ -83,7 +83,16 @@ export const BookmarkList = ({ bookmarks, allHighlights, onBookmarkClick }: Book
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             style={{ overflow: 'hidden' }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0.5,
+                maxHeight: 'calc(30vh)',
+                overflow: 'visible',
+                overflowY: 'auto',
+              }}
+            >
               {bookmarkedHighlights.map(({ bookmark, highlight }) => {
                 if (!highlight) return null;
 

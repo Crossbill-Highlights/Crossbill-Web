@@ -62,7 +62,7 @@ export const ChapterNav = ({ chapters, onChapterClick }: ChapterNavProps) => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 0.5,
-                maxHeight: 'calc(100vh - 550px)',
+                maxHeight: 'calc(30vh)',
                 overflow: 'visible',
                 overflowY: 'auto',
               }}
