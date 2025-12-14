@@ -88,9 +88,8 @@ export const BookmarkList = ({ bookmarks, allHighlights, onBookmarkClick }: Book
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 0.5,
-                maxHeight: 'calc(30vh)',
-                overflow: 'visible',
-                overflowY: 'auto',
+                maxHeight: isMobile ? 'none' : 'calc(30vh)',
+                overflowY: isMobile ? 'visible' : 'auto',
               }}
             >
               {bookmarkedHighlights.map(({ bookmark, highlight }) => {
