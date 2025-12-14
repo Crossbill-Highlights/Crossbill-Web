@@ -589,7 +589,7 @@ function CrossbillSync:uploadCoverImage(book_id, token)
         local body = table.concat(body_parts, "\r\n")
 
         -- Construct API URL
-        local api_url = self.settings.base_url .. "/api/v1/book/" .. book_id .. "/metadata/cover"
+        local api_url = self.settings.base_url .. "/api/v1/books/" .. book_id .. "/metadata/cover"
         logger.dbg("Crossbill: Uploading cover to", api_url)
 
         local response_body = {}
