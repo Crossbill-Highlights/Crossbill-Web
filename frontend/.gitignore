@@ -31,5 +31,3 @@ dist-ssr
 # Build outputs
 coverage
 
-# Generated files
-src/routeTree.gen.ts
