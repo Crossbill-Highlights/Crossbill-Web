@@ -1,4 +1,7 @@
-import { useGetBookDetailsApiV1BooksBookIdGet } from '@/api/generated/books/books';
+import {
+  useGetBookDetailsApiV1BooksBookIdGet,
+  useGetHighlightTagsApiV1BooksBookIdHighlightTagsGet,
+} from '@/api/generated/books/books';
 import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/highlights/highlights.ts';
 import type { Highlight } from '@/api/generated/model';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
@@ -7,7 +10,7 @@ import { SwapVert as SwapVertIcon } from '@mui/icons-material';
 import { Alert, Box, Container, IconButton, Tooltip, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { keyBy } from 'lodash';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollToTopButton } from '../common/ScrollToTopButton';
 import { SearchBar } from '../common/SearchBar';
 import { Spinner } from '../common/Spinner';
@@ -16,21 +19,31 @@ import { BookTitle } from './components/BookTitle';
 import { ChapterList } from './components/ChapterList';
 import { ChapterNav } from './components/ChapterNav';
 import { HighlightTags } from './components/HighlightTags';
+import { HighlightViewModal } from './components/HighlightViewModal';
 import { groupSearchResultsIntoChapters } from './utils/groupSearchResults';
 
 export const BookPage = () => {
   const { bookId } = useParams({ from: '/book/$bookId' });
-  const { search, tagId } = useSearch({ from: '/book/$bookId' });
+  const { search, tagId, highlightId } = useSearch({ from: '/book/$bookId' });
   const { data: book, isLoading, isError } = useGetBookDetailsApiV1BooksBookIdGet(Number(bookId));
+
+  // Fetch available tags for the book (used by the highlight modal)
+  const { data: tagsResponse } = useGetHighlightTagsApiV1BooksBookIdHighlightTagsGet(
+    Number(bookId)
+  );
 
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const navigate = useNavigate({ from: '/book/$bookId' });
   const searchText = search || '';
 
   const [selectedTagId, setSelectedTagId] = useState<number | undefined>(tagId);
   const [isReversed, setIsReversed] = useState(false);
+
+  // Modal state for highlight viewing - synced with URL
+  const [openHighlightId, setOpenHighlightId] = useState<number | undefined>(highlightId);
 
   const handleSearch = (value: string) => {
     navigate({
@@ -84,6 +97,61 @@ export const BookPage = () => {
     // Scroll to the chapter
     scrollToElementWithHighlight(`chapter-${chapterId}`, { behavior: 'smooth', block: 'start' });
   };
+
+  // Handler to open a highlight modal - updates URL
+  const handleOpenHighlight = useCallback(
+    (highlightIdToOpen: number) => {
+      setOpenHighlightId(highlightIdToOpen);
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          highlightId: highlightIdToOpen,
+        }),
+        replace: true,
+      });
+    },
+    [navigate]
+  );
+
+  // Handler to close the highlight modal - removes highlightId from URL
+  const handleCloseHighlight = useCallback(
+    (lastViewedHighlightId?: number) => {
+      setOpenHighlightId(undefined);
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          highlightId: undefined,
+        }),
+        replace: true,
+      });
+
+      // Scroll to the last viewed highlight (mobile only)
+      if (lastViewedHighlightId && isMobile) {
+        scrollToElementWithHighlight(`highlight-${lastViewedHighlightId}`);
+      }
+    },
+    [navigate, isMobile]
+  );
+
+  // Handler to navigate between highlights - updates URL
+  const handleNavigateHighlight = useCallback(
+    (newHighlightId: number) => {
+      setOpenHighlightId(newHighlightId);
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          highlightId: newHighlightId,
+        }),
+        replace: true,
+      });
+    },
+    [navigate]
+  );
+
+  // Sync modal state when URL changes (e.g., browser back/forward)
+  useEffect(() => {
+    setOpenHighlightId(highlightId);
+  }, [highlightId]);
 
   const { data: searchResults, isLoading: isSearching } =
     useSearchHighlightsApiV1HighlightsSearchGet(
@@ -169,6 +237,28 @@ export const BookPage = () => {
   const allHighlights = useMemo(() => {
     return chapters.flatMap((chapter) => chapter.highlights);
   }, [chapters]);
+
+  // Find the current highlight and its index for the modal
+  const currentHighlightIndex = useMemo(() => {
+    if (!openHighlightId) return -1;
+    return allHighlights.findIndex((h) => h.id === openHighlightId);
+  }, [allHighlights, openHighlightId]);
+
+  const currentHighlight = useMemo(() => {
+    if (currentHighlightIndex === -1) return null;
+    return allHighlights[currentHighlightIndex];
+  }, [allHighlights, currentHighlightIndex]);
+
+  // Handler for modal navigation - converts index to highlight ID
+  const handleModalNavigate = useCallback(
+    (newIndex: number) => {
+      const newHighlight = allHighlights[newIndex];
+      if (newHighlight) {
+        handleNavigateHighlight(newHighlight.id);
+      }
+    },
+    [allHighlights, handleNavigateHighlight]
+  );
 
   // Compute empty message based on state
   const emptyMessage = useMemo(() => {
@@ -265,6 +355,10 @@ export const BookPage = () => {
                 isLoading={showSearchResults && isSearching}
                 emptyMessage={emptyMessage}
                 animationKey={`chapters-${showSearchResults ? 'search' : 'view'}-${selectedTagId ?? 'all'}`}
+                openHighlightId={openHighlightId}
+                onOpenHighlight={handleOpenHighlight}
+                onCloseHighlight={handleCloseHighlight}
+                onNavigateHighlight={handleNavigateHighlight}
               />
             </>
           )}
@@ -337,6 +431,10 @@ export const BookPage = () => {
                   isLoading={showSearchResults && isSearching}
                   emptyMessage={emptyMessage}
                   animationKey={`chapters-${showSearchResults ? 'search' : 'view'}-${selectedTagId ?? 'all'}`}
+                  openHighlightId={openHighlightId}
+                  onOpenHighlight={handleOpenHighlight}
+                  onCloseHighlight={handleCloseHighlight}
+                  onNavigateHighlight={handleNavigateHighlight}
                 />
 
                 {/* Right Column - Bookmarks + Chapters */}
@@ -363,6 +461,21 @@ export const BookPage = () => {
           )}
         </Container>
       </FadeInOut>
+
+      {/* Highlight Modal - rendered at page level for URL sync */}
+      {currentHighlight && (
+        <HighlightViewModal
+          highlight={currentHighlight}
+          bookId={book.id}
+          open={!!openHighlightId}
+          onClose={handleCloseHighlight}
+          availableTags={tagsResponse?.tags || []}
+          bookmarksByHighlightId={bookmarksByHighlightId}
+          allHighlights={allHighlights}
+          currentIndex={currentHighlightIndex}
+          onNavigate={handleModalNavigate}
+        />
+      )}
     </Box>
   );
 };

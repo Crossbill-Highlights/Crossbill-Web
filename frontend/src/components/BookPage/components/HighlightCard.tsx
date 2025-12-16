@@ -1,16 +1,12 @@
-import { useGetHighlightTagsApiV1BooksBookIdHighlightTagsGet } from '@/api/generated/books/books.ts';
 import type { Bookmark, Highlight } from '@/api/generated/model';
 import { TagList } from '@/components/BookPage/components/TagList.tsx';
-import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils';
 import {
   Bookmark as BookmarkIcon,
   CalendarMonth as CalendarIcon,
   Notes as NotesIcon,
   FormatQuote as QuoteIcon,
 } from '@mui/icons-material';
-import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
-import { useState } from 'react';
-import { HighlightViewModal } from './HighlightViewModal';
+import { Box, Typography } from '@mui/material';
 
 export interface HighlightCardProps {
   highlight: Highlight;
@@ -19,6 +15,10 @@ export interface HighlightCardProps {
   bookmarksByHighlightId: Record<number, Bookmark>;
   allHighlights?: Highlight[];
   currentIndex?: number;
+  isModalOpen?: boolean;
+  onOpenModal?: (highlightId: number) => void;
+  onCloseModal?: (lastViewedHighlightId?: number) => void;
+  onNavigate?: (newHighlightId: number) => void;
 }
 
 interface FooterProps {
@@ -95,15 +95,9 @@ const previewWordCount = 40;
 
 export const HighlightCard = ({
   highlight,
-  bookId,
   bookmark,
-  bookmarksByHighlightId,
-  allHighlights,
-  currentIndex,
+  onOpenModal,
 }: HighlightCardProps) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
   const startsWithLowercase =
     highlight.text.length > 0 &&
     highlight.text[0] === highlight.text[0].toLowerCase() &&
@@ -117,100 +111,63 @@ export const HighlightCard = ({
     ? words.slice(0, previewWordCount).join(' ') + '...'
     : formattedText;
 
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [currentHighlightIndex, setCurrentHighlightIndex] = useState(currentIndex ?? 0);
-
-  // Fetch available tags for the book
-  const { data: tagsResponse } = useGetHighlightTagsApiV1BooksBookIdHighlightTagsGet(bookId);
-
   const handleOpenModal = () => {
-    setCurrentHighlightIndex(currentIndex ?? 0);
-    setViewModalOpen(true);
+    onOpenModal?.(highlight.id);
   };
-
-  const handleNavigate = (newIndex: number) => {
-    setCurrentHighlightIndex(newIndex);
-  };
-
-  const handleCloseModal = (lastViewedHighlightId?: number) => {
-    setViewModalOpen(false);
-
-    // Scroll to the last viewed highlight (mobile only)
-    if (lastViewedHighlightId && isMobile) {
-      scrollToElementWithHighlight(`highlight-${lastViewedHighlightId}`);
-    }
-  };
-
-  const currentHighlight = allHighlights?.[currentHighlightIndex] ?? highlight;
 
   return (
-    <>
-      <Box
-        id={`highlight-${highlight.id}`}
-        onClick={handleOpenModal}
-        sx={{
-          position: 'relative',
-          py: 3.5,
-          px: 2.5,
-          borderBottom: 1,
-          borderColor: 'divider',
-          borderLeft: 3,
-          borderLeftStyle: 'solid',
-          borderLeftColor: 'transparent',
-          borderRadiusTopRight: 1.5,
-          borderRadiusBottomRight: 1.5,
-          transition: 'all 0.2s ease',
-          cursor: 'pointer',
-          '@media (hover: hover)': {
-            '&:hover': {
-              bgcolor: 'action.hover',
-              borderLeftColor: 'primary.main',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-            },
+    <Box
+      id={`highlight-${highlight.id}`}
+      onClick={handleOpenModal}
+      sx={{
+        position: 'relative',
+        py: 3.5,
+        px: 2.5,
+        borderBottom: 1,
+        borderColor: 'divider',
+        borderLeft: 3,
+        borderLeftStyle: 'solid',
+        borderLeftColor: 'transparent',
+        borderRadiusTopRight: 1.5,
+        borderRadiusBottomRight: 1.5,
+        transition: 'all 0.2s ease',
+        cursor: 'pointer',
+        '@media (hover: hover)': {
+          '&:hover': {
+            bgcolor: 'action.hover',
+            borderLeftColor: 'primary.main',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
           },
-          '&:last-child': {
-            borderBottom: 0,
-          },
-        }}
-      >
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          {/* Quote Icon and Text */}
-          <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5, mb: 2 }}>
-            <QuoteIcon
-              sx={{
-                fontSize: 22,
-                color: 'primary.main',
-                flexShrink: 0,
-                mt: 0.3,
-                opacity: 0.7,
-              }}
-            />
-            <Typography
-              variant="body1"
-              sx={{
-                color: 'text.primary',
-              }}
-            >
-              {previewText}
-            </Typography>
-          </Box>
-
-          <Footer highlight={highlight} bookmark={bookmark} />
+        },
+        '&:last-child': {
+          borderBottom: 0,
+        },
+      }}
+    >
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        {/* Quote Icon and Text */}
+        <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5, mb: 2 }}>
+          <QuoteIcon
+            sx={{
+              fontSize: 22,
+              color: 'primary.main',
+              flexShrink: 0,
+              mt: 0.3,
+              opacity: 0.7,
+            }}
+          />
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'text.primary',
+            }}
+          >
+            {previewText}
+          </Typography>
         </Box>
-      </Box>
 
-      {/* Highlight View Modal */}
-      <HighlightViewModal
-        highlight={currentHighlight}
-        bookId={bookId}
-        open={viewModalOpen}
-        onClose={handleCloseModal}
-        availableTags={tagsResponse?.tags || []}
-        bookmarksByHighlightId={bookmarksByHighlightId}
-        allHighlights={allHighlights}
-        currentIndex={currentHighlightIndex}
-        onNavigate={handleNavigate}
-      />
-    </>
+        <Footer highlight={highlight} bookmark={bookmark} />
+      </Box>
+    </Box>
   );
 };

@@ -19,6 +19,10 @@ interface ChapterListProps {
   isLoading?: boolean;
   emptyMessage?: string;
   animationKey?: string;
+  openHighlightId?: number;
+  onOpenHighlight?: (highlightId: number) => void;
+  onCloseHighlight?: (lastViewedHighlightId?: number) => void;
+  onNavigateHighlight?: (newHighlightId: number) => void;
 }
 
 export const ChapterList = ({
@@ -29,6 +33,10 @@ export const ChapterList = ({
   isLoading,
   emptyMessage = 'No chapters found.',
   animationKey = 'chapters',
+  openHighlightId,
+  onOpenHighlight,
+  onCloseHighlight,
+  onNavigateHighlight,
 }: ChapterListProps) => {
   if (isLoading) {
     return (
@@ -65,6 +73,10 @@ export const ChapterList = ({
                         bookmarksByHighlightId={bookmarksByHighlightId}
                         allHighlights={allHighlights}
                         currentIndex={highlightIndex}
+                        isModalOpen={openHighlightId === highlight.id}
+                        onOpenModal={onOpenHighlight}
+                        onCloseModal={onCloseHighlight}
+                        onNavigate={onNavigateHighlight}
                       />
                     );
                   })}

@@ -4,6 +4,7 @@ import { BookPage } from '../components/BookPage/BookPage';
 type BookPageSearch = {
   search?: string;
   tagId?: number;
+  highlightId?: number;
 };
 export const Route = createFileRoute('/book/$bookId')({
   component: BookPage,
@@ -11,6 +12,7 @@ export const Route = createFileRoute('/book/$bookId')({
     return {
       search: (search?.search as string) || undefined,
       tagId: (search?.tagId as number) || undefined,
+      highlightId: (search?.highlightId as number) || undefined,
     };
   },
 });
