@@ -143,6 +143,7 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
           flexDirection={{ xs: 'column', sm: 'row' }}
           gap={2}
           alignItems={{ xs: 'center', sm: 'flex-start' }}
+          sx={{ mt: 3 }}
         >
           <BookCover
             coverPath={book.cover}

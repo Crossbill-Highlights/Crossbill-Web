@@ -233,7 +233,7 @@ export const HighlightTagsModal = ({
         </Box>
       }
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
         <Typography variant="body2" color="text.secondary">
           Tag groups help you organize your highlight tags by theme or category.
         </Typography>
