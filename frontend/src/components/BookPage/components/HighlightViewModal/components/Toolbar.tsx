@@ -6,7 +6,9 @@ import type { Bookmark } from '@/api/generated/model';
 import {
   BookmarkBorder as BookmarkBorderIcon,
   Bookmark as BookmarkIcon,
+  ContentCopy as ContentCopyIcon,
   Delete as DeleteIcon,
+  Link as LinkIcon,
   Notes as NotesIcon,
 } from '@mui/icons-material';
 import { Box, IconButton } from '@mui/material';
@@ -16,6 +18,7 @@ import { useState } from 'react';
 interface ToolbarProps {
   highlightId: number;
   bookId: number;
+  highlightText: string;
   bookmark?: Bookmark;
   hasNote: boolean;
   noteVisible: boolean;
@@ -27,6 +30,7 @@ interface ToolbarProps {
 export const Toolbar = ({
   highlightId,
   bookId,
+  highlightText,
   bookmark,
   hasNote,
   noteVisible,
@@ -86,10 +90,36 @@ export const Toolbar = ({
     }
   };
 
+  const handleCopyLink = async () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('highlightId', highlightId.toString());
+    await navigator.clipboard.writeText(url.toString());
+  };
+
+  const handleCopyContent = async () => {
+    await navigator.clipboard.writeText(highlightText);
+  };
+
   const isLoading = disabled || isProcessing;
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+      <IconButton
+        onClick={handleCopyLink}
+        disabled={isLoading}
+        aria-label="Copy link to highlight"
+        size="small"
+      >
+        <LinkIcon />
+      </IconButton>
+      <IconButton
+        onClick={handleCopyContent}
+        disabled={isLoading}
+        aria-label="Copy highlight text"
+        size="small"
+      >
+        <ContentCopyIcon />
+      </IconButton>
       <IconButton
         onClick={handleBookmarkToggle}
         disabled={isLoading}

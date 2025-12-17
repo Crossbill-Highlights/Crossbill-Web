@@ -135,6 +135,7 @@ export const HighlightViewModal = ({
         key={highlight.id}
         highlightId={highlight.id}
         bookId={bookId}
+        highlightText={highlight.text}
         bookmark={currentBookmark}
         hasNote={hasNote}
         noteVisible={noteVisible}
