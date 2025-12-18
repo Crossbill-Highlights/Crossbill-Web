@@ -1,4 +1,5 @@
 import {
+  getGetRecentlyViewedBooksApiV1BooksRecentlyViewedGetQueryKey,
   useGetBookDetailsApiV1BooksBookIdGet,
   useGetHighlightTagsApiV1BooksBookIdHighlightTagsGet,
 } from '@/api/generated/books/books';
@@ -6,11 +7,12 @@ import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/hig
 import type { Highlight } from '@/api/generated/model';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils';
+import { queryClient } from '@/lib/queryClient';
 import { SwapVert as SwapVertIcon } from '@mui/icons-material';
 import { Alert, Box, Container, IconButton, Tooltip, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { keyBy } from 'lodash';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollToTopButton } from '../common/ScrollToTopButton';
 import { SearchBar } from '../common/SearchBar';
 import { Spinner } from '../common/Spinner';
@@ -42,6 +44,14 @@ export const BookPage = () => {
 
   const [selectedTagId, setSelectedTagId] = useState<number | undefined>(tagId);
   const [isReversed, setIsReversed] = useState(false);
+
+  useEffect(() => {
+    if (book) {
+      void queryClient.invalidateQueries({
+        queryKey: getGetRecentlyViewedBooksApiV1BooksRecentlyViewedGetQueryKey(),
+      });
+    }
+  });
 
   const handleSearch = (value: string) => {
     navigate({
