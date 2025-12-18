@@ -4,7 +4,7 @@ import { SectionTitle } from '../../common/SectionTitle';
 import { Spinner } from '../../common/Spinner';
 import { BookList } from './BookList';
 
-const RECENTLY_VIEWED_LIMIT = 10;
+const RECENTLY_VIEWED_LIMIT = 8;
 
 export const RecentlyViewedBooks = () => {
   const { data, isLoading, isError } = useGetRecentlyViewedBooksApiV1BooksRecentlyViewedGet({
