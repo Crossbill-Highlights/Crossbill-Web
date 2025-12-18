@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import Sequence
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.engine import Row
@@ -31,7 +31,9 @@ class BookRepository:
         )
         return self.db.execute(stmt).scalar_one_or_none()
 
-    def find_by_content_hash(self, content_hash: str, user_id: int) -> models.Book | None:
+    def find_by_content_hash(
+        self, content_hash: str, user_id: int
+    ) -> models.Book | None:
         """Find a book by its content hash and user."""
         stmt = select(models.Book).where(
             models.Book.content_hash == content_hash,
@@ -39,9 +41,13 @@ class BookRepository:
         )
         return self.db.execute(stmt).scalar_one_or_none()
 
-    def create(self, book_data: schemas.BookCreate, content_hash: str, user_id: int) -> models.Book:
+    def create(
+        self, book_data: schemas.BookCreate, content_hash: str, user_id: int
+    ) -> models.Book:
         """Create a new book."""
-        book = models.Book(**book_data.model_dump(), content_hash=content_hash, user_id=user_id)
+        book = models.Book(
+            **book_data.model_dump(), content_hash=content_hash, user_id=user_id
+        )
         self.db.add(book)
         self.db.flush()
         self.db.refresh(book)
@@ -82,7 +88,11 @@ class BookRepository:
         return self.create(book_data, content_hash, user_id)
 
     def get_books_with_highlight_count(
-        self, user_id: int, offset: int = 0, limit: int = 100, search_text: str | None = None
+        self,
+        user_id: int,
+        offset: int = 0,
+        limit: int = 100,
+        search_text: str | None = None,
     ) -> tuple[Sequence[Row[tuple[models.Book, int]]], int]:
         """
         Get books with their highlight counts for a specific user, sorted alphabetically by title.
@@ -111,7 +121,9 @@ class BookRepository:
 
         # Main query for books with highlight counts (excluding soft-deleted highlights)
         stmt = (
-            select(models.Book, func.count(models.Highlight.id).label("highlight_count"))
+            select(
+                models.Book, func.count(models.Highlight.id).label("highlight_count")
+            )
             .outerjoin(
                 models.Highlight,
                 (models.Book.id == models.Highlight.book_id)
@@ -170,7 +182,7 @@ class BookRepository:
         if not book:
             return None
 
-        book.last_viewed = datetime.now(timezone.utc)
+        book.last_viewed = datetime.now(UTC)
         self.db.flush()
         logger.debug(f"Updated last_viewed for book: {book.title} (id={book.id})")
         return book
@@ -191,7 +203,9 @@ class BookRepository:
             Sequence of (book, highlight_count) tuples ordered by last_viewed DESC
         """
         stmt = (
-            select(models.Book, func.count(models.Highlight.id).label("highlight_count"))
+            select(
+                models.Book, func.count(models.Highlight.id).label("highlight_count")
+            )
             .outerjoin(
                 models.Highlight,
                 (models.Book.id == models.Highlight.book_id)
