@@ -22,33 +22,41 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
     <>
       <Box
         sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', lg: '280px 1fr 280px' },
+          gap: 4,
+          alignItems: 'start',
           mb: 5,
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          gap: { xs: 2, md: 3 },
-          alignItems: { xs: 'center', md: 'stretch' },
         }}
       >
         {/* Book Cover */}
         <Box
           sx={{
-            flexShrink: 0,
-            width: { xs: 160, md: 200 },
-            height: { xs: 240, md: 280 },
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
           }}
         >
-          <BookCover
-            coverPath={book.cover}
-            title={book.title}
-            height="100%"
-            width="100%"
-            objectFit="cover"
+          <Box
             sx={{
-              boxShadow: 3,
-              borderRadius: 1,
-              transition: 'box-shadow 0.3s ease, transform 0.3s ease',
+              flexShrink: 0,
+              width: { xs: 160, md: 200 },
+              height: { xs: 240, md: 280 },
             }}
-          />
+          >
+            <BookCover
+              coverPath={book.cover}
+              title={book.title}
+              height="100%"
+              width="100%"
+              objectFit="cover"
+              sx={{
+                boxShadow: 3,
+                borderRadius: 1,
+                transition: 'box-shadow 0.3s ease, transform 0.3s ease',
+              }}
+            />
+          </Box>
         </Box>
 
         {/* Book Info */}
@@ -57,28 +65,23 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            alignItems: { xs: 'center', md: 'flex-start' },
-            justifyContent: { xs: 'center', md: 'flex-start' },
-            textAlign: { xs: 'center', md: 'left' },
-            width: { xs: '100%', md: 'auto' },
+            alignItems: { xs: 'center', lg: 'flex-start' },
+            justifyContent: { xs: 'center', lg: 'flex-start' },
+            textAlign: { xs: 'center', lg: 'left' },
+            width: { xs: '100%', lg: 'auto' },
             position: 'relative',
           }}
         >
           {/* Title with Edit Button (Desktop only) */}
-          <Box
+          <Typography
+            variant="h1"
+            component="h1"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: { xs: 'center', md: 'flex-start' },
-              gap: 1,
               mb: 1,
-              width: '100%',
             }}
           >
-            <Typography variant="h1" component="h1">
-              {book.title}
-            </Typography>
-          </Box>
+            {book.title}
+          </Typography>
 
           <Typography
             variant="h2"
@@ -95,8 +98,7 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: { xs: 'center', md: 'flex-start' },
+              justifyContent: { xs: 'center', lg: 'flex-start' },
               gap: 1,
               mb: book.tags && book.tags.length > 0 ? 2 : 0,
               width: '100%',

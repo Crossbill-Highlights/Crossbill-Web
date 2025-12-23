@@ -9,7 +9,7 @@ export const TagList: React.FC<{ tags?: { id: number; name: string }[] }> = ({ t
       sx={{
         display: 'flex',
         flexWrap: 'wrap',
-        justifyContent: { xs: 'center', md: 'flex-start' },
+        justifyContent: { xs: 'center', lg: 'flex-start' },
         gap: 1,
         width: '100%',
       }}
