@@ -301,16 +301,7 @@ export const BookPage = () => {
         {/* Desktop Full-Width Layout */}
         {isDesktop && (
           <Box sx={{ px: 4, py: 4 }}>
-            {/* Book Header - Centered with max-width */}
-            <Box
-              sx={{
-                maxWidth: '900px',
-                mx: 'auto',
-                mb: 4,
-              }}
-            >
-              <BookTitle book={book} highlightCount={totalHighlights} />
-            </Box>
+            <BookTitle book={book} highlightCount={totalHighlights} />
 
             {/* 3-Column Content Grid - Full Width */}
             <Box
