@@ -537,7 +537,6 @@ const TagGroupHeader = ({
 }: TagGroupHeaderProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Use adaptive hover pattern: actions visible on touch, hover-based on desktop
   const adaptiveStyles = createAdaptiveHoverStyles({
     actionsClassName: 'group-actions',
     transitionDuration: 0.15,
@@ -894,7 +893,7 @@ export const HighlightTags = ({
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <TagIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ fontSize: '0.875rem', fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
               Tags
             </Typography>
           </Box>
