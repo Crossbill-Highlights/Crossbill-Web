@@ -111,6 +111,8 @@ class Book(Base):
     isbn: Mapped[str | None] = mapped_column(String(20), nullable=True)
     cover: Mapped[str | None] = mapped_column(String(500), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    language: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    page_count: Mapped[int | None] = mapped_column(nullable=True)
     content_hash: Mapped[str] = mapped_column(
         String(64), nullable=False, index=True
     )  # SHA-256 hash for deduplication
