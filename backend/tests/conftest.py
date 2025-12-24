@@ -32,18 +32,20 @@ def create_test_book(  # noqa: PLR0913
     author: str | None = None,
     isbn: str | None = None,
     cover: str | None = None,
+    description: str | None = None,
 ) -> Book:
     """Create a test book with properly computed content_hash.
 
     This helper ensures all test books have valid content_hash values.
     """
-    content_hash = compute_book_hash(title=title, author=author)
+    content_hash = compute_book_hash(title=title, author=author, description=description)
     book = Book(
         user_id=user_id,
         title=title,
         author=author,
         isbn=isbn,
         cover=cover,
+        description=description,
         content_hash=content_hash,
     )
     db_session.add(book)

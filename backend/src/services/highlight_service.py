@@ -52,6 +52,7 @@ class HighlightService:
         book_hash = compute_book_hash(
             title=request.book.title,
             author=request.book.author,
+            description=request.book.description,
         )
         book = self.book_repo.get_or_create(request.book, book_hash, user_id)
 
@@ -185,6 +186,7 @@ class HighlightService:
                 author=book.author,
                 isbn=book.isbn,
                 cover=book.cover,
+                description=book.description,
                 highlight_count=count,
                 tags=[schemas.TagInBook.model_validate(tag) for tag in book.tags],
                 created_at=book.created_at,
@@ -221,6 +223,7 @@ class HighlightService:
                 author=book.author,
                 isbn=book.isbn,
                 cover=book.cover,
+                description=book.description,
                 highlight_count=count,
                 tags=[schemas.TagInBook.model_validate(tag) for tag in book.tags],
                 created_at=book.created_at,

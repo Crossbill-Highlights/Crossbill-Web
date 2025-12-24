@@ -117,6 +117,7 @@ class BookDetails(BaseModel):
     author: str | None
     isbn: str | None
     cover: str | None
+    description: str | None = None
     tags: list[TagInBook] = Field(default_factory=list, description="List of tags for this book")
     highlight_tags: list[HighlightTagInBook] = Field(
         default_factory=list, description="List of highlight tags for this book"

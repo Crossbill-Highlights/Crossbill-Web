@@ -110,6 +110,7 @@ class Book(Base):
     author: Mapped[str | None] = mapped_column(String(500), nullable=True)
     isbn: Mapped[str | None] = mapped_column(String(20), nullable=True)
     cover: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     content_hash: Mapped[str] = mapped_column(
         String(64), nullable=False, index=True
     )  # SHA-256 hash for deduplication

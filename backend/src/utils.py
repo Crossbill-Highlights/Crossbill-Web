@@ -3,29 +3,31 @@
 import hashlib
 
 
-def compute_book_hash(title: str, author: str | None) -> str:
+def compute_book_hash(title: str, author: str | None, description: str | None = None) -> str:
     """
-    Compute a unique hash for a book based on its title and author.
+    Compute a unique hash for a book based on its title, author, and description.
 
     This hash is used for deduplication during book uploads. The hash is computed
-    from the book title and author (if present). This allows the book metadata
-    (title, author) to be edited later without breaking deduplication - the original
-    hash is preserved and used to identify the same book on subsequent uploads.
+    from the book title, author (if present), and description (if present). This
+    allows the book metadata to be edited later without breaking deduplication -
+    the original hash is preserved and used to identify the same book on subsequent uploads.
 
     Args:
         title: The title of the book
         author: The author of the book (can be None)
+        description: The description of the book (can be None)
 
     Returns:
         A 64-character hex string (SHA-256 hash)
     """
-    # Normalize inputs: strip whitespace and use empty string for None author
+    # Normalize inputs: strip whitespace and use empty string for None values
     normalized_title = title.strip()
     normalized_author = (author or "").strip()
+    normalized_description = (description or "").strip()
 
     # Create a consistent string representation for hashing
     # Using pipe as separator since it's unlikely to appear in content
-    hash_input = f"{normalized_title}|{normalized_author}"
+    hash_input = f"{normalized_title}|{normalized_author}|{normalized_description}"
 
     # Compute SHA-256 hash and return as hex string (64 chars)
     return hashlib.sha256(hash_input.encode("utf-8")).hexdigest()

@@ -12,6 +12,7 @@ class BookBase(BaseModel):
     author: str | None = Field(None, max_length=500, description="Book author")
     isbn: str | None = Field(None, max_length=20, description="Book ISBN")
     cover: str | None = Field(None, max_length=500, description="Book cover image path")
+    description: str | None = Field(None, description="Book description from ebook metadata")
 
 
 class BookCreate(BookBase):
@@ -46,6 +47,7 @@ class BookWithHighlightCount(BaseModel):
     author: str | None
     isbn: str | None
     cover: str | None
+    description: str | None = None
     highlight_count: int = Field(..., ge=0, description="Number of highlights for this book")
     tags: list[TagInBook] = Field(default_factory=list, description="List of tags for this book")
     created_at: datetime
