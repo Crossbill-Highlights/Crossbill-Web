@@ -12,6 +12,7 @@ import {
   Drawer,
   IconButton,
   Paper,
+  Typography,
 } from '@mui/material';
 import { motion } from 'motion/react';
 import { useState } from 'react';
@@ -24,10 +25,12 @@ const BottomDrawer = ({
   isOpen,
   onClose,
   content,
+  title,
 }: {
   isOpen: boolean;
   onClose: () => void;
   content: React.ReactNode;
+  title: React.ReactNode;
 }) => {
   return (
     <Drawer anchor="bottom" open={isOpen} onClose={onClose}>
@@ -37,7 +40,8 @@ const BottomDrawer = ({
           paddingBottom: 6,
         }}
       >
-        <Box display="flex" alignItems="center" justifyContent="end" sx={{ mt: -1, mb: 2 }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+          {title}
           <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
             <CloseIcon />
           </IconButton>
@@ -63,6 +67,7 @@ const TagsDrawerContent = ({ book, selectedTag, onTagClick }: TagsDrawerContentP
         bookId={book.id}
         selectedTag={selectedTag}
         onTagClick={onTagClick}
+        hideTitle={true}
       />
     </Box>
   );
@@ -85,6 +90,7 @@ const BookmarksDrawerContent = ({
         bookmarks={bookmarks || []}
         allHighlights={allHighlights}
         onBookmarkClick={onBookmarkClick}
+        hideTitle={true}
       />
     </Box>
   );
@@ -98,7 +104,7 @@ interface ChaptersDrawerContentProps {
 const ChaptersDrawerContent = ({ chapters, onChapterClick }: ChaptersDrawerContentProps) => {
   return (
     <Box>
-      <ChapterNav chapters={chapters} onChapterClick={onChapterClick} />
+      <ChapterNav chapters={chapters} onChapterClick={onChapterClick} hideTitle={true} />
     </Box>
   );
 };
@@ -159,6 +165,25 @@ export const MobileNavigation = ({
     }
   };
 
+  const getDrawerTitle = (type: DrawerContentType): React.ReactNode => {
+    const config: Record<DrawerContentType, { icon: React.ReactNode; text: string }> = {
+      tags: { icon: <TagIcon />, text: 'Tags' },
+      bookmarks: { icon: <BookmarkIcon />, text: 'Bookmarks' },
+      chapters: { icon: <ListIcon />, text: 'Chapters' },
+    };
+
+    const { icon, text } = config[type];
+
+    return (
+      <Box display="flex" alignItems="center" gap={1}>
+        {icon}
+        <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+          {text}
+        </Typography>
+      </Box>
+    );
+  };
+
   return (
     <>
       <motion.div
@@ -201,6 +226,7 @@ export const MobileNavigation = ({
       <BottomDrawer
         isOpen={drawerIsOpen}
         onClose={() => setDrawerState(false)}
+        title={getDrawerTitle(drawerContent)}
         content={getDrawerContent(drawerContent)}
       />
     </>

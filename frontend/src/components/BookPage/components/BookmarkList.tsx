@@ -8,10 +8,17 @@ interface BookmarkListProps {
   bookmarks: Bookmark[];
   allHighlights: Highlight[];
   onBookmarkClick: (highlightId: number) => void;
+  hideTitle?: boolean;
 }
 
-export const BookmarkList = ({ bookmarks, allHighlights, onBookmarkClick }: BookmarkListProps) => {
+export const BookmarkList = ({
+  bookmarks,
+  allHighlights,
+  onBookmarkClick,
+  hideTitle,
+}: BookmarkListProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const effectiveIsExpanded = hideTitle ? true : isExpanded;
 
   // Create a map of highlight IDs to highlights for quick lookup
   const highlightMap = new Map(allHighlights.map((h) => [h.id, h]));
@@ -50,37 +57,39 @@ export const BookmarkList = ({ bookmarks, allHighlights, onBookmarkClick }: Book
         flexDirection: 'column',
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 2,
-          cursor: 'pointer',
-          flexShrink: 0,
-        }}
-        onClick={() => setIsExpanded((prev) => !prev)}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <BookmarkIcon sx={{ fontSize: 20, color: 'primary.main' }} />
-          <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-            Bookmarks
-          </Typography>
-        </Box>
-        <IconButton
-          size="small"
+      {!hideTitle && (
+        <Box
           sx={{
-            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s',
-            display: { xs: 'none', lg: 'block' },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+            cursor: 'pointer',
+            flexShrink: 0,
           }}
+          onClick={() => setIsExpanded((prev) => !prev)}
         >
-          <ExpandMoreIcon fontSize="small" />
-        </IconButton>
-      </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BookmarkIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+              Bookmarks
+            </Typography>
+          </Box>
+          <IconButton
+            size="small"
+            sx={{
+              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s',
+              display: { xs: 'none', lg: 'block' },
+            }}
+          >
+            <ExpandMoreIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      )}
 
       <AnimatePresence initial={false}>
-        {isExpanded && (
+        {effectiveIsExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}

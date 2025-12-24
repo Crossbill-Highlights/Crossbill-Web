@@ -48,6 +48,7 @@ interface HighlightTagsProps {
   bookId: number;
   selectedTag?: number | null;
   onTagClick: (tagId: number | null) => void;
+  hideTitle?: boolean;
 }
 
 interface DraggableTagProps {
@@ -644,6 +645,7 @@ export const HighlightTags = ({
   bookId,
   selectedTag,
   onTagClick,
+  hideTitle,
 }: HighlightTagsProps) => {
   const [collapsedGroups, setCollapsedGroups] = useState<Record<number, boolean>>({});
   const [ungroupedCollapsed, setUngroupedCollapsed] = useState(false);
@@ -882,31 +884,33 @@ export const HighlightTags = ({
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <Box>
         {/* Header */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            mb: 2,
-            pb: 1.5,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TagIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-              Tags
-            </Typography>
+        {!hideTitle && (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2,
+              pb: 1.5,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <TagIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+              <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+                Tags
+              </Typography>
+            </Box>
+            <Tooltip title="Add new group">
+              <IconButton
+                size="small"
+                onClick={() => setShowAddGroup(true)}
+                sx={{ color: 'text.secondary', padding: 0.5 }}
+              >
+                <AddIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
           </Box>
-          <Tooltip title="Add new group">
-            <IconButton
-              size="small"
-              onClick={() => setShowAddGroup(true)}
-              sx={{ color: 'text.secondary', padding: 0.5 }}
-            >
-              <AddIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
+        )}
 
         {/* Add New Group Form */}
         <AddGroupForm
