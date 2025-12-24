@@ -1,10 +1,21 @@
 import type { BookDetails } from '@/api/generated/model';
 import { TagList } from '@/components/BookPage/components/TagList.tsx';
-import { BookmarkBorder as BookmarkIcon, Edit as EditIcon } from '@mui/icons-material';
+import {
+  BookmarkBorder as BookmarkIcon,
+  Edit as EditIcon,
+  ExpandLess as ExpandLessIcon,
+  ExpandMore as ExpandMoreIcon,
+} from '@mui/icons-material';
 import { Box, Button, Typography } from '@mui/material';
 import { useState } from 'react';
 import { BookCover } from '../../common/BookCover';
 import { BookEditModal } from './BookEditModal';
+
+// Strip HTML tags from description for display
+const stripHtml = (html: string): string => {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
+};
 
 export interface BookTitleProps {
   book: BookDetails;
@@ -13,10 +24,19 @@ export interface BookTitleProps {
 
 export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
   const handleEdit = () => {
     setEditModalOpen(true);
   };
+
+  // Process description - strip HTML and check if it's long
+  const plainDescription = book.description ? stripHtml(book.description) : null;
+  const isLongDescription = plainDescription && plainDescription.length > 300;
+  const truncatedDescription =
+    isLongDescription && !descriptionExpanded
+      ? plainDescription.slice(0, 300) + '...'
+      : plainDescription;
 
   return (
     <>
@@ -93,6 +113,30 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
           >
             {book.author || 'Unknown Author'}
           </Typography>
+
+          {plainDescription && (
+            <Box sx={{ mb: 2, width: '100%' }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                  lineHeight: 1.6,
+                }}
+              >
+                {truncatedDescription}
+              </Typography>
+              {isLongDescription && (
+                <Button
+                  size="small"
+                  onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+                  endIcon={descriptionExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  sx={{ mt: 0.5, p: 0, minWidth: 'auto' }}
+                >
+                  {descriptionExpanded ? 'Show less' : 'Show more'}
+                </Button>
+              )}
+            </Box>
+          )}
 
           <Box
             sx={{
