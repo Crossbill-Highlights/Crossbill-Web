@@ -262,11 +262,44 @@ function CrossbillSync:performSync(is_autosync)
 			logger.dbg("Crossbill: No identifiers field found in metadata")
 		end
 
+		-- Extract language code if available
+		local language = metadata_props.language or nil
+		if language then
+			logger.dbg("Crossbill: Extracted language:", language)
+		end
+
+		-- Extract page count from document
+		local page_count = doc_settings:readSetting("doc_pages") or nil
+		if page_count then
+			logger.dbg("Crossbill: Extracted page count:", page_count)
+		end
+
+		-- Extract keywords and split into array
+		local keywords = nil
+		if metadata_props.keywords then
+			keywords = {}
+			-- Keywords can be separated by newlines (backslash-newline in Lua string)
+			for keyword in metadata_props.keywords:gmatch("[^\n]+") do
+				local trimmed = keyword:match("^%s*(.-)%s*$") -- trim whitespace
+				if trimmed and trimmed ~= "" then
+					table.insert(keywords, trimmed)
+				end
+			end
+			if #keywords > 0 then
+				logger.dbg("Crossbill: Extracted", #keywords, "keywords")
+			else
+				keywords = nil
+			end
+		end
+
 		local book_data = {
 			title = book_props.display_title or book_props.title or self:getFilename(doc_path),
 			author = book_props.authors or nil,
 			isbn = isbn,
 			description = metadata_props.description or nil,
+			language = language,
+			page_count = page_count,
+			keywords = keywords,
 		}
 
 		-- Get highlights from memory (ReaderAnnotation) if available,
