@@ -54,9 +54,7 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
   }, [book.description]);
 
   const truncatedDescription =
-    isLongDescription && !descriptionExpanded
-      ? plainDescription!.slice(0, 300) + '...'
-      : null;
+    isLongDescription && !descriptionExpanded ? plainDescription!.slice(0, 300) + '...' : null;
 
   return (
     <>
