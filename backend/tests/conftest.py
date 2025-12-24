@@ -33,6 +33,8 @@ def create_test_book(  # noqa: PLR0913
     isbn: str | None = None,
     cover: str | None = None,
     description: str | None = None,
+    language: str | None = None,
+    page_count: int | None = None,
 ) -> Book:
     """Create a test book with properly computed content_hash.
 
@@ -46,6 +48,8 @@ def create_test_book(  # noqa: PLR0913
         isbn=isbn,
         cover=cover,
         description=description,
+        language=language,
+        page_count=page_count,
         content_hash=content_hash,
     )
     db_session.add(book)

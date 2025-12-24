@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from src import models
+from tests.conftest import create_test_book
 
 
 class TestHighlightsUpload:
@@ -564,3 +565,221 @@ class TestHighlightsUpload:
         assert highlight_texts["Second highlight in Chapter 1"] == chapter_map["Chapter 1"]
         assert highlight_texts["New highlight in Chapter 2"] == chapter_map["Chapter 2"]
         assert highlight_texts["Another new highlight in Chapter 3"] == chapter_map["Chapter 3"]
+
+    def test_upload_with_language_and_page_count(
+        self, client: TestClient, db_session: Session
+    ) -> None:
+        """Test uploading highlights with language and page_count metadata."""
+        payload = {
+            "book": {
+                "title": "Test Book with Metadata",
+                "author": "Test Author",
+                "language": "en",
+                "page_count": 350,
+            },
+            "highlights": [
+                {
+                    "text": "Test highlight",
+                    "datetime": "2024-01-15 14:30:22",
+                },
+            ],
+        }
+
+        response = client.post("/api/v1/highlights/upload", json=payload)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["success"] is True
+        assert data["highlights_created"] == 1
+
+        # Verify book was created with language and page_count
+        book = (
+            db_session.query(models.Book)
+            .filter_by(title="Test Book with Metadata", author="Test Author")
+            .first()
+        )
+        assert book is not None
+        assert book.language == "en"
+        assert book.page_count == 350
+
+    def test_upload_with_keywords_creates_tags(
+        self, client: TestClient, db_session: Session
+    ) -> None:
+        """Test that uploading with keywords creates corresponding tags."""
+        payload = {
+            "book": {
+                "title": "Test Book with Keywords",
+                "author": "Test Author",
+                "keywords": ["Fiction", "Science", "Adventure"],
+            },
+            "highlights": [
+                {
+                    "text": "Test highlight",
+                    "datetime": "2024-01-15 14:30:22",
+                },
+            ],
+        }
+
+        response = client.post("/api/v1/highlights/upload", json=payload)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["success"] is True
+
+        # Verify book was created
+        book = (
+            db_session.query(models.Book)
+            .filter_by(title="Test Book with Keywords", author="Test Author")
+            .first()
+        )
+        assert book is not None
+
+        # Verify tags were created and associated with the book
+        tag_names = {tag.name for tag in book.tags}
+        assert tag_names == {"Fiction", "Science", "Adventure"}
+
+        # Verify tags exist in the database for user
+        tags = db_session.query(models.Tag).filter_by(user_id=book.user_id).all()
+        assert len(tags) >= 3
+        db_tag_names = {tag.name for tag in tags}
+        assert "Fiction" in db_tag_names
+        assert "Science" in db_tag_names
+        assert "Adventure" in db_tag_names
+
+    def test_upload_keywords_no_duplicates_on_resync(
+        self, client: TestClient, db_session: Session
+    ) -> None:
+        """Test that resyncing with same keywords doesn't create duplicate tags."""
+        payload = {
+            "book": {
+                "title": "Duplicate Keywords Test Book",
+                "author": "Test Author",
+                "keywords": ["Tag1", "Tag2"],
+            },
+            "highlights": [
+                {
+                    "text": "Test highlight",
+                    "datetime": "2024-01-15 14:30:22",
+                },
+            ],
+        }
+
+        # First upload
+        response1 = client.post("/api/v1/highlights/upload", json=payload)
+        assert response1.status_code == status.HTTP_200_OK
+
+        # Second upload with same keywords
+        response2 = client.post("/api/v1/highlights/upload", json=payload)
+        assert response2.status_code == status.HTTP_200_OK
+
+        # Verify book has only 2 tags (no duplicates)
+        book = (
+            db_session.query(models.Book)
+            .filter_by(title="Duplicate Keywords Test Book", author="Test Author")
+            .first()
+        )
+        assert book is not None
+        assert len(book.tags) == 2
+        tag_names = {tag.name for tag in book.tags}
+        assert tag_names == {"Tag1", "Tag2"}
+
+        # Verify only 2 tags exist in database for this user
+        tags = db_session.query(models.Tag).filter_by(user_id=book.user_id).all()
+        tag_counts = {}
+        for tag in tags:
+            tag_counts[tag.name] = tag_counts.get(tag.name, 0) + 1
+        # Each tag name should only appear once
+        for name in ["Tag1", "Tag2"]:
+            assert tag_counts.get(name) == 1
+
+    def test_upload_keywords_adds_to_existing_tags(
+        self, client: TestClient, db_session: Session
+    ) -> None:
+        """Test that uploading with new keywords adds them without removing existing tags."""
+        # First upload with initial keywords
+        payload1 = {
+            "book": {
+                "title": "Additive Keywords Test Book",
+                "author": "Test Author",
+                "keywords": ["Original1", "Original2"],
+            },
+            "highlights": [
+                {
+                    "text": "Test highlight 1",
+                    "datetime": "2024-01-15 14:30:22",
+                },
+            ],
+        }
+        response1 = client.post("/api/v1/highlights/upload", json=payload1)
+        assert response1.status_code == status.HTTP_200_OK
+
+        # Second upload with different keywords
+        payload2 = {
+            "book": {
+                "title": "Additive Keywords Test Book",
+                "author": "Test Author",
+                "keywords": ["Original1", "NewTag"],  # Original1 is repeated, NewTag is new
+            },
+            "highlights": [
+                {
+                    "text": "Test highlight 2",
+                    "datetime": "2024-01-15 15:30:22",
+                },
+            ],
+        }
+        response2 = client.post("/api/v1/highlights/upload", json=payload2)
+        assert response2.status_code == status.HTTP_200_OK
+
+        # Verify book has all 3 tags
+        book = (
+            db_session.query(models.Book)
+            .filter_by(title="Additive Keywords Test Book", author="Test Author")
+            .first()
+        )
+        assert book is not None
+        tag_names = {tag.name for tag in book.tags}
+        assert tag_names == {"Original1", "Original2", "NewTag"}
+
+    def test_books_response_includes_language_and_page_count(
+        self, client: TestClient, db_session: Session, test_user: models.User
+    ) -> None:
+        """Test that book list response includes language and page_count fields."""
+        # Create a book with language and page_count
+        create_test_book(
+            db_session,
+            user_id=test_user.id,
+            title="Book with Metadata",
+            author="Test Author",
+            language="de",
+            page_count=500,
+        )
+
+        response = client.get("/api/v1/books/")
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert len(data["books"]) == 1
+        book_data = data["books"][0]
+        assert book_data["language"] == "de"
+        assert book_data["page_count"] == 500
+
+    def test_book_details_includes_language_and_page_count(
+        self, client: TestClient, db_session: Session, test_user: models.User
+    ) -> None:
+        """Test that book details response includes language and page_count fields."""
+        # Create a book with language and page_count
+        book = create_test_book(
+            db_session,
+            user_id=test_user.id,
+            title="Book Details Metadata Test",
+            author="Test Author",
+            language="fr",
+            page_count=200,
+        )
+
+        response = client.get(f"/api/v1/books/{book.id}")
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["language"] == "fr"
+        assert data["page_count"] == 200
