@@ -7,7 +7,7 @@ import {
   Notes as NotesIcon,
   FormatQuote as QuoteIcon,
 } from '@mui/icons-material';
-import { Box, Typography } from '@mui/material';
+import { Box, CardActionArea, Typography } from '@mui/material';
 
 export interface HighlightCardProps {
   highlight: Highlight;
@@ -113,7 +113,7 @@ export const HighlightCard = ({ highlight, bookmark, onOpenModal }: HighlightCar
   };
 
   return (
-    <Box
+    <CardActionArea
       id={`highlight-${highlight.id}`}
       onClick={handleOpenModal}
       sx={{
@@ -165,6 +165,6 @@ export const HighlightCard = ({ highlight, bookmark, onOpenModal }: HighlightCar
 
         <Footer highlight={highlight} bookmark={bookmark} />
       </Box>
-    </Box>
+    </CardActionArea>
   );
 };
