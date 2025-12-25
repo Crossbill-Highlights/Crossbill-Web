@@ -35,6 +35,13 @@ export const useHighlightNavigation = ({
     if (!open || !hasNavigation) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't navigate when user is typing in an input field
+      const target = e.target as HTMLElement;
+      const isEditableElement =
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+      if (isEditableElement) return;
+
       if (e.key === 'ArrowLeft' && hasPrevious) {
         e.preventDefault();
         handlePrevious();
