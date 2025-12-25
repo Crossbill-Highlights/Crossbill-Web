@@ -10,6 +10,7 @@ import { Box, Button, IconButton, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { CommonDialog } from '../../../common/CommonDialog';
+import { FlashcardSection } from './components/FlashcardSection';
 import { HighlightContent } from './components/HighlightContent';
 import { HighlightNote } from './components/HighlightNote';
 import { ProgressBar } from './components/ProgressBar';
@@ -42,6 +43,7 @@ export const HighlightViewModal = ({
 }: HighlightViewModalProps) => {
   const queryClient = useQueryClient();
   const [noteVisibleWhenEmpty, setNoteVisibleWhenEmpty] = useState(false);
+  const [flashcardVisibleWhenEmpty, setFlashcardVisibleWhenEmpty] = useState(false);
 
   const currentBookmark = bookmarksByHighlightId[highlight.id] ?? undefined;
 
@@ -56,8 +58,15 @@ export const HighlightViewModal = ({
   const hasNote = !!highlight.note;
   const noteVisible = hasNote || noteVisibleWhenEmpty;
 
+  const hasFlashcards = !!highlight.flashcards?.length;
+  const flashcardVisible = hasFlashcards || flashcardVisibleWhenEmpty;
+
   const handleNoteToggle = () => {
     setNoteVisibleWhenEmpty((prev) => !prev);
+  };
+
+  const handleFlashcardToggle = () => {
+    setFlashcardVisibleWhenEmpty((prev) => !prev);
   };
 
   const deleteHighlightMutation = useDeleteHighlightsApiV1BooksBookIdHighlightDelete({
@@ -121,6 +130,19 @@ export const HighlightViewModal = ({
   // Shared content for both layouts
   const renderContent = () => (
     <>
+      <Toolbar
+        key={highlight.id}
+        highlightId={highlight.id}
+        bookId={bookId}
+        highlightText={highlight.text}
+        bookmark={currentBookmark}
+        noteVisible={noteVisible}
+        onNoteToggle={handleNoteToggle}
+        flashcardVisible={flashcardVisible}
+        onFlashcardToggle={handleFlashcardToggle}
+        onDelete={handleDelete}
+        disabled={isLoading}
+      />
       <TagInput
         highlightId={highlight.id}
         bookId={bookId}
@@ -135,16 +157,11 @@ export const HighlightViewModal = ({
         visible={noteVisible}
         disabled={isLoading}
       />
-      <Toolbar
-        key={highlight.id}
+      <FlashcardSection
         highlightId={highlight.id}
         bookId={bookId}
-        highlightText={highlight.text}
-        bookmark={currentBookmark}
-        hasNote={hasNote}
-        noteVisible={noteVisible}
-        onNoteToggle={handleNoteToggle}
-        onDelete={handleDelete}
+        flashcards={highlight.flashcards || []}
+        visible={flashcardVisible}
         disabled={isLoading}
       />
     </>

@@ -9,6 +9,7 @@ import {
   Bookmark as BookmarkIcon,
   ContentCopy as ContentCopyIcon,
   Delete as DeleteIcon,
+  School as FlashcardIcon,
   Link as LinkIcon,
   Notes as NotesIcon,
 } from '@mui/icons-material';
@@ -21,9 +22,10 @@ interface ToolbarProps {
   bookId: number;
   highlightText: string;
   bookmark?: Bookmark;
-  hasNote: boolean;
   noteVisible: boolean;
   onNoteToggle: () => void;
+  flashcardVisible?: boolean;
+  onFlashcardToggle?: () => void;
   onDelete: () => void;
   disabled?: boolean;
 }
@@ -33,9 +35,10 @@ export const Toolbar = ({
   bookId,
   highlightText,
   bookmark,
-  hasNote,
   noteVisible,
   onNoteToggle,
+  flashcardVisible = false,
+  onFlashcardToggle,
   onDelete,
   disabled = false,
 }: ToolbarProps) => {
@@ -141,11 +144,18 @@ export const Toolbar = ({
           disabled={isLoading}
           aria-label={noteVisible ? 'Hide note' : 'Show note'}
           size="small"
-          sx={{
-            color: hasNote || noteVisible ? 'primary.main' : 'inherit',
-          }}
         >
           <NotesIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={flashcardVisible ? 'Hide flashcards' : 'Show flashcards'}>
+        <IconButton
+          onClick={onFlashcardToggle}
+          disabled={isLoading}
+          aria-label={flashcardVisible ? 'Hide flashcards' : 'Show flashcards'}
+          size="small"
+        >
+          <FlashcardIcon />
         </IconButton>
       </Tooltip>
       <Tooltip title="Delete highlight">
