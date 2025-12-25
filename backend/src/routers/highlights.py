@@ -9,7 +9,7 @@ from src import schemas
 from src.database import DatabaseSession
 from src.exceptions import CrossbillError
 from src.models import User
-from src.services import HighlightService, HighlightTagService
+from src.services import FlashcardService, HighlightService, HighlightTagService
 from src.services.auth_service import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -243,4 +243,58 @@ def delete_tag_group(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete tag group: {e!s}",
+        ) from e
+
+
+@router.post(
+    "/{highlight_id}/flashcards",
+    response_model=schemas.FlashcardCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_flashcard_for_highlight(
+    highlight_id: int,
+    request: schemas.FlashcardCreateRequest,
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> schemas.FlashcardCreateResponse:
+    """
+    Create a flashcard for a highlight.
+
+    Creates a flashcard that is associated with a specific highlight.
+    The flashcard will also be linked to the highlight's book.
+
+    Args:
+        highlight_id: ID of the highlight
+        request: Request containing question and answer
+        db: Database session
+
+    Returns:
+        Created flashcard
+
+    Raises:
+        HTTPException: If highlight not found or creation fails
+    """
+    try:
+        service = FlashcardService(db)
+        flashcard = service.create_flashcard_for_highlight(
+            highlight_id=highlight_id,
+            user_id=current_user.id,
+            question=request.question,
+            answer=request.answer,
+        )
+        return schemas.FlashcardCreateResponse(
+            success=True,
+            message="Flashcard created successfully",
+            flashcard=flashcard,
+        )
+    except CrossbillError:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Failed to create flashcard for highlight {highlight_id}: {e!s}",
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create flashcard: {e!s}",
         ) from e

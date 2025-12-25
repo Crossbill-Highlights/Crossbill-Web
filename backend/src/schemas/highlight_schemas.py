@@ -34,6 +34,7 @@ class Highlight(HighlightBase):
     highlight_tags: list[HighlightTagInBook] = Field(
         default_factory=list, description="List of highlight tags for this highlight"
     )
+    flashcard_count: int = Field(default=0, description="Number of flashcards for this highlight")
     created_at: dt
     updated_at: dt
 
@@ -52,9 +53,17 @@ class Highlight(HighlightBase):
                 # Also extract chapter_number if not present
                 if "chapter_number" not in data or data["chapter_number"] is None:
                     data["chapter_number"] = getattr(chapter, "chapter_number", None)
+            # Compute flashcard_count if flashcards is present
+            if "flashcard_count" not in data and "flashcards" in data:
+                flashcards = data.get("flashcards")
+                if flashcards is not None:
+                    data["flashcard_count"] = len(flashcards)
         # It's an ORM model object - get attributes
         elif hasattr(data, "chapter"):
             chapter = data.chapter
+            flashcard_count = 0
+            if hasattr(data, "flashcards") and data.flashcards is not None:
+                flashcard_count = len(data.flashcards)
             if chapter is not None and hasattr(chapter, "name"):
                 # Need to set chapter to the name string
                 # Since we can't modify the ORM object, create a dict
@@ -69,9 +78,26 @@ class Highlight(HighlightBase):
                     "created_at": data.created_at,
                     "updated_at": data.updated_at,
                     "highlight_tags": data.highlight_tags,
+                    "flashcard_count": flashcard_count,
                     "chapter": chapter.name,
                     "chapter_number": getattr(chapter, "chapter_number", None),
                 }
+            # Chapter is None but we still need to include flashcard_count
+            return {
+                "id": data.id,
+                "book_id": data.book_id,
+                "chapter_id": data.chapter_id,
+                "text": data.text,
+                "page": data.page,
+                "note": data.note,
+                "datetime": data.datetime,
+                "created_at": data.created_at,
+                "updated_at": data.updated_at,
+                "highlight_tags": data.highlight_tags,
+                "flashcard_count": flashcard_count,
+                "chapter": None,
+                "chapter_number": None,
+            }
         return data
 
 

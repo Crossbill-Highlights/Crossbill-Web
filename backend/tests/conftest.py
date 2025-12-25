@@ -16,6 +16,7 @@ from src.main import app
 from src.models import (  # noqa: F401 - Import to register models
     Book,
     Chapter,
+    Flashcard,
     Highlight,
     HighlightTag,
     HighlightTagGroup,
