@@ -16,6 +16,48 @@ interface FlashcardSectionProps {
   disabled?: boolean;
 }
 
+const Flashcard = ({
+  id,
+  question,
+  answer,
+  isLoading,
+  onDelete,
+}: Flashcard & {
+  isLoading: boolean;
+  onDelete: (id: number) => void;
+}) => {
+  return (
+    <Box
+      key={id}
+      sx={{
+        p: 1.5,
+        borderRadius: 1,
+        bgcolor: 'action.hover',
+        position: 'relative',
+      }}
+    >
+      <Box sx={{ pr: 4 }}>
+        <Typography variant="body2" fontWeight="medium">
+          Q: {question}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          A: {answer}
+        </Typography>
+      </Box>
+      <Tooltip title="Delete flashcard">
+        <IconButton
+          size="small"
+          onClick={() => onDelete(id)}
+          disabled={isLoading}
+          sx={{ position: 'absolute', top: 8, right: 8 }}
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  );
+};
+
 export const FlashcardSection = ({
   highlightId,
   bookId,
@@ -101,34 +143,7 @@ export const FlashcardSection = ({
             {flashcards.length > 0 && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
                 {flashcards.map((flashcard) => (
-                  <Box
-                    key={flashcard.id}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 1,
-                      bgcolor: 'action.hover',
-                      position: 'relative',
-                    }}
-                  >
-                    <Box sx={{ pr: 4 }}>
-                      <Typography variant="body2" fontWeight="medium">
-                        Q: {flashcard.question}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        A: {flashcard.answer}
-                      </Typography>
-                    </Box>
-                    <Tooltip title="Delete flashcard">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(flashcard.id)}
-                        disabled={isLoading}
-                        sx={{ position: 'absolute', top: 8, right: 8 }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                  <Flashcard onDelete={handleDelete} isLoading={isLoading} {...flashcard} />
                 ))}
               </Box>
             )}
