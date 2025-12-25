@@ -1,6 +1,6 @@
+import { Collapsable } from '@/components/common/animations/Collapsable';
 import { ExpandMore as ExpandMoreIcon, List as ListIcon } from '@mui/icons-material';
 import { Box, IconButton, Typography } from '@mui/material';
-import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import type { ChapterData } from './ChapterList';
 
@@ -58,78 +58,62 @@ export const ChapterNav = ({ chapters, onChapterClick, hideTitle }: ChapterNavPr
         </Box>
       )}
 
-      <AnimatePresence initial={false}>
-        {effectiveIsExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            style={{
-              overflow: 'hidden',
-              flex: '1 1 auto',
-              minHeight: 0,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
+      <Collapsable isExpanded={effectiveIsExpanded}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 0.5,
+            flex: '1 1 auto',
+            minHeight: 0,
+          }}
+        >
+          {chapters.map((chapter) => (
             <Box
+              key={chapter.id}
+              onClick={() => onChapterClick(chapter.id)}
               sx={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: 0.5,
-                flex: '1 1 auto',
-                minHeight: 0,
+                alignItems: 'start',
+                gap: 1,
+                py: 0.75,
+                px: 0.5,
+                borderRadius: 0.5,
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease',
+                '@media (hover: hover)': {
+                  '&:hover': {
+                    bgcolor: 'action.hover',
+                  },
+                },
               }}
             >
-              {chapters.map((chapter) => (
-                <Box
-                  key={chapter.id}
-                  onClick={() => onChapterClick(chapter.id)}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="body2"
                   sx={{
-                    display: 'flex',
-                    alignItems: 'start',
-                    gap: 1,
-                    py: 0.75,
-                    px: 0.5,
-                    borderRadius: 0.5,
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s ease',
-                    '@media (hover: hover)': {
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                      },
-                    },
+                    fontSize: '0.875rem',
+                    color: 'text.primary',
+                    lineHeight: 1.4,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   }}
                 >
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: '0.875rem',
-                        color: 'text.primary',
-                        lineHeight: 1.4,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {chapter.name}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ fontSize: '0.75rem', mt: 0.25, display: 'block' }}
-                    >
-                      {chapter.highlights.length} highlight
-                      {chapter.highlights.length !== 1 ? 's' : ''}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
+                  {chapter.name}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ fontSize: '0.75rem', mt: 0.25, display: 'block' }}
+                >
+                  {chapter.highlights.length} highlight
+                  {chapter.highlights.length !== 1 ? 's' : ''}
+                </Typography>
+              </Box>
             </Box>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          ))}
+        </Box>
+      </Collapsable>
     </Box>
   );
 };

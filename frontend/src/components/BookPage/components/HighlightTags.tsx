@@ -7,6 +7,7 @@ import {
   useDeleteTagGroupApiV1HighlightsTagGroupTagGroupIdDelete,
 } from '@/api/generated/highlights/highlights';
 import { HighlightTagGroupInBook, HighlightTagInBook } from '@/api/generated/model';
+import { Collapsable } from '@/components/common/animations/Collapsable';
 import { createAdaptiveHoverStyles, createAdaptiveTouchTarget } from '@/utils/adaptiveHover';
 import {
   DndContext,
@@ -221,34 +222,24 @@ const TagGroup = ({
         onDelete={onDelete}
         isProcessing={isProcessing}
       />
-      <AnimatePresence initial={false}>
-        {!isCollapsed && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            style={{ overflow: 'hidden' }}
-          >
-            <DroppableGroup id={`group-${group.id}`} isEmpty={tags.length === 0}>
-              {tags.length > 0 ? (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
-                  {tags.map((tag) => (
-                    <DraggableTag
-                      key={tag.id}
-                      tag={tag}
-                      selectedTag={selectedTag}
-                      onTagClick={onTagClick}
-                    />
-                  ))}
-                </Box>
-              ) : (
-                <EmptyGroupPlaceholder message="Drag tags here" />
-              )}
-            </DroppableGroup>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Collapsable isExpanded={!isCollapsed}>
+        <DroppableGroup id={`group-${group.id}`} isEmpty={tags.length === 0}>
+          {tags.length > 0 ? (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+              {tags.map((tag) => (
+                <DraggableTag
+                  key={tag.id}
+                  tag={tag}
+                  selectedTag={selectedTag}
+                  onTagClick={onTagClick}
+                />
+              ))}
+            </Box>
+          ) : (
+            <EmptyGroupPlaceholder message="Drag tags here" />
+          )}
+        </DroppableGroup>
+      </Collapsable>
     </Box>
   );
 };
@@ -301,34 +292,24 @@ const UngroupedTags = ({
             onToggleCollapse={onToggleCollapse}
           />
         </Box>
-        <AnimatePresence initial={false}>
-          {!isCollapsed && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              style={{ overflow: 'hidden' }}
-            >
-              <DroppableGroup id="ungrouped" isEmpty={tags.length === 0} emptyHeight={30}>
-                {tags.length > 0 ? (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
-                    {tags.map((tag) => (
-                      <DraggableTag
-                        key={tag.id}
-                        tag={tag}
-                        selectedTag={selectedTag}
-                        onTagClick={onTagClick}
-                      />
-                    ))}
-                  </Box>
-                ) : (
-                  <EmptyGroupPlaceholder message="Drop here to remove from groups" />
-                )}
-              </DroppableGroup>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <Collapsable isExpanded={!isCollapsed}>
+          <DroppableGroup id="ungrouped" isEmpty={tags.length === 0} emptyHeight={30}>
+            {tags.length > 0 ? (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                {tags.map((tag) => (
+                  <DraggableTag
+                    key={tag.id}
+                    tag={tag}
+                    selectedTag={selectedTag}
+                    onTagClick={onTagClick}
+                  />
+                ))}
+              </Box>
+            ) : (
+              <EmptyGroupPlaceholder message="Drop here to remove from groups" />
+            )}
+          </DroppableGroup>
+        </Collapsable>
       </Box>
     </motion.div>
   );
