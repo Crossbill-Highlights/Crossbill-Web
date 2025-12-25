@@ -3,6 +3,7 @@ import { TagList } from '@/components/BookPage/components/TagList.tsx';
 import {
   Bookmark as BookmarkIcon,
   CalendarMonth as CalendarIcon,
+  School as FlashcardIcon,
   Notes as NotesIcon,
   FormatQuote as QuoteIcon,
 } from '@mui/icons-material';
@@ -72,6 +73,13 @@ const Footer = ({ highlight, bookmark }: FooterProps) => {
             <span>
               &nbsp;&nbsp;•
               <NotesIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
+            </span>
+          )}
+          {highlight.flashcards?.length && (
+            <span>
+              &nbsp;&nbsp;•
+              <FlashcardIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
+              <span>&nbsp;&nbsp;{highlight.flashcards.length}</span>
             </span>
           )}
         </Typography>
