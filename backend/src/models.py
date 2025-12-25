@@ -91,6 +91,9 @@ class User(Base):
     highlight_tags: Mapped[list["HighlightTag"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    flashcards: Mapped[list["Flashcard"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         """String representation of User."""
@@ -147,6 +150,9 @@ class Book(Base):
         back_populates="book", cascade="all, delete-orphan", lazy="selectin"
     )
     bookmarks: Mapped[list["Bookmark"]] = relationship(
+        back_populates="book", cascade="all, delete-orphan"
+    )
+    flashcards: Mapped[list["Flashcard"]] = relationship(
         back_populates="book", cascade="all, delete-orphan"
     )
 
@@ -237,6 +243,9 @@ class Highlight(Base):
         secondary=highlight_highlight_tags, back_populates="highlights", lazy="selectin"
     )
     bookmarks: Mapped[list["Bookmark"]] = relationship(
+        back_populates="highlight", cascade="all, delete-orphan"
+    )
+    flashcards: Mapped[list["Flashcard"]] = relationship(
         back_populates="highlight", cascade="all, delete-orphan"
     )
 
@@ -383,3 +392,42 @@ class Bookmark(Base):
     def __repr__(self) -> str:
         """String representation of Bookmark."""
         return f"<Bookmark(id={self.id}, book_id={self.book_id}, highlight_id={self.highlight_id})>"
+
+
+class Flashcard(Base):
+    """Flashcard model for creating study cards from highlights."""
+
+    __tablename__ = "flashcards"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("books.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    highlight_id: Mapped[int | None] = mapped_column(
+        ForeignKey("highlights.id", ondelete="CASCADE"), index=True, nullable=True
+    )
+    question: Mapped[str] = mapped_column(Text, nullable=False)
+    answer: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[dt] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[dt] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="flashcards")
+    book: Mapped["Book"] = relationship(back_populates="flashcards")
+    highlight: Mapped["Highlight | None"] = relationship(back_populates="flashcards")
+
+    def __repr__(self) -> str:
+        """String representation of Flashcard."""
+        return (
+            f"<Flashcard(id={self.id}, book_id={self.book_id}, highlight_id={self.highlight_id})>"
+        )

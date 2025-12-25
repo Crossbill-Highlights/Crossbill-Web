@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from src import models, schemas
 
@@ -148,6 +148,7 @@ class HighlightRepository:
         """Find all non-deleted highlights for a chapter, ordered by datetime."""
         stmt = (
             select(models.Highlight)
+            .options(selectinload(models.Highlight.flashcards))
             .where(
                 models.Highlight.chapter_id == chapter_id,
                 models.Highlight.user_id == user_id,
@@ -258,6 +259,13 @@ class HighlightRepository:
         result = self.db.execute(stmt_delete_bookmarks)
         bookmarks_deleted = getattr(result, "rowcount", 0) or 0
 
+        # Bulk delete all flashcards for these highlights in a single query
+        stmt_delete_flashcards = delete(models.Flashcard).where(
+            models.Flashcard.highlight_id.in_(highlight_ids_to_delete)
+        )
+        result = self.db.execute(stmt_delete_flashcards)
+        flashcards_deleted = getattr(result, "rowcount", 0) or 0
+
         # Soft delete each highlight
         count = 0
         for highlight in highlights:
@@ -266,8 +274,8 @@ class HighlightRepository:
 
         self.db.flush()
         logger.info(
-            f"Soft deleted {count} highlights and {bookmarks_deleted} associated bookmarks "
-            f"for book_id={book_id}, user_id={user_id}"
+            f"Soft deleted {count} highlights, {bookmarks_deleted} associated bookmarks, "
+            f"and {flashcards_deleted} associated flashcards for book_id={book_id}, user_id={user_id}"
         )
         return count
 

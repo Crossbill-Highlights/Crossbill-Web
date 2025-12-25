@@ -17,6 +17,17 @@ from src.schemas.bookmark_schemas import (
     BookmarksResponse,
 )
 from src.schemas.chapter_schemas import Chapter, ChapterBase
+from src.schemas.flashcard_schemas import (
+    Flashcard,
+    FlashcardBase,
+    FlashcardCreate,
+    FlashcardCreateRequest,
+    FlashcardCreateResponse,
+    FlashcardDeleteResponse,
+    FlashcardsListResponse,
+    FlashcardUpdateRequest,
+    FlashcardUpdateResponse,
+)
 from src.schemas.highlight_schemas import (
     BookDetails,
     ChapterWithHighlights,
@@ -64,6 +75,15 @@ __all__ = [
     "ChapterBase",
     "ChapterWithHighlights",
     "CoverUploadResponse",
+    "Flashcard",
+    "FlashcardBase",
+    "FlashcardCreate",
+    "FlashcardCreateRequest",
+    "FlashcardCreateResponse",
+    "FlashcardDeleteResponse",
+    "FlashcardUpdateRequest",
+    "FlashcardUpdateResponse",
+    "FlashcardsListResponse",
     "Highlight",
     "HighlightBase",
     "HighlightCreate",

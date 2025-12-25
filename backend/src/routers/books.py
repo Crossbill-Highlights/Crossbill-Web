@@ -9,7 +9,7 @@ from src import schemas
 from src.database import DatabaseSession
 from src.exceptions import CrossbillError
 from src.models import User
-from src.services import BookmarkService, BookService, HighlightTagService
+from src.services import BookmarkService, BookService, FlashcardService, HighlightTagService
 from src.services.auth_service import get_current_user
 from src.services.highlight_service import HighlightService
 
@@ -714,4 +714,93 @@ def get_bookmarks(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get bookmarks: {e!s}",
+        ) from e
+
+
+@router.post(
+    "/{book_id}/flashcards",
+    response_model=schemas.FlashcardCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_flashcard_for_book(
+    book_id: int,
+    request: schemas.FlashcardCreateRequest,
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> schemas.FlashcardCreateResponse:
+    """
+    Create a standalone flashcard for a book (without a highlight).
+
+    This creates a flashcard that is associated with a book but not tied
+    to any specific highlight.
+
+    Args:
+        book_id: ID of the book
+        request: Request containing question and answer
+        db: Database session
+
+    Returns:
+        Created flashcard
+
+    Raises:
+        HTTPException: If book not found or creation fails
+    """
+    try:
+        service = FlashcardService(db)
+        flashcard = service.create_flashcard_for_book(
+            book_id=book_id,
+            user_id=current_user.id,
+            question=request.question,
+            answer=request.answer,
+        )
+        return schemas.FlashcardCreateResponse(
+            success=True,
+            message="Flashcard created successfully",
+            flashcard=flashcard,
+        )
+    except CrossbillError:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to create flashcard for book {book_id}: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create flashcard: {e!s}",
+        ) from e
+
+
+@router.get(
+    "/{book_id}/flashcards",
+    response_model=schemas.FlashcardsListResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_flashcards_for_book(
+    book_id: int,
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> schemas.FlashcardsListResponse:
+    """
+    Get all flashcards for a book.
+
+    Returns all flashcards ordered by creation date (newest first).
+
+    Args:
+        book_id: ID of the book
+        db: Database session
+
+    Returns:
+        List of flashcards for the book
+
+    Raises:
+        HTTPException: If book not found or fetching fails
+    """
+    try:
+        service = FlashcardService(db)
+        return service.get_flashcards_by_book(book_id, current_user.id)
+    except CrossbillError:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get flashcards for book {book_id}: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get flashcards: {e!s}",
         ) from e

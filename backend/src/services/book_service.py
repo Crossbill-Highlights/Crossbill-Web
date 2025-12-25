@@ -76,6 +76,7 @@ class BookService:
                     highlight_tags=[
                         schemas.HighlightTagInBook.model_validate(tag) for tag in h.highlight_tags
                     ],
+                    flashcard_count=len(h.flashcards) if h.flashcards else 0,
                     created_at=h.created_at,
                     updated_at=h.updated_at,
                 )
