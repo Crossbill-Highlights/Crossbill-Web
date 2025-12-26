@@ -1,11 +1,11 @@
-import type { Flashcard } from '@/api/generated/model';
+import type { Flashcard, Highlight } from '@/api/generated/model';
 import { FlashcardListCard } from '@/components/BookPage/components/flashcards/FlashcardListCard.tsx';
 import { FadeInOut } from '@/components/common/animations/FadeInOut';
 import { SectionTitle } from '@/components/common/SectionTitle';
 import { Box, Typography } from '@mui/material';
 
 export interface FlashcardWithContext extends Flashcard {
-  highlightText?: string;
+  highlight?: Highlight;
   chapterName?: string;
   chapterId?: number;
   highlightTags?: { id: number; name: string }[];

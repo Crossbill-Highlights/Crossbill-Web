@@ -83,7 +83,7 @@ export const FlashcardsTab = ({ book, isDesktop }: FlashcardsTabProps) => {
       flatMap(chapter.highlights || [], (highlight: Highlight) =>
         (highlight.flashcards || []).map((flashcard: Flashcard) => ({
           ...flashcard,
-          highlightText: highlight.text,
+          highlight: highlight,
           chapterName: chapter.name || 'Unknown Chapter',
           chapterId: chapter.id,
           highlightTags: highlight.highlight_tags,

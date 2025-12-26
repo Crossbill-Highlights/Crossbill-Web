@@ -11,7 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { CommonDialog } from '../../../common/CommonDialog';
 import { FlashcardSection } from './components/FlashcardSection';
-import { HighlightContent } from './components/HighlightContent';
+import { HighlightContent } from '../HighlightContent.tsx';
 import { HighlightNote } from './components/HighlightNote';
 import { ProgressBar } from './components/ProgressBar';
 import { TagInput } from './components/TagInput';

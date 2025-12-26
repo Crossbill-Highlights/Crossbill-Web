@@ -1,5 +1,5 @@
 import type { Highlight } from '@/api/generated/model';
-import { DateIcon, QuoteIcon } from '@/components/common/Icons';
+import { DateIcon, QuoteIcon } from '@/components/common/Icons.tsx';
 import { Box, Typography } from '@mui/material';
 
 interface HighlightContentProps {

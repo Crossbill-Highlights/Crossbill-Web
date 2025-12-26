@@ -1,7 +1,7 @@
 import { getGetBookDetailsApiV1BooksBookIdGetQueryKey } from '@/api/generated/books/books.ts';
 import { useUpdateFlashcardApiV1FlashcardsFlashcardIdPut } from '@/api/generated/flashcards/flashcards.ts';
+import { HighlightContent } from '@/components/BookPage/components/HighlightContent.tsx';
 import { CommonDialog } from '@/components/common/CommonDialog.tsx';
-import { FormatQuote as QuoteIcon } from '@mui/icons-material';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -71,7 +71,7 @@ export const FlashcardEditDialog = ({
       open={open}
       onClose={onClose}
       title="Edit Flashcard"
-      maxWidth="sm"
+      maxWidth="md"
       isLoading={isSaving}
       footerActions={
         <Box sx={{ display: 'flex', gap: 1, width: '100%', justifyContent: 'flex-end' }}>
@@ -84,44 +84,8 @@ export const FlashcardEditDialog = ({
         </Box>
       }
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {/* Source highlight context */}
-        {flashcard.highlightText && (
-          <Box
-            sx={{
-              p: 2,
-              bgcolor: 'action.hover',
-              borderRadius: 2,
-              borderLeft: '3px solid',
-              borderLeftColor: 'primary.light',
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-              <QuoteIcon sx={{ fontSize: 18, color: 'text.disabled', mt: 0.25, flexShrink: 0 }} />
-              <Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    display: 'block',
-                    mb: 0.5,
-                  }}
-                >
-                  Source Highlight
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: 'text.secondary', fontStyle: 'italic', lineHeight: 1.5 }}
-                >
-                  {flashcard.highlightText}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        )}
+      <Box sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {flashcard.highlight && <HighlightContent highlight={flashcard.highlight} />}
 
         {/* Question field */}
         <Box>
