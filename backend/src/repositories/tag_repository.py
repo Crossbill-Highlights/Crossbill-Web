@@ -64,8 +64,6 @@ class TagRepository:
         tags = [models.Tag(name=name, user_id=user_id) for name in names]
         self.db.add_all(tags)
         self.db.flush()
-        for tag in tags:
-            self.db.refresh(tag)
         logger.info(f"Bulk created {len(tags)} tags for user_id={user_id}")
         return tags
 

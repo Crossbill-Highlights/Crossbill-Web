@@ -195,6 +195,11 @@ class HighlightRepository:
             select(models.Highlight)
             .join(models.Book)
             .outerjoin(models.Chapter, models.Highlight.chapter_id == models.Chapter.id)
+            .options(
+                selectinload(models.Highlight.book),
+                selectinload(models.Highlight.chapter),
+                selectinload(models.Highlight.highlight_tags),
+            )
             .where(
                 models.Highlight.user_id == user_id,
                 models.Highlight.deleted_at.is_(None),
