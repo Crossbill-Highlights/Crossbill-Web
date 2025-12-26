@@ -266,7 +266,6 @@ class HighlightTagRepository:
                           or if updating and tag group doesn't belong to the specified book
         """
         if tag_group_id:
-            # Update existing tag group (validates book_id ownership)
             tag_group = self.update_tag_group(tag_group_id, user_id, name, book_id)
             if tag_group:
                 return tag_group
@@ -279,7 +278,6 @@ class HighlightTagRepository:
                 f"A tag group with the name '{name}' already exists for this book", status_code=409
             )
 
-        # Create new tag group (validates book ownership)
         return self.create_tag_group(book_id, user_id, name)
 
     def delete_tag_group(self, tag_group_id: int, user_id: int) -> bool:

@@ -344,12 +344,10 @@ class HighlightTagService:
             ValueError: If tag group name is empty
             CrossbillError: If book not found, tag group doesn't belong to book, or name conflict
         """
-        # Validate tag group name
         name = name.strip()
         if not name:
             raise ValueError("Tag group name cannot be empty")
 
-        # Upsert the tag group (validates book ownership and book_id match internally)
         tag_group = self.highlight_tag_repo.upsert_tag_group(book_id, user_id, name, tag_group_id)
         self.db.commit()
 
