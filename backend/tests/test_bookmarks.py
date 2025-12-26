@@ -37,7 +37,7 @@ class TestCreateBookmark:
 
         # Create a bookmark
         response = client.post(
-            f"/api/v1/books/{book.id}/bookmark",
+            f"/api/v1/books/{book.id}/bookmarks",
             json={"highlight_id": highlight.id},
         )
 
@@ -75,7 +75,7 @@ class TestCreateBookmark:
 
         # Create first bookmark
         response1 = client.post(
-            f"/api/v1/books/{book.id}/bookmark",
+            f"/api/v1/books/{book.id}/bookmarks",
             json={"highlight_id": highlight.id},
         )
         assert response1.status_code == status.HTTP_201_CREATED
@@ -83,7 +83,7 @@ class TestCreateBookmark:
 
         # Try to create duplicate bookmark
         response2 = client.post(
-            f"/api/v1/books/{book.id}/bookmark",
+            f"/api/v1/books/{book.id}/bookmarks",
             json={"highlight_id": highlight.id},
         )
         assert response2.status_code == status.HTTP_201_CREATED
@@ -99,7 +99,7 @@ class TestCreateBookmark:
     def test_create_bookmark_book_not_found(self, client: TestClient, db_session: Session) -> None:
         """Test creating a bookmark for non-existent book."""
         response = client.post(
-            "/api/v1/books/99999/bookmark",
+            "/api/v1/books/99999/bookmarks",
             json={"highlight_id": 1},
         )
 
@@ -118,7 +118,7 @@ class TestCreateBookmark:
         )
 
         response = client.post(
-            f"/api/v1/books/{book.id}/bookmark",
+            f"/api/v1/books/{book.id}/bookmarks",
             json={"highlight_id": 99999},
         )
 
@@ -154,7 +154,7 @@ class TestCreateBookmark:
 
         # Try to create bookmark for book1 with highlight from book2
         response = client.post(
-            f"/api/v1/books/{book1.id}/bookmark",
+            f"/api/v1/books/{book1.id}/bookmarks",
             json={"highlight_id": highlight.id},
         )
 
@@ -162,7 +162,7 @@ class TestCreateBookmark:
 
 
 class TestDeleteBookmark:
-    """Test suite for DELETE /books/:id/bookmark/:bookmark_id endpoint."""
+    """Test suite for DELETE /books/:id/bookmarks/:bookmark_id endpoint."""
 
     def test_delete_bookmark_success(self, client: TestClient, db_session: Session) -> None:
         """Test successful deletion of a bookmark."""
@@ -189,7 +189,7 @@ class TestDeleteBookmark:
         db_session.refresh(bookmark)
 
         # Delete the bookmark
-        response = client.delete(f"/api/v1/books/{book.id}/bookmark/{bookmark.id}")
+        response = client.delete(f"/api/v1/books/{book.id}/bookmarks/{bookmark.id}")
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -208,14 +208,14 @@ class TestDeleteBookmark:
         )
 
         # Try to delete non-existent bookmark
-        response = client.delete(f"/api/v1/books/{book.id}/bookmark/99999")
+        response = client.delete(f"/api/v1/books/{book.id}/bookmarks/99999")
 
         # Should succeed (idempotent operation)
         assert response.status_code == status.HTTP_200_OK
 
     def test_delete_bookmark_book_not_found(self, client: TestClient, db_session: Session) -> None:
         """Test deleting a bookmark for non-existent book."""
-        response = client.delete("/api/v1/books/99999/bookmark/1")
+        response = client.delete("/api/v1/books/99999/bookmarks/1")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
