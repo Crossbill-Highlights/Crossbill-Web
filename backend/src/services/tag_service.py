@@ -41,13 +41,8 @@ class TagService:
         if not book:
             raise ValueError(f"Book with id {book_id} not found")
 
-        # Get or create tags
-        tags = []
-        for tag_name in tag_names:
-            name = tag_name.strip()
-            if name:  # Skip empty strings
-                tag = self.tag_repo.get_or_create(name, user_id)
-                tags.append(tag)
+        # Get or create tags (bulk operation: max 2 queries)
+        tags = self.tag_repo.get_or_create_many(tag_names, user_id)
 
         # Update book's tags
         book.tags = tags
