@@ -1,4 +1,4 @@
-import MenuBookIcon from '@mui/icons-material/MenuBook';
+import { BookCoverIcon } from '@/components/common/Icons';
 import { Box, type SxProps, type Theme, useTheme } from '@mui/material';
 
 export interface BookCoverProps {
@@ -82,7 +82,7 @@ export const BookCover = ({
           height: '100%',
         }}
       >
-        <MenuBookIcon
+        <BookCoverIcon
           sx={{
             fontSize: typeof height === 'number' ? height * 0.4 : 80,
             color: 'text.disabled',

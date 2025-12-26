@@ -1,6 +1,6 @@
 import type { Bookmark, Highlight } from '@/api/generated/model';
 import { Collapsable } from '@/components/common/animations/Collapsable';
-import { Bookmark as BookmarkIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
+import { BookmarkFilledIcon, ExpandMoreIcon } from '@/components/common/Icons';
 import { Box, IconButton, Typography } from '@mui/material';
 import { useState } from 'react';
 
@@ -70,7 +70,7 @@ export const BookmarkList = ({
           onClick={() => setIsExpanded((prev) => !prev)}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <BookmarkIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+            <BookmarkFilledIcon sx={{ fontSize: 20, color: 'primary.main' }} />
             <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
               Bookmarks
             </Typography>

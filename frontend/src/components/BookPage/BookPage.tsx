@@ -7,8 +7,8 @@ import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/hig
 import type { Highlight } from '@/api/generated/model';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils';
+import { SortIcon } from '@/components/common/Icons';
 import { queryClient } from '@/lib/queryClient';
-import { SwapVert as SwapVertIcon } from '@mui/icons-material';
 import { Alert, Box, Container, IconButton, Tooltip, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { keyBy } from 'lodash';
@@ -270,7 +270,7 @@ export const BookPage = () => {
                       '&:hover': { color: 'primary.main' },
                     }}
                   >
-                    <SwapVertIcon />
+                    <SortIcon />
                   </IconButton>
                 </Tooltip>
               </Box>
@@ -338,7 +338,7 @@ export const BookPage = () => {
                         '&:hover': { color: 'primary.main' },
                       }}
                     >
-                      <SwapVertIcon />
+                      <SortIcon />
                     </IconButton>
                   </Tooltip>
                 </Box>

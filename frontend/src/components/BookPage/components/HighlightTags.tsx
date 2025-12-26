@@ -8,6 +8,7 @@ import {
 } from '@/api/generated/highlights/highlights';
 import { HighlightTagGroupInBook, HighlightTagInBook } from '@/api/generated/model';
 import { Collapsable } from '@/components/common/animations/Collapsable';
+import { AddIcon, DeleteIcon, EditIcon, ExpandMoreIcon, TagIcon } from '@/components/common/Icons';
 import { createAdaptiveHoverStyles, createAdaptiveTouchTarget } from '@/utils/adaptiveHover';
 import {
   DndContext,
@@ -22,13 +23,6 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  ExpandMore as ExpandMoreIcon,
-  LocalOffer as TagIcon,
-} from '@mui/icons-material';
 import {
   Box,
   Chip,

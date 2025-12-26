@@ -1,4 +1,4 @@
-import { Close as CloseIcon } from '@mui/icons-material';
+import { CloseIcon } from '@/components/common/Icons';
 import {
   Box,
   Dialog,

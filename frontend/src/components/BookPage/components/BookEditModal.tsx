@@ -5,7 +5,7 @@ import {
   useUpdateBookApiV1BooksBookIdPost,
 } from '@/api/generated/books/books.ts';
 import { BookWithHighlightCount } from '@/api/generated/model';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { DeleteIcon } from '@/components/common/Icons';
 import { Box, Button, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';

@@ -3,7 +3,7 @@ import { useDeleteFlashcardApiV1FlashcardsFlashcardIdDelete } from '@/api/genera
 import { useCreateFlashcardForHighlightApiV1HighlightsHighlightIdFlashcardsPost } from '@/api/generated/highlights/highlights';
 import type { Flashcard } from '@/api/generated/model';
 import { Collapsable } from '@/components/common/animations/Collapsable';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { DeleteIcon } from '@/components/common/Icons';
 import {
   Box,
   Button,

@@ -1,7 +1,7 @@
 import type { BookWithHighlightCount } from '@/api/generated/model';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
+import { BookmarkIcon } from '@/components/common/Icons';
 import { theme } from '@/theme/theme.ts';
-import { BookmarkBorder as BookmarkIcon } from '@mui/icons-material';
 import { Box, Typography } from '@mui/material';
 import { Link } from '@tanstack/react-router';
 import { BookCover } from '../../common/BookCover';

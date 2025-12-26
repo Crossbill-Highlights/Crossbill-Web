@@ -5,7 +5,7 @@ import {
 } from '@/api/generated/books/books';
 import type { Bookmark, Highlight, HighlightTagInBook } from '@/api/generated/model';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
-import { ArrowBack as ArrowBackIcon, ArrowForward as ArrowForwardIcon } from '@mui/icons-material';
+import { ArrowBackIcon, ArrowForwardIcon } from '@/components/common/Icons';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';

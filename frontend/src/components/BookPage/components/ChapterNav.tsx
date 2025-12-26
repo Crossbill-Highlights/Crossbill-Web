@@ -1,5 +1,5 @@
 import { Collapsable } from '@/components/common/animations/Collapsable';
-import { ExpandMore as ExpandMoreIcon, List as ListIcon } from '@mui/icons-material';
+import { ChapterListIcon, ExpandMoreIcon } from '@/components/common/Icons';
 import { Box, IconButton, Typography } from '@mui/material';
 import { useState } from 'react';
 import type { ChapterData } from './ChapterList';
@@ -40,7 +40,7 @@ export const ChapterNav = ({ chapters, onChapterClick, hideTitle }: ChapterNavPr
           onClick={() => setIsExpanded((prev) => !prev)}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ListIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+            <ChapterListIcon sx={{ fontSize: 20, color: 'primary.main' }} />
             <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
               Chapters
             </Typography>

@@ -1,11 +1,6 @@
 import type { BookDetails } from '@/api/generated/model';
 import { TagList } from '@/components/BookPage/components/TagList.tsx';
-import {
-  BookmarkBorder as BookmarkIcon,
-  Edit as EditIcon,
-  ExpandLess as ExpandLessIcon,
-  ExpandMore as ExpandMoreIcon,
-} from '@mui/icons-material';
+import { BookmarkIcon, EditIcon, ExpandLessIcon, ExpandMoreIcon } from '@/components/common/Icons';
 import { Box, Button, Typography } from '@mui/material';
 import DOMPurify from 'dompurify';
 import { useMemo, useState } from 'react';

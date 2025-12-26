@@ -1,12 +1,12 @@
 import type { Bookmark, Highlight } from '@/api/generated/model';
 import { TagList } from '@/components/BookPage/components/TagList.tsx';
 import {
-  Bookmark as BookmarkIcon,
-  CalendarMonth as CalendarIcon,
-  School as FlashcardIcon,
-  Notes as NotesIcon,
-  FormatQuote as QuoteIcon,
-} from '@mui/icons-material';
+  BookmarkFilledIcon,
+  DateIcon,
+  FlashcardsIcon,
+  NotesIcon,
+  QuoteIcon,
+} from '@/components/common/Icons';
 import { Box, CardActionArea, Typography } from '@mui/material';
 
 export interface HighlightCardProps {
@@ -41,7 +41,7 @@ const Footer = ({ highlight, bookmark }: FooterProps) => {
           opacity: 0.6,
         }}
       >
-        <CalendarIcon
+        <DateIcon
           sx={(theme) => ({
             fontSize: 14,
             color:
@@ -66,7 +66,7 @@ const Footer = ({ highlight, bookmark }: FooterProps) => {
           {hasBookmark && (
             <span>
               &nbsp;&nbsp;•
-              <BookmarkIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
+              <BookmarkFilledIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
             </span>
           )}
           {highlight.note && (
@@ -78,7 +78,7 @@ const Footer = ({ highlight, bookmark }: FooterProps) => {
           {!!highlight.flashcards?.length && (
             <span>
               &nbsp;&nbsp;•
-              <FlashcardIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
+              <FlashcardsIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
               <span>&nbsp;&nbsp;{highlight.flashcards.length}</span>
             </span>
           )}

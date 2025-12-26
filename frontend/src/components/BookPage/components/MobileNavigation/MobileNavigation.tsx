@@ -1,10 +1,5 @@
 import { BookDetails, Bookmark, Highlight } from '@/api/generated/model';
-import {
-  Bookmark as BookmarkIcon,
-  Close as CloseIcon,
-  List as ListIcon,
-  LocalOffer as TagIcon,
-} from '@mui/icons-material';
+import { BookmarkFilledIcon, ChapterListIcon, CloseIcon, TagIcon } from '@/components/common/Icons';
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -168,8 +163,8 @@ export const MobileNavigation = ({
   const getDrawerTitle = (type: DrawerContentType): React.ReactNode => {
     const config: Record<DrawerContentType, { icon: React.ReactNode; text: string }> = {
       tags: { icon: <TagIcon />, text: 'Tags' },
-      bookmarks: { icon: <BookmarkIcon />, text: 'Bookmarks' },
-      chapters: { icon: <ListIcon />, text: 'Chapters' },
+      bookmarks: { icon: <BookmarkFilledIcon />, text: 'Bookmarks' },
+      chapters: { icon: <ChapterListIcon />, text: 'Chapters' },
     };
 
     const { icon, text } = config[type];
@@ -208,14 +203,14 @@ export const MobileNavigation = ({
             />
             <BottomNavigationAction
               label="Bookmarks"
-              icon={<BookmarkIcon />}
+              icon={<BookmarkFilledIcon />}
               onClick={() => {
                 setDrawerContent('bookmarks');
               }}
             />
             <BottomNavigationAction
               label="Chapters"
-              icon={<ListIcon />}
+              icon={<ChapterListIcon />}
               onClick={() => {
                 setDrawerContent('chapters');
               }}

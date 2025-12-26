@@ -1,4 +1,4 @@
-import { Logout, Menu as MenuIcon, Settings } from '@mui/icons-material';
+import { LogoutIcon, MenuIcon, SettingsIcon } from '@/components/common/Icons';
 import {
   Box,
   Button,
@@ -125,13 +125,13 @@ export function AppBar() {
           >
             <MenuItem component={Link} to="/settings" onClick={handleMenuClose}>
               <ListItemIcon>
-                <Settings fontSize="small" />
+                <SettingsIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Preferences</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleLogout}>
               <ListItemIcon>
-                <Logout fontSize="small" />
+                <LogoutIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Logout</ListItemText>
             </MenuItem>

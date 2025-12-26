@@ -1,5 +1,5 @@
 import type { Highlight } from '@/api/generated/model';
-import { CalendarMonth as CalendarIcon, FormatQuote as QuoteIcon } from '@mui/icons-material';
+import { DateIcon, QuoteIcon } from '@/components/common/Icons';
 import { Box, Typography } from '@mui/material';
 
 interface HighlightContentProps {
@@ -57,7 +57,7 @@ export const HighlightContent = ({ highlight }: HighlightContentProps) => {
 
       {/* Metadata */}
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', opacity: 0.8 }}>
-        <CalendarIcon
+        <DateIcon
           sx={{
             fontSize: 20,
             color: 'text.secondary',

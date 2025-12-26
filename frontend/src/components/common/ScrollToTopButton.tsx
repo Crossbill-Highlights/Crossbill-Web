@@ -1,4 +1,4 @@
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { ScrollToTopIcon } from '@/components/common/Icons';
 import { Fab, Zoom } from '@mui/material';
 import { useEffect, useState } from 'react';
 
@@ -55,7 +55,7 @@ export const ScrollToTopButton = ({
           zIndex: 1000,
         }}
       >
-        <KeyboardArrowUpIcon />
+        <ScrollToTopIcon />
       </Fab>
     </Zoom>
   );

@@ -5,14 +5,14 @@ import {
 } from '@/api/generated/books/books';
 import type { Bookmark } from '@/api/generated/model';
 import {
-  BookmarkBorder as BookmarkBorderIcon,
-  Bookmark as BookmarkIcon,
-  ContentCopy as ContentCopyIcon,
-  Delete as DeleteIcon,
-  School as FlashcardIcon,
-  Link as LinkIcon,
-  Notes as NotesIcon,
-} from '@mui/icons-material';
+  BookmarkFilledIcon,
+  BookmarkIcon,
+  CopyIcon,
+  DeleteIcon,
+  FlashcardsIcon,
+  LinkIcon,
+  NotesIcon,
+} from '@/components/common/Icons';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -125,7 +125,7 @@ export const Toolbar = ({
           aria-label="Copy highlight text"
           size="small"
         >
-          <ContentCopyIcon />
+          <CopyIcon />
         </IconButton>
       </Tooltip>
       <Tooltip title={bookmark ? 'Remove bookmark' : 'Add bookmark'}>
@@ -135,7 +135,7 @@ export const Toolbar = ({
           aria-label={bookmark ? 'Remove bookmark' : 'Add bookmark'}
           size="small"
         >
-          {bookmark ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+          {bookmark ? <BookmarkFilledIcon /> : <BookmarkIcon />}
         </IconButton>
       </Tooltip>
       <Tooltip title={noteVisible ? 'Hide note' : 'Show note'}>
@@ -155,7 +155,7 @@ export const Toolbar = ({
           aria-label={flashcardVisible ? 'Hide flashcards' : 'Show flashcards'}
           size="small"
         >
-          <FlashcardIcon />
+          <FlashcardsIcon />
         </IconButton>
       </Tooltip>
       <Tooltip title="Delete highlight">
