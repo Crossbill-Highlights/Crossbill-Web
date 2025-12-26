@@ -22,13 +22,14 @@ export interface FlashcardCardProps {
   onEdit: () => void;
 }
 
-const FlashcardStyled = styled(Card)(() => ({
+const FlashcardStyled = styled(Card)(({ theme }) => ({
   height: 'fit-content',
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
   transition: 'all 0.2s ease',
   bgcolor: 'background.paper',
+  borderColor: theme.palette.divider,
   '&:hover': {
     transform: 'translateY(-2px)',
     boxShadow: 3,
@@ -105,7 +106,7 @@ export const FlashcardListCard = ({ flashcard, bookId, onEdit }: FlashcardCardPr
           justifyContent: 'flex-start',
         }}
       >
-        <CardContent sx={{ width: '100%', pt: 3 }}>
+        <CardContent sx={{ width: '100%', pt: 2 }}>
           {/* Question */}
           <Box
             sx={{
@@ -126,7 +127,7 @@ export const FlashcardListCard = ({ flashcard, bookId, onEdit }: FlashcardCardPr
             >
               Question
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: 500, lineHeight: 1.5 }}>
+            <Typography variant="body1" sx={{ lineHeight: 1.5 }}>
               {flashcard.question}
             </Typography>
           </Box>
