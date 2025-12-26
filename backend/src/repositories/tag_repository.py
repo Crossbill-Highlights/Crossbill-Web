@@ -42,13 +42,6 @@ class TagRepository:
         logger.info(f"Created tag: {tag.name} (id={tag.id}, user_id={user_id})")
         return tag
 
-    def get_or_create(self, name: str, user_id: int) -> models.Tag:
-        """Get existing tag by name for user or create a new one."""
-        tag = self.get_by_name(name, user_id)
-        if tag:
-            return tag
-        return self.create(name, user_id)
-
     def get_all(self, user_id: int) -> list[models.Tag]:
         """Get all tags for a specific user."""
         stmt = select(models.Tag).where(models.Tag.user_id == user_id).order_by(models.Tag.name)
