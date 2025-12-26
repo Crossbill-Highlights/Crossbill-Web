@@ -219,13 +219,15 @@ export const MobileNavigation = ({
                 setDrawerContent('tags');
               }}
             />
-            <BottomNavigationAction
-              label="Bookmarks"
-              icon={<BookmarkFilledIcon />}
-              onClick={() => {
-                setDrawerContent('bookmarks');
-              }}
-            />
+            {currentTab === 'highlights' && (
+              <BottomNavigationAction
+                label="Bookmarks"
+                icon={<BookmarkFilledIcon />}
+                onClick={() => {
+                  setDrawerContent('bookmarks');
+                }}
+              />
+            )}
             <BottomNavigationAction
               label="Chapters"
               icon={<ChapterListIcon />}
