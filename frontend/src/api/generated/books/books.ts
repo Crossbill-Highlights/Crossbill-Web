@@ -1563,13 +1563,13 @@ Raises:
     HTTPException: If book or highlight not found, or creation fails
  * @summary Create Bookmark
  */
-export const createBookmarkApiV1BooksBookIdBookmarkPost = (
+export const createBookmarkApiV1BooksBookIdBookmarksPost = (
   bookId: number,
   bookmarkCreateRequest: BookmarkCreateRequest,
   signal?: AbortSignal
 ) => {
   return axiosInstance<Bookmark>({
-    url: `/api/v1/books/${bookId}/bookmark`,
+    url: `/api/v1/books/${bookId}/bookmarks`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     data: bookmarkCreateRequest,
@@ -1577,23 +1577,23 @@ export const createBookmarkApiV1BooksBookIdBookmarkPost = (
   });
 };
 
-export const getCreateBookmarkApiV1BooksBookIdBookmarkPostMutationOptions = <
+export const getCreateBookmarkApiV1BooksBookIdBookmarksPostMutationOptions = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarkPost>>,
+    Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarksPost>>,
     TError,
     { bookId: number; data: BookmarkCreateRequest },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarkPost>>,
+  Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarksPost>>,
   TError,
   { bookId: number; data: BookmarkCreateRequest },
   TContext
 > => {
-  const mutationKey = ['createBookmarkApiV1BooksBookIdBookmarkPost'];
+  const mutationKey = ['createBookmarkApiV1BooksBookIdBookmarksPost'];
   const { mutation: mutationOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
@@ -1601,33 +1601,33 @@ export const getCreateBookmarkApiV1BooksBookIdBookmarkPostMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarkPost>>,
+    Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarksPost>>,
     { bookId: number; data: BookmarkCreateRequest }
   > = (props) => {
     const { bookId, data } = props ?? {};
 
-    return createBookmarkApiV1BooksBookIdBookmarkPost(bookId, data);
+    return createBookmarkApiV1BooksBookIdBookmarksPost(bookId, data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type CreateBookmarkApiV1BooksBookIdBookmarkPostMutationResult = NonNullable<
-  Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarkPost>>
+export type CreateBookmarkApiV1BooksBookIdBookmarksPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarksPost>>
 >;
-export type CreateBookmarkApiV1BooksBookIdBookmarkPostMutationBody = BookmarkCreateRequest;
-export type CreateBookmarkApiV1BooksBookIdBookmarkPostMutationError = HTTPValidationError;
+export type CreateBookmarkApiV1BooksBookIdBookmarksPostMutationBody = BookmarkCreateRequest;
+export type CreateBookmarkApiV1BooksBookIdBookmarksPostMutationError = HTTPValidationError;
 
 /**
  * @summary Create Bookmark
  */
-export const useCreateBookmarkApiV1BooksBookIdBookmarkPost = <
+export const useCreateBookmarkApiV1BooksBookIdBookmarksPost = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarkPost>>,
+      Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarksPost>>,
       TError,
       { bookId: number; data: BookmarkCreateRequest },
       TContext
@@ -1635,106 +1635,12 @@ export const useCreateBookmarkApiV1BooksBookIdBookmarkPost = <
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarkPost>>,
+  Awaited<ReturnType<typeof createBookmarkApiV1BooksBookIdBookmarksPost>>,
   TError,
   { bookId: number; data: BookmarkCreateRequest },
   TContext
 > => {
-  const mutationOptions = getCreateBookmarkApiV1BooksBookIdBookmarkPostMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Delete a bookmark from a book.
-
-This operation is idempotent - calling it on a non-existent bookmark
-will succeed and return 200 without error.
-
-Args:
-    book_id: ID of the book
-    bookmark_id: ID of the bookmark to delete
-    db: Database session
-
-Raises:
-    HTTPException: If book not found or deletion fails
- * @summary Delete Bookmark
- */
-export const deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete = (
-  bookId: number,
-  bookmarkId: number
-) => {
-  return axiosInstance<unknown>({
-    url: `/api/v1/books/${bookId}/bookmark/${bookmarkId}`,
-    method: 'DELETE',
-  });
-};
-
-export const getDeleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDeleteMutationOptions = <
-  TError = HTTPValidationError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete>>,
-    TError,
-    { bookId: number; bookmarkId: number },
-    TContext
-  >;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete>>,
-  TError,
-  { bookId: number; bookmarkId: number },
-  TContext
-> => {
-  const mutationKey = ['deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete'];
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete>>,
-    { bookId: number; bookmarkId: number }
-  > = (props) => {
-    const { bookId, bookmarkId } = props ?? {};
-
-    return deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete(bookId, bookmarkId);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type DeleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDeleteMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete>>
->;
-
-export type DeleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDeleteMutationError =
-  HTTPValidationError;
-
-/**
- * @summary Delete Bookmark
- */
-export const useDeleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete = <
-  TError = HTTPValidationError,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete>>,
-      TError,
-      { bookId: number; bookmarkId: number },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete>>,
-  TError,
-  { bookId: number; bookmarkId: number },
-  TContext
-> => {
-  const mutationOptions =
-    getDeleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDeleteMutationOptions(options);
+  const mutationOptions = getCreateBookmarkApiV1BooksBookIdBookmarksPostMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
@@ -1897,6 +1803,100 @@ export function useGetBookmarksApiV1BooksBookIdBookmarksGet<
   return query;
 }
 
+/**
+ * Delete a bookmark from a book.
+
+This operation is idempotent - calling it on a non-existent bookmark
+will succeed and return 200 without error.
+
+Args:
+    book_id: ID of the book
+    bookmark_id: ID of the bookmark to delete
+    db: Database session
+
+Raises:
+    HTTPException: If book not found or deletion fails
+ * @summary Delete Bookmark
+ */
+export const deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete = (
+  bookId: number,
+  bookmarkId: number
+) => {
+  return axiosInstance<unknown>({
+    url: `/api/v1/books/${bookId}/bookmarks/${bookmarkId}`,
+    method: 'DELETE',
+  });
+};
+
+export const getDeleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDeleteMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete>>,
+    TError,
+    { bookId: number; bookmarkId: number },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete>>,
+  TError,
+  { bookId: number; bookmarkId: number },
+  TContext
+> => {
+  const mutationKey = ['deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete'];
+  const { mutation: mutationOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete>>,
+    { bookId: number; bookmarkId: number }
+  > = (props) => {
+    const { bookId, bookmarkId } = props ?? {};
+
+    return deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete(bookId, bookmarkId);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDeleteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete>>
+>;
+
+export type DeleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDeleteMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Delete Bookmark
+ */
+export const useDeleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete>>,
+      TError,
+      { bookId: number; bookmarkId: number },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete>>,
+  TError,
+  { bookId: number; bookmarkId: number },
+  TContext
+> => {
+  const mutationOptions =
+    getDeleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDeleteMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 /**
  * Create a standalone flashcard for a book (without a highlight).
 

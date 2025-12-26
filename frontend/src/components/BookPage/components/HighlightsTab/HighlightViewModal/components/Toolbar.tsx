@@ -1,8 +1,8 @@
 import {
   getGetBookDetailsApiV1BooksBookIdGetQueryKey,
-  useCreateBookmarkApiV1BooksBookIdBookmarkPost,
-  useDeleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete,
-} from '@/api/generated/books/books.ts';
+  useCreateBookmarkApiV1BooksBookIdBookmarksPost,
+  useDeleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete,
+} from '@/api/generated/books/books';
 import type { Bookmark } from '@/api/generated/model';
 import {
   BookmarkFilledIcon,
@@ -12,7 +12,7 @@ import {
   FlashcardsIcon,
   LinkIcon,
   NotesIcon,
-} from '@/components/common/Icons.tsx';
+} from '@/components/common/Icons';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -45,7 +45,7 @@ export const Toolbar = ({
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const createBookmarkMutation = useCreateBookmarkApiV1BooksBookIdBookmarkPost({
+  const createBookmarkMutation = useCreateBookmarkApiV1BooksBookIdBookmarksPost({
     mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries({
@@ -59,7 +59,7 @@ export const Toolbar = ({
     },
   });
 
-  const deleteBookmarkMutation = useDeleteBookmarkApiV1BooksBookIdBookmarkBookmarkIdDelete({
+  const deleteBookmarkMutation = useDeleteBookmarkApiV1BooksBookIdBookmarksBookmarkIdDelete({
     mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries({

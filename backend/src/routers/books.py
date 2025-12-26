@@ -596,7 +596,7 @@ def remove_tag_from_highlight(
 
 
 @router.post(
-    "/{book_id}/bookmark",
+    "/{book_id}/bookmarks",
     response_model=schemas.Bookmark,
     status_code=status.HTTP_201_CREATED,
 )
@@ -638,7 +638,7 @@ def create_bookmark(
 
 
 @router.delete(
-    "/{book_id}/bookmark/{bookmark_id}",
+    "/{book_id}/bookmarks/{bookmark_id}",
     status_code=status.HTTP_200_OK,
 )
 def delete_bookmark(
