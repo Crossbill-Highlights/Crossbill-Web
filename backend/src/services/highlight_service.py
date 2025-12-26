@@ -93,7 +93,7 @@ class HighlightService:
         self.db.commit()
 
         # Step 3: Bulk create highlights
-        created, skipped = self.highlight_repo.bulk_create(
+        highlights_created, highlights_skipped = self.highlight_repo.bulk_create(
             book.id, user_id, highlights_with_chapters
         )
 
@@ -105,16 +105,16 @@ class HighlightService:
             "upload_complete",
             book_id=book.id,
             book_title=book.title,
-            highlights_created=created,
-            highlights_skipped=skipped,
+            highlights_created=highlights_created,
+            highlights_skipped=highlights_skipped,
         )
 
         return schemas.HighlightUploadResponse(
             success=True,
             message=message,
             book_id=book.id,
-            highlights_created=created,
-            highlights_skipped=skipped,
+            highlights_created=highlights_created,
+            highlights_skipped=highlights_skipped,
         )
 
     def search_highlights(

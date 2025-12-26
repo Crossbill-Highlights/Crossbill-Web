@@ -2,7 +2,7 @@
 
 import logging
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from src import models
@@ -114,3 +114,11 @@ class FlashcardRepository:
         self.db.flush()
         logger.info(f"Deleted flashcard: id={flashcard_id}")
         return True
+
+    def count_by_book_id(self, book_id: int, user_id: int) -> int:
+        """Count flashcards for a specific book, verifying user ownership."""
+        stmt = select(func.count(models.Flashcard.id)).where(
+            models.Flashcard.book_id == book_id,
+            models.Flashcard.user_id == user_id,
+        )
+        return self.db.execute(stmt).scalar() or 0

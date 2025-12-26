@@ -27,6 +27,7 @@ class BookService:
         self.highlight_repo = repositories.HighlightRepository(db)
         self.highlight_tag_repo = repositories.HighlightTagRepository(db)
         self.bookmark_repo = repositories.BookmarkRepository(db)
+        self.flashcard_repo = repositories.FlashcardRepository(db)
 
     def get_book_details(self, book_id: int, user_id: int) -> schemas.BookDetails:
         """
@@ -267,12 +268,13 @@ class BookService:
         # Commit the changes
         self.db.commit()
 
-        # Get highlight count for the response
+        # Get highlight and flashcard counts for the response
         highlight_count = self.highlight_repo.count_by_book_id(book_id, user_id)
+        flashcard_count = self.flashcard_repo.count_by_book_id(book_id, user_id)
 
         logger.info(f"Successfully updated book {book_id}")
 
-        # Return updated book with highlight count
+        # Return updated book with highlight and flashcard counts
         return schemas.BookWithHighlightCount(
             id=updated_book.id,
             title=updated_book.title,
@@ -283,6 +285,7 @@ class BookService:
             language=updated_book.language,
             page_count=updated_book.page_count,
             highlight_count=highlight_count,
+            flashcard_count=flashcard_count,
             tags=[schemas.TagInBook.model_validate(tag) for tag in updated_book.tags],
             created_at=updated_book.created_at,
             updated_at=updated_book.updated_at,
