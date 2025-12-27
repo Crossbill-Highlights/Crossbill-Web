@@ -1,6 +1,3 @@
-// Module-level token storage (not accessible to XSS)
-// This is kept separate from AuthContext to avoid circular dependency with axios-instance
-
 let accessToken: string | null = null;
 let tokenExpiresAt: number | null = null;
 

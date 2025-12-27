@@ -16,9 +16,6 @@ import type { UserDetailsResponse } from '../api/generated/model';
 import { getRegisterApiV1UsersRegisterPostMutationOptions } from '../api/generated/users/users';
 import { clearTokens, getAccessToken, setAccessToken } from '../api/token-manager';
 
-// Legacy localStorage key for migration cleanup
-const LEGACY_AUTH_TOKEN_KEY = 'auth_token';
-
 interface AuthContextType {
   user: UserDetailsResponse | null;
   isAuthenticated: boolean;
@@ -122,9 +119,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // On mount: clean up legacy localStorage and try to restore session via refresh
   useEffect(() => {
     const initAuth = async () => {
-      // Clean up legacy localStorage token (migration)
-      localStorage.removeItem(LEGACY_AUTH_TOKEN_KEY);
-
       // Try to restore session from httpOnly cookie
       const success = await silentRefresh();
       if (success) {
