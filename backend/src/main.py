@@ -18,7 +18,7 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import sessionmaker
-from starlette.middleware.base import RequestResponseEndpoint
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from src.config import configure_logging, get_settings
 from src.database import get_engine
@@ -164,6 +164,17 @@ async def add_request_id_and_logging(
 
     return response
 
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Configure CORS
 # Note: When using wildcard origins, credentials must be False
