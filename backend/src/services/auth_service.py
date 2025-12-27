@@ -16,14 +16,23 @@ from src.repositories import UserRepository
 
 settings = get_settings()
 SECRET_KEY = settings.SECRET_KEY
+REFRESH_TOKEN_SECRET_KEY = settings.REFRESH_TOKEN_SECRET_KEY or SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+REFRESH_TOKEN_EXPIRE_DAYS = settings.REFRESH_TOKEN_EXPIRE_DAYS
 DUMMY_HASH = "fasdflkdfjdlkfjlfdjsdlkasfsf"
 
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class TokenWithRefresh(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+    expires_in: int
 
 
 class TokenData(BaseModel):
@@ -74,8 +83,44 @@ def create_access_token(data: dict[str, str], expires_delta: timedelta | None = 
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "type": "access"})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def create_refresh_token(user_id: int) -> str:
+    """Create a refresh token for the given user."""
+    expire = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode = {"sub": str(user_id), "exp": expire, "type": "refresh"}
+    return jwt.encode(to_encode, REFRESH_TOKEN_SECRET_KEY, algorithm=ALGORITHM)
+
+
+def verify_refresh_token(token: str) -> int | None:
+    """Verify a refresh token and return the user_id if valid."""
+    try:
+        payload = jwt.decode(token, REFRESH_TOKEN_SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "refresh":
+            return None
+        user_id = payload.get("sub")
+        if user_id is None:
+            return None
+        return int(user_id)
+    except (InvalidTokenError, ValueError):
+        return None
+
+
+def create_token_pair(user_id: int) -> TokenWithRefresh:
+    """Create both access and refresh tokens for a user."""
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(user_id)}, expires_delta=access_token_expires
+    )
+    refresh_token = create_refresh_token(user_id)
+    return TokenWithRefresh(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",  # noqa: S106
+        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,  # Convert to seconds
+    )
 
 
 async def get_current_user(
@@ -83,6 +128,9 @@ async def get_current_user(
 ) -> User:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # Reject refresh tokens - they should only be used at the /refresh endpoint
+        if payload.get("type") == "refresh":
+            raise CredentialsException
         user_id = payload.get("sub")
         if user_id is None:
             raise CredentialsException
