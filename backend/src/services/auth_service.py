@@ -18,6 +18,7 @@ settings = get_settings()
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+DUMMY_HASH = "fasdflkdfjdlkfjlfdjsdlkasfsf"
 
 
 class Token(BaseModel):
@@ -60,6 +61,7 @@ def _get_user_by_id(db: DatabaseSession, id: int) -> User | None:
 def authenticate_user(email: str, password: str, db: DatabaseSession) -> User | None:
     user = _get_user_by_email(db, email)
     if not user:
+        _verify_password(password, DUMMY_HASH)  # Constant time to avoid timing difference
         return None
     if not user.hashed_password or not _verify_password(password, user.hashed_password):
         return None
