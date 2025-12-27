@@ -70,25 +70,22 @@ def _get_user_by_id(db: DatabaseSession, id: int) -> User | None:
 def authenticate_user(email: str, password: str, db: DatabaseSession) -> User | None:
     user = _get_user_by_email(db, email)
     if not user:
-        _verify_password(password, DUMMY_HASH)  # Constant time to avoid timing difference
+        _verify_password(
+            password, DUMMY_HASH
+        )  # Constant time to avoid timing difference
         return None
     if not user.hashed_password or not _verify_password(password, user.hashed_password):
         return None
     return user
 
 
-def create_access_token(data: dict[str, str], expires_delta: timedelta | None = None) -> str:
-    to_encode: dict[str, str | datetime] = dict(data)
-    if expires_delta:
-        expire = datetime.now(UTC) + expires_delta
-    else:
-        expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire, "type": "access"})
+def create_access_token(user_id: int) -> str:
+    expire = datetime.now(UTC) + timedelta(days=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode = {"sub": str(user_id), "exp": expire, "type": "access"}
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def create_refresh_token(user_id: int) -> str:
-    """Create a refresh token for the given user."""
     expire = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode = {"sub": str(user_id), "exp": expire, "type": "refresh"}
     return jwt.encode(to_encode, REFRESH_TOKEN_SECRET_KEY, algorithm=ALGORITHM)
@@ -109,11 +106,7 @@ def verify_refresh_token(token: str) -> int | None:
 
 
 def create_token_pair(user_id: int) -> TokenWithRefresh:
-    """Create both access and refresh tokens for a user."""
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": str(user_id)}, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(user_id)
     refresh_token = create_refresh_token(user_id)
     return TokenWithRefresh(
         access_token=access_token,
