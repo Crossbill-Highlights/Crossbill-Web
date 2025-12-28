@@ -33,7 +33,7 @@ class UserRepository:
         self.db.add(user)
         self.db.flush()
         self.db.refresh(user)
-        logger.info(f"Created user: {user.email} (id={user.id})")
+        logger.info(f"Created user: (id={user.id})")
         return user
 
     def create_with_password(self, email: str, hashed_password: str) -> models.User:

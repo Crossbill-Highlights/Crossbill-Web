@@ -9,13 +9,16 @@ from pathlib import Path
 from typing import Any
 
 import structlog
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pwdlib import PasswordHash
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import sessionmaker
-from starlette.middleware.base import RequestResponseEndpoint
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from src.config import configure_logging, get_settings
 from src.database import get_engine
@@ -30,9 +33,6 @@ settings = get_settings()
 configure_logging(settings.ENVIRONMENT)
 
 logger = structlog.get_logger(__name__)
-
-# Directory for book cover images
-COVERS_DIR = Path(__file__).parent.parent / "book-covers"
 
 # Directory for frontend static files
 STATIC_DIR = Path(__file__).parent.parent / "static"
@@ -97,6 +97,27 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Configure rate limiter
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    """Handle rate limit exceeded errors."""
+    logger.warning(
+        "rate_limit_exceeded",
+        path=request.url.path,
+        client_host=request.client.host if request.client else None,
+    )
+    return JSONResponse(
+        status_code=429,
+        content={
+            "error": "rate_limit_exceeded",
+            "message": "Too many requests. Please try again later.",
+        },
+    )
+
 
 # Add request ID middleware
 @app.middleware("http")
@@ -140,6 +161,18 @@ async def add_request_id_and_logging(
 
     return response
 
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        if settings.ENVIRONMENT != "development":
+            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Configure CORS
 # Note: When using wildcard origins, credentials must be False
@@ -201,11 +234,6 @@ app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(users.router, prefix=settings.API_V1_PREFIX)
 app.include_router(settings_router.router, prefix=settings.API_V1_PREFIX)
 
-# Mount static files for book covers
-# Ensure directory exists before mounting
-COVERS_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/media/covers", StaticFiles(directory=str(COVERS_DIR)), name="covers")
-
 
 @app.get("/health")
 async def health() -> dict[str, str]:
@@ -234,7 +262,12 @@ if STATIC_DIR.exists():
     async def serve_spa(full_path: str) -> FileResponse:
         """Serve the SPA for all non-API routes."""
         # If the path is a file that exists in static, serve it
-        file_path = STATIC_DIR / full_path
+        file_path = (STATIC_DIR / full_path).resolve()
+
+        # Validate that the resolved path is within STATIC_DIR to prevent path traversal
+        if not file_path.is_relative_to(STATIC_DIR):
+            raise HTTPException(status_code=404, detail="Not found")
+
         if file_path.is_file():
             return FileResponse(file_path)
         # Otherwise serve index.html for client-side routing

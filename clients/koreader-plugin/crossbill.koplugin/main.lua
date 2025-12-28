@@ -27,6 +27,10 @@ function CrossbillSync:init()
 			username = "",
 			password = "",
 			autosync_enabled = false,
+			-- Token caching for refresh token support
+			access_token = nil,
+			refresh_token = nil,
+			token_expires_at = nil,
 		}
 
 	self.ui.menu:registerToMainMenu(self)
@@ -137,6 +141,7 @@ end
 function CrossbillSync:login()
 	-- Authenticate with the server and return an access token
 	-- Returns token string on success, nil on failure
+	-- Also stores refresh_token and token_expires_at for later use
 	local username = self.settings.username or ""
 	local password = self.settings.password or ""
 
@@ -177,6 +182,13 @@ function CrossbillSync:login()
 		local ok, response_data = pcall(JSON.decode, response_text)
 		if ok and response_data.access_token then
 			logger.dbg("Crossbill: Login successful")
+			-- Store tokens for refresh support
+			self.settings.access_token = response_data.access_token
+			self.settings.refresh_token = response_data.refresh_token
+			if response_data.expires_in then
+				self.settings.token_expires_at = os.time() + response_data.expires_in
+			end
+			G_reader_settings:saveSetting("crossbill_sync", self.settings)
 			return response_data.access_token
 		else
 			logger.err("Crossbill: Invalid login response:", response_text)
@@ -186,6 +198,97 @@ function CrossbillSync:login()
 		logger.err("Crossbill: Login failed with code:", code)
 		return nil, "Login failed: " .. tostring(code)
 	end
+end
+
+function CrossbillSync:refreshToken()
+	-- Refresh the access token using the stored refresh token
+	-- Returns new access token on success, nil on failure
+	local refresh_token = self.settings.refresh_token
+	if not refresh_token then
+		logger.dbg("Crossbill: No refresh token available")
+		return nil, "No refresh token"
+	end
+
+	local api_url = self.settings.base_url .. "/api/v1/auth/refresh"
+	logger.dbg("Crossbill: Refreshing token at", api_url)
+
+	-- Send refresh token in request body (for plugin clients)
+	local body = JSON.encode({ refresh_token = refresh_token })
+
+	local response_body = {}
+	local request = {
+		url = api_url,
+		method = "POST",
+		headers = {
+			["Content-Type"] = "application/json",
+			["Accept"] = "application/json",
+			["Content-Length"] = tostring(#body),
+		},
+		source = ltn12.source.string(body),
+		sink = ltn12.sink.table(response_body),
+	}
+
+	local code
+	if api_url:match("^https://") then
+		code = socket.skip(1, https.request(request))
+	else
+		code = socket.skip(1, http.request(request))
+	end
+	socketutil:reset_timeout()
+
+	if code == 200 then
+		local response_text = table.concat(response_body)
+		local ok, response_data = pcall(JSON.decode, response_text)
+		if ok and response_data.access_token then
+			logger.dbg("Crossbill: Token refresh successful")
+			-- Store new tokens
+			self.settings.access_token = response_data.access_token
+			self.settings.refresh_token = response_data.refresh_token
+			if response_data.expires_in then
+				self.settings.token_expires_at = os.time() + response_data.expires_in
+			end
+			G_reader_settings:saveSetting("crossbill_sync", self.settings)
+			return response_data.access_token
+		else
+			logger.err("Crossbill: Invalid refresh response:", response_text)
+			return nil, "Invalid server response"
+		end
+	else
+		logger.err("Crossbill: Token refresh failed with code:", code)
+		-- Clear stored tokens on refresh failure
+		self.settings.access_token = nil
+		self.settings.refresh_token = nil
+		self.settings.token_expires_at = nil
+		G_reader_settings:saveSetting("crossbill_sync", self.settings)
+		return nil, "Refresh failed: " .. tostring(code)
+	end
+end
+
+function CrossbillSync:getValidToken()
+	-- Get a valid access token, refreshing or re-authenticating if needed
+	-- Returns token string on success, nil on failure
+	local current_time = os.time()
+	local expires_at = self.settings.token_expires_at
+
+	-- Check if we have a cached token that's still valid (with 60s buffer)
+	if self.settings.access_token and expires_at and (expires_at - 60) > current_time then
+		logger.dbg("Crossbill: Using cached access token")
+		return self.settings.access_token
+	end
+
+	-- Try to refresh the token if we have a refresh token
+	if self.settings.refresh_token then
+		logger.dbg("Crossbill: Access token expired or missing, trying refresh")
+		local token, err = self:refreshToken()
+		if token then
+			return token
+		end
+		logger.dbg("Crossbill: Refresh failed:", err)
+	end
+
+	-- Fall back to full login
+	logger.dbg("Crossbill: Falling back to full login")
+	return self:login()
 end
 
 function CrossbillSync:ensureWifiEnabled(callback)
@@ -470,16 +573,16 @@ function CrossbillSync:sendToServer(book_data, highlights, is_autosync)
 	-- Wrap everything in pcall for error handling
 	-- is_autosync: if true, don't show result popup (silent mode)
 	local success, result = pcall(function()
-		-- Login first to get auth token
-		local token, login_err = self:login()
+		-- Get a valid auth token (will refresh or login as needed)
+		local token, auth_err = self:getValidToken()
 		if not token then
 			if not is_autosync then
 				UIManager:show(InfoMessage:new({
-					text = _("Authentication failed: ") .. (login_err or "unknown error"),
+					text = _("Authentication failed: ") .. (auth_err or "unknown error"),
 					timeout = 5,
 				}))
 			end
-			return false, login_err
+			return false, auth_err
 		end
 
 		local payload = {

@@ -6,20 +6,26 @@ import { BooksListResponse, BookDetails } from './types';
 
 export interface LoginResponse {
   access_token: string;
+  refresh_token: string;
   token_type: string;
+  expires_in: number;
 }
 
 export class CrossbillAPI {
   private bearerToken: string = '';
+  private refreshToken: string = '';
+  private tokenExpiresAt: number | null = null;
   private email: string = '';
   private password: string = '';
-  private onTokenUpdate?: (token: string) => Promise<void>;
+  private onTokenUpdate?: (token: string, refreshToken: string, expiresAt: number) => Promise<void>;
 
   constructor(
     private serverHost: string,
     bearerToken?: string,
     email?: string,
-    password?: string
+    password?: string,
+    refreshToken?: string,
+    tokenExpiresAt?: number
   ) {
     if (bearerToken) {
       this.bearerToken = bearerToken;
@@ -30,6 +36,12 @@ export class CrossbillAPI {
     if (password) {
       this.password = password;
     }
+    if (refreshToken) {
+      this.refreshToken = refreshToken;
+    }
+    if (tokenExpiresAt) {
+      this.tokenExpiresAt = tokenExpiresAt;
+    }
   }
 
   setCredentials(email: string, password: string) {
@@ -37,19 +49,79 @@ export class CrossbillAPI {
     this.password = password;
   }
 
-  setBearerToken(token: string) {
+  setBearerToken(token: string, refreshToken?: string, expiresAt?: number) {
     this.bearerToken = token;
+    if (refreshToken !== undefined) {
+      this.refreshToken = refreshToken;
+    }
+    if (expiresAt !== undefined) {
+      this.tokenExpiresAt = expiresAt;
+    }
   }
 
-  setOnTokenUpdate(callback: (token: string) => Promise<void>) {
+  setOnTokenUpdate(callback: (token: string, refreshToken: string, expiresAt: number) => Promise<void>) {
     this.onTokenUpdate = callback;
   }
 
+  private isTokenExpired(): boolean {
+    if (!this.tokenExpiresAt) {
+      return true;
+    }
+    // Check with 60 second buffer
+    return Date.now() > (this.tokenExpiresAt - 60000);
+  }
+
+  private async refreshAccessToken(): Promise<boolean> {
+    if (!this.refreshToken) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${this.serverHost}/api/v1/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh_token: this.refreshToken }),
+      });
+
+      if (!response.ok) {
+        // Clear tokens on refresh failure
+        this.refreshToken = '';
+        this.tokenExpiresAt = null;
+        return false;
+      }
+
+      const data: LoginResponse = await response.json();
+      this.bearerToken = data.access_token;
+      this.refreshToken = data.refresh_token;
+      this.tokenExpiresAt = Date.now() + data.expires_in * 1000;
+
+      // Notify the plugin to save the tokens
+      if (this.onTokenUpdate) {
+        await this.onTokenUpdate(this.bearerToken, this.refreshToken, this.tokenExpiresAt);
+      }
+
+      return true;
+    } catch {
+      this.refreshToken = '';
+      this.tokenExpiresAt = null;
+      return false;
+    }
+  }
+
   private async ensureAuthenticated(): Promise<void> {
-    if (this.bearerToken) {
+    // Check if we have a valid (non-expired) token
+    if (this.bearerToken && !this.isTokenExpired()) {
       return;
     }
 
+    // Try to refresh the token if we have a refresh token
+    if (this.refreshToken && await this.refreshAccessToken()) {
+      return;
+    }
+
+    // Fall back to full login
     if (!this.email || !this.password) {
       throw new Error('No credentials provided. Please set email and password in settings.');
     }
@@ -77,10 +149,12 @@ export class CrossbillAPI {
 
     const data: LoginResponse = await response.json();
     this.bearerToken = data.access_token;
+    this.refreshToken = data.refresh_token;
+    this.tokenExpiresAt = Date.now() + data.expires_in * 1000;
 
-    // Notify the plugin to save the token
+    // Notify the plugin to save the tokens
     if (this.onTokenUpdate) {
-      await this.onTokenUpdate(data.access_token);
+      await this.onTokenUpdate(this.bearerToken, this.refreshToken, this.tokenExpiresAt);
     }
 
     return data;
@@ -106,9 +180,18 @@ export class CrossbillAPI {
     const response = await fetch(url, { ...options, headers });
 
     if (response.status === 401) {
+      // Try refresh first, then fall back to login
       this.bearerToken = '';
-      await this.ensureAuthenticated();
+      if (this.refreshToken && await this.refreshAccessToken()) {
+        const retryHeaders = {
+          ...options.headers,
+          ...this.getAuthHeaders(),
+        };
+        return await fetch(url, { ...options, headers: retryHeaders });
+      }
 
+      // Refresh failed, try full login
+      await this.ensureAuthenticated();
       const retryHeaders = {
         ...options.headers,
         ...this.getAuthHeaders(),

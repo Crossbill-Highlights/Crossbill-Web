@@ -4,6 +4,7 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import FileResponse
 
 from src import schemas
 from src.database import DatabaseSession
@@ -48,7 +49,7 @@ def get_books(
         logger.error(f"Failed to fetch books: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch books: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -84,7 +85,7 @@ def get_recently_viewed_books(
         logger.error(f"Failed to fetch recently viewed books: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch recently viewed books: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -117,7 +118,7 @@ def get_book_details(
         logger.error(f"Failed to fetch book details for book_id={book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch book details: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -151,7 +152,7 @@ def delete_book(
         logger.error(f"Failed to delete book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete book: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -194,7 +195,7 @@ def delete_highlights(
         logger.error(f"Failed to delete highlights for book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete highlights: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -237,8 +238,36 @@ def upload_book_cover(
         logger.error(f"Failed to upload cover for book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to upload cover: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
+
+
+@router.get("/{book_id}/cover", status_code=status.HTTP_200_OK)
+def get_book_cover(
+    book_id: int,
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> FileResponse:
+    """
+    Get the cover image for a book.
+
+    This endpoint serves the book cover image with user ownership verification.
+    Only users who own the book can access its cover.
+
+    Args:
+        book_id: ID of the book
+        db: Database session
+        current_user: Authenticated user
+
+    Returns:
+        FileResponse with the book cover image
+
+    Raises:
+        HTTPException: If book is not found, user doesn't own it, or cover doesn't exist
+    """
+    service = BookService(db)
+    cover_path = service.get_cover_path(book_id, current_user.id)
+    return FileResponse(cover_path, media_type="image/jpeg")
 
 
 @router.post(
@@ -278,7 +307,7 @@ def update_book(
         logger.error(f"Failed to update book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update book: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -362,7 +391,7 @@ def create_highlight_tag(
         logger.error(f"Failed to create highlight tag for book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create highlight tag: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -415,7 +444,7 @@ def delete_highlight_tag(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete highlight tag: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -475,7 +504,7 @@ def update_highlight_tag(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update highlight tag: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -541,7 +570,7 @@ def add_tag_to_highlight(
         logger.error(f"Failed to add tag to highlight {highlight_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to add tag to highlight: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -591,7 +620,7 @@ def remove_tag_from_highlight(
         logger.error(f"Failed to remove tag from highlight {highlight_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to remove tag from highlight: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -633,7 +662,7 @@ def create_bookmark(
         logger.error(f"Failed to create bookmark for book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create bookmark: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -674,7 +703,7 @@ def delete_bookmark(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete bookmark: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -713,7 +742,7 @@ def get_bookmarks(
         logger.error(f"Failed to get bookmarks for book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get bookmarks: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -764,7 +793,7 @@ def create_flashcard_for_book(
         logger.error(f"Failed to create flashcard for book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create flashcard: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e
 
 
@@ -802,5 +831,5 @@ def get_flashcards_for_book(
         logger.error(f"Failed to get flashcards for book {book_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get flashcards: {e!s}",
+            detail="An unexpected error occurred. Please try again later.",
         ) from e

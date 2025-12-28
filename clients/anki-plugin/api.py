@@ -5,6 +5,7 @@ Handles communication with the Crossbill backend server.
 """
 
 import json
+import time
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -39,6 +40,8 @@ class CrossbillAPI:
         bearer_token: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
+        refresh_token: Optional[str] = None,
+        token_expires_at: Optional[float] = None,
     ):
         """
         Initialize API client
@@ -48,31 +51,92 @@ class CrossbillAPI:
             bearer_token: Optional JWT bearer token for authentication
             email: Optional email for automatic login
             password: Optional password for automatic login
+            refresh_token: Optional refresh token for token renewal
+            token_expires_at: Optional timestamp when access token expires
         """
         self.server_host = server_host.rstrip("/")
         self.bearer_token = bearer_token or ""
         self.email = email or ""
         self.password = password or ""
-        self.on_token_update: Optional[Callable[[str], None]] = None
+        self.refresh_token = refresh_token or ""
+        self.token_expires_at = token_expires_at
+        self.on_token_update: Optional[Callable[[str, str, float], None]] = None
 
     def set_credentials(self, email: str, password: str):
         """Update email and password credentials"""
         self.email = email
         self.password = password
 
-    def set_bearer_token(self, token: str):
-        """Update bearer token"""
+    def set_bearer_token(self, token: str, refresh_token: str = "", expires_at: Optional[float] = None):
+        """Update bearer token and optionally refresh token"""
         self.bearer_token = token
+        if refresh_token:
+            self.refresh_token = refresh_token
+        if expires_at is not None:
+            self.token_expires_at = expires_at
 
-    def set_on_token_update(self, callback: Callable[[str], None]):
-        """Set callback to be called when token is updated"""
+    def set_on_token_update(self, callback: Callable[[str, str, float], None]):
+        """Set callback to be called when token is updated (token, refresh_token, expires_at)"""
         self.on_token_update = callback
+
+    def _is_token_expired(self) -> bool:
+        """Check if the current access token is expired (with 60s buffer)"""
+        if not self.token_expires_at:
+            return True
+        return time.time() > (self.token_expires_at - 60)
+
+    def _refresh_access_token(self) -> bool:
+        """
+        Refresh the access token using the stored refresh token
+
+        Returns:
+            True if refresh succeeded, False otherwise
+        """
+        if not self.refresh_token:
+            return False
+
+        url = f"{self.server_host}/api/v1/auth/refresh"
+
+        # Send refresh token in request body (for plugin clients)
+        body = json.dumps({"refresh_token": self.refresh_token})
+
+        try:
+            request = urllib.request.Request(
+                url, data=body.encode("utf-8"), method="POST"
+            )
+            request.add_header("Content-Type", "application/json")
+            request.add_header("Accept", "application/json")
+
+            with urllib.request.urlopen(request, timeout=30) as response:
+                data = json.loads(response.read().decode("utf-8"))
+                self.bearer_token = data["access_token"]
+                self.refresh_token = data.get("refresh_token", self.refresh_token)
+                if "expires_in" in data:
+                    self.token_expires_at = time.time() + data["expires_in"]
+
+                # Notify callback if set
+                if self.on_token_update:
+                    self.on_token_update(self.bearer_token, self.refresh_token, self.token_expires_at or 0)
+
+                return True
+
+        except Exception:
+            # Refresh failed, clear tokens
+            self.refresh_token = ""
+            self.token_expires_at = None
+            return False
 
     def _ensure_authenticated(self):
         """Ensure we have a valid authentication token"""
-        if self.bearer_token:
+        # Check if we have a valid (non-expired) token
+        if self.bearer_token and not self._is_token_expired():
             return
 
+        # Try to refresh the token if we have a refresh token
+        if self.refresh_token and self._refresh_access_token():
+            return
+
+        # Fall back to full login
         if not self.email or not self.password:
             raise CrossbillAPIError(
                 "No credentials provided. Please set email and password in settings."
@@ -89,7 +153,7 @@ class CrossbillAPI:
             password: User password
 
         Returns:
-            Login response with access_token and token_type
+            Login response with access_token, refresh_token, and expires_in
 
         Raises:
             CrossbillAPIError: If login fails
@@ -114,10 +178,13 @@ class CrossbillAPI:
             with urllib.request.urlopen(request, timeout=30) as response:
                 data = json.loads(response.read().decode("utf-8"))
                 self.bearer_token = data["access_token"]
+                self.refresh_token = data.get("refresh_token", "")
+                if "expires_in" in data:
+                    self.token_expires_at = time.time() + data["expires_in"]
 
                 # Notify callback if set
                 if self.on_token_update:
-                    self.on_token_update(self.bearer_token)
+                    self.on_token_update(self.bearer_token, self.refresh_token, self.token_expires_at or 0)
 
                 return data
 
@@ -168,8 +235,11 @@ class CrossbillAPI:
         except urllib.error.HTTPError as e:
             # Handle 401 Unauthorized - token expired
             if e.code == 401 and retry_on_401:
-                # Clear token and retry with fresh login
+                # Try refresh first, then fall back to login
                 self.bearer_token = ""
+                if self.refresh_token and self._refresh_access_token():
+                    return self._make_request(endpoint, retry_on_401=False)
+                # Refresh failed, try full login
                 self._ensure_authenticated()
                 return self._make_request(endpoint, retry_on_401=False)
 
