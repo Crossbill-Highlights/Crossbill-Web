@@ -36,11 +36,13 @@ sed -i 's/description = _(\[\[Syncs your highlights to Crossbill server for edit
 # Change the class name
 sed -i 's/name = "Crossbill"/name = "Crossbill Test"/' "$TMP_TEST_DIR/crossbill-test.koplugin/main.lua"
 
+# Modify modules/settings.lua for test version
 # Change settings key to separate from production version
-sed -i 's/crossbill_sync/crossbill_test_sync/g' "$TMP_TEST_DIR/crossbill-test.koplugin/main.lua"
+sed -i 's/crossbill_sync/crossbill_test_sync/g' "$TMP_TEST_DIR/crossbill-test.koplugin/modules/settings.lua"
 
+# Modify modules/ui.lua for test version
 # Change menu text
-sed -i 's/_("Crossbill Sync")/_("Crossbill Test Sync")/g' "$TMP_TEST_DIR/crossbill-test.koplugin/main.lua"
+sed -i 's/_("Crossbill Sync")/_("Crossbill Test Sync")/g' "$TMP_TEST_DIR/crossbill-test.koplugin/modules/ui.lua"
 
 # Copy test plugin to destination
 cp -R "$TMP_TEST_DIR/crossbill-test.koplugin" "$KOREADER_PLUGINS_PATH/"
