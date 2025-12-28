@@ -180,9 +180,13 @@ class SettingsDialog(QDialog):
         self.config['server_host'] = server_host
         self.config['email'] = email
         self.config['password'] = password
-        # Keep existing bearer_token if present
+        # Keep existing tokens if present
         if 'bearer_token' not in self.config:
             self.config['bearer_token'] = ''
+        if 'refresh_token' not in self.config:
+            self.config['refresh_token'] = ''
+        if 'token_expires_at' not in self.config:
+            self.config['token_expires_at'] = None
         self.config['default_deck'] = default_deck
         self.config['default_note_type'] = default_note_type
         self.config['suspend_on_import'] = suspend_on_import

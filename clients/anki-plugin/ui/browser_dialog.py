@@ -39,12 +39,16 @@ class FlashcardsBrowserDialog(QWidget):
             self.config.get('server_host', 'http://localhost:8000'),
             bearer_token=self.config.get('bearer_token', ''),
             email=self.config.get('email', ''),
-            password=self.config.get('password', '')
+            password=self.config.get('password', ''),
+            refresh_token=self.config.get('refresh_token', ''),
+            token_expires_at=self.config.get('token_expires_at')
         )
 
-        # Set up callback to save bearer token when it's updated
-        def save_token(token: str):
+        # Set up callback to save tokens when updated
+        def save_token(token: str, refresh_token: str, expires_at: float):
             self.config['bearer_token'] = token
+            self.config['refresh_token'] = refresh_token
+            self.config['token_expires_at'] = expires_at
             mw.addonManager.writeConfig(__name__.split('.')[0], self.config)
 
         self.api.set_on_token_update(save_token)
