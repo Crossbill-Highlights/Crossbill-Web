@@ -18,6 +18,10 @@ export type GetBooksApiV1BooksGetParams = {
    */
   limit?: number;
   /**
+   * Return only books with flashcards
+   */
+  only_with_flashcards?: boolean;
+  /**
    * Search text to filter books by title or author
    */
   search?: string | null;
