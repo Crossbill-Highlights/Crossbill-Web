@@ -1,8 +1,7 @@
 ---
-name: making-commits
-description: Guidelines on makign git commits
+name: writing-tests
+description: Guidelines on writing tests for the backend
 ---
-When working on bigger tasks follow these guidelines to ensure clear and maintainable commit history:
-- Make small and focused commits that address a single concern or feature.
-- Break big changes into logical separated commits
-- Always run linter and formatting before committing.
+When writing tests for the backend, follow these guidelines to ensure comprehensive and maintainable test coverage:
+- Try to keep individual tests cases short. Setup common test data using fixtures.
+- When tests need setup, use fixtures and functions to avoid repeating same steps in multiple tests.
