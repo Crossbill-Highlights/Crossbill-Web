@@ -1,6 +1,7 @@
 import { useUpdateMeApiV1UsersMePost } from '@/api/generated/users/users';
+import { PageContainer } from '@/components/layout/Layouts.tsx';
 import { useAuth } from '@/context/AuthContext';
-import { Alert, Box, Button, Container, Divider, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Divider, TextField, Typography } from '@mui/material';
 import { FormEvent, useState } from 'react';
 
 export const SettingsPage = () => {
@@ -76,7 +77,7 @@ export const SettingsPage = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 6 }}>
+    <PageContainer maxWidth="sm">
       <Typography
         variant="h1"
         sx={{
@@ -234,6 +235,6 @@ export const SettingsPage = () => {
           </Button>
         </Box>
       </Box>
-    </Container>
+    </PageContainer>
   );
 };

@@ -9,18 +9,9 @@ import { HighlightsTab } from '@/components/BookPage/HighlightsTab/HighlightsTab
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils';
 import { FlashcardsIcon, HighlightsIcon } from '@/components/common/Icons.tsx';
-import { ThreeColumnLayout } from '@/components/layout/Layouts.tsx';
+import { PageContainer, ThreeColumnLayout } from '@/components/layout/Layouts.tsx';
 import { queryClient } from '@/lib/queryClient';
-import {
-  Alert,
-  Box,
-  Container,
-  Tab,
-  Tabs,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Alert, Box, Tab, Tabs, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { flatMap } from 'lodash';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -208,11 +199,11 @@ const BookPageContent = ({ book }: BookPageContentProps) => {
   );
 
   return (
-    <Container sx={{ minHeight: '100vh' }} maxWidth="xl">
+    <PageContainer maxWidth="xl">
       <ScrollToTopButton />
       <FadeInOut ekey={'book-title'}>
         {isDesktop ? (
-          <Box sx={{ pt: 4 }}>
+          <Box>
             <BookTitle book={book} />
             <ThreeColumnLayout>
               <div></div> {/* Empty left column for spacing */}
@@ -220,7 +211,7 @@ const BookPageContent = ({ book }: BookPageContentProps) => {
             </ThreeColumnLayout>
           </Box>
         ) : (
-          <Box sx={{ pt: 8, maxWidth: '800px', mx: 'auto' }}>
+          <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
             <BookTitle book={book} />
             <BookTabs activeTab={activeTab} handleTabChange={handleTabChange} book={book} />
           </Box>
@@ -244,6 +235,6 @@ const BookPageContent = ({ book }: BookPageContentProps) => {
           />
         )}
       </FadeInOut>
-    </Container>
+    </PageContainer>
   );
 };
