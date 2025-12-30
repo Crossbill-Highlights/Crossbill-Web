@@ -1,6 +1,6 @@
 import type { BookDetails } from '@/api/generated/model';
 import { TagList } from '@/components/BookPage/components/TagList.tsx';
-import { BookmarkIcon, EditIcon, ExpandLessIcon, ExpandMoreIcon } from '@/components/common/Icons';
+import { EditIcon, ExpandLessIcon, ExpandMoreIcon } from '@/components/common/Icons';
 import { Box, Button, Typography } from '@mui/material';
 import DOMPurify from 'dompurify';
 import { useMemo, useState } from 'react';
@@ -23,10 +23,9 @@ const sanitizeHtml = (html: string): string => {
 
 export interface BookTitleProps {
   book: BookDetails;
-  highlightCount: number;
 }
 
-export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
+export const BookTitle = ({ book }: BookTitleProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
@@ -179,10 +178,6 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
               flexWrap: 'wrap',
             }}
           >
-            <BookmarkIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-              {highlightCount} {highlightCount === 1 ? 'highlight' : 'highlights'}
-            </Typography>
             <Button variant="text" startIcon={<EditIcon />} onClick={handleEdit} size="small">
               Edit
             </Button>
@@ -200,7 +195,6 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
           author: book.author,
           isbn: book.isbn,
           cover: book.cover,
-          highlight_count: highlightCount,
           tags: book.tags || [],
           created_at: book.created_at,
           updated_at: book.updated_at,

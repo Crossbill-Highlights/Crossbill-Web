@@ -36,6 +36,65 @@ import { MobileNavigation } from './components/MobileNavigation.tsx';
 
 type TabValue = 'highlights' | 'flashcards';
 
+const BookTabs = ({
+  activeTab,
+  handleTabChange,
+  book,
+}: {
+  activeTab: TabValue;
+  handleTabChange: (_event: React.SyntheticEvent, newValue: TabValue) => void;
+  book: BookDetails;
+}) => {
+  const totalHighlights = useMemo(() => {
+    return book.chapters?.reduce((sum, chapter) => sum + (chapter.highlights?.length || 0), 0) || 0;
+  }, [book.chapters]);
+
+  const totalFlashcards = useMemo(() => {
+    if (!book.chapters) return 0;
+    return flatMap(book.chapters, (chapter) =>
+      flatMap(chapter.highlights || [], (highlight) => highlight.flashcards || [])
+    ).length;
+  }, [book.chapters]);
+
+  return (
+    <Tabs
+      value={activeTab}
+      onChange={handleTabChange}
+      sx={{
+        mb: 3,
+        '& .MuiTabs-indicator': {
+          backgroundColor: 'primary.main',
+        },
+      }}
+    >
+      <Tab
+        value="highlights"
+        label={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <HighlightsIcon sx={{ fontSize: 20 }} />
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              Highlights ({totalHighlights})
+            </Typography>
+          </Box>
+        }
+        sx={{ textTransform: 'none' }}
+      />
+      <Tab
+        value="flashcards"
+        label={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FlashcardsIcon sx={{ fontSize: 20 }} />
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              Flashcards ({totalFlashcards})
+            </Typography>
+          </Box>
+        }
+        sx={{ textTransform: 'none' }}
+      />
+    </Tabs>
+  );
+};
+
 export const BookPage = () => {
   const { bookId } = useParams({ from: '/book/$bookId' });
   const { data: book, isLoading, isError } = useGetBookDetailsApiV1BooksBookIdGet(Number(bookId));
@@ -156,18 +215,6 @@ const BookPageContent = ({ book }: BookPageContentProps) => {
     [navigate, urlSearch]
   );
 
-  // Calculate totals for tab labels
-  const totalHighlights = useMemo(() => {
-    return book.chapters?.reduce((sum, chapter) => sum + (chapter.highlights?.length || 0), 0) || 0;
-  }, [book.chapters]);
-
-  const totalFlashcards = useMemo(() => {
-    if (!book.chapters) return 0;
-    return flatMap(book.chapters, (chapter) =>
-      flatMap(chapter.highlights || [], (highlight) => highlight.flashcards || [])
-    ).length;
-  }, [book.chapters]);
-
   // TODO: refactor these to be universal and no mobile specific
   const highlightsData = useHighlightsTabData(book, urlSearch, tagId);
   const flashcardsData = useFlashcardsTabData(book, tagId);
@@ -178,44 +225,6 @@ const BookPageContent = ({ book }: BookPageContentProps) => {
 
   const mobileNavData = activeTab === 'highlights' ? highlightsData : flashcardsData;
 
-  const TabsComponent = (
-    <Tabs
-      value={activeTab}
-      onChange={handleTabChange}
-      sx={{
-        mb: 3,
-        '& .MuiTabs-indicator': {
-          backgroundColor: 'primary.main',
-        },
-      }}
-    >
-      <Tab
-        value="highlights"
-        label={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <HighlightsIcon sx={{ fontSize: 20 }} />
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Highlights ({totalHighlights})
-            </Typography>
-          </Box>
-        }
-        sx={{ textTransform: 'none' }}
-      />
-      <Tab
-        value="flashcards"
-        label={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FlashcardsIcon sx={{ fontSize: 20 }} />
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Flashcards ({totalFlashcards})
-            </Typography>
-          </Box>
-        }
-        sx={{ textTransform: 'none' }}
-      />
-    </Tabs>
-  );
-
   return (
     <Container sx={{ minHeight: '100vh' }} maxWidth="xl">
       <ScrollToTopButton />
@@ -224,8 +233,8 @@ const BookPageContent = ({ book }: BookPageContentProps) => {
         {!isDesktop && (
           <>
             <Box sx={{ py: 8, maxWidth: '800px', mx: 'auto' }}>
-              <BookTitle book={book} highlightCount={totalHighlights} />
-              {TabsComponent}
+              <BookTitle book={book} />
+              <BookTabs activeTab={activeTab} handleTabChange={handleTabChange} book={book} />
 
               {activeTab === 'highlights' ? (
                 <HighlightsTab
@@ -265,10 +274,10 @@ const BookPageContent = ({ book }: BookPageContentProps) => {
         {/* Desktop Layout */}
         {isDesktop && (
           <Box sx={{ px: 4, py: 4 }}>
-            <BookTitle book={book} highlightCount={totalHighlights} />
+            <BookTitle book={book} />
             <ThreeColumnLayout>
               <div></div> {/* Empty left column for spacing */}
-              {TabsComponent}
+              <BookTabs activeTab={activeTab} handleTabChange={handleTabChange} book={book} />
             </ThreeColumnLayout>
 
             {activeTab === 'highlights' ? (

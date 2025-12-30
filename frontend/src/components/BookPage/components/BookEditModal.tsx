@@ -4,7 +4,7 @@ import {
   useDeleteBookApiV1BooksBookIdDelete,
   useUpdateBookApiV1BooksBookIdPost,
 } from '@/api/generated/books/books.ts';
-import { BookWithHighlightCount } from '@/api/generated/model';
+import { BookDetails } from '@/api/generated/model';
 import { DeleteIcon } from '@/components/common/Icons';
 import { Box, Button, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
@@ -20,7 +20,7 @@ interface BookEditFormData {
 }
 
 interface BookEditModalProps {
-  book: BookWithHighlightCount;
+  book: BookDetails;
   open: boolean;
   onClose: () => void;
 }
@@ -171,9 +171,6 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
                 ISBN: {book.isbn}
               </Typography>
             )}
-            <Typography variant="body2" color="text.secondary">
-              {book.highlight_count} {book.highlight_count === 1 ? 'highlight' : 'highlights'}
-            </Typography>
           </Box>
         </Box>
 
