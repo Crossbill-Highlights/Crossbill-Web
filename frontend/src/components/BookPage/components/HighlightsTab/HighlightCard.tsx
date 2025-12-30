@@ -142,7 +142,6 @@ export const HighlightCard = ({ highlight, bookmark, onOpenModal }: HighlightCar
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        {/* Quote Icon and Text */}
         <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5, mb: 2 }}>
           <QuoteIcon
             sx={{

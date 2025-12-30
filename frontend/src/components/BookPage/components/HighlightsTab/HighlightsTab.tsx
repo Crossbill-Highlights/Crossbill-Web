@@ -98,7 +98,6 @@ export const HighlightsTab = ({
     return chapters.flatMap((chapter) => chapter.highlights);
   }, [chapters]);
 
-  // Use the highlight modal hook for URL-synced modal state
   const {
     openHighlightId,
     currentHighlight,
@@ -175,7 +174,6 @@ export const HighlightsTab = ({
         />
       )}
 
-      {/* Highlight Modal */}
       {currentHighlight && (
         <HighlightViewModal
           highlight={currentHighlight}

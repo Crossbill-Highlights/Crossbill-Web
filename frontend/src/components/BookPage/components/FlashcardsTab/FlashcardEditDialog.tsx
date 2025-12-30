@@ -87,7 +87,6 @@ export const FlashcardEditDialog = ({
       <Box sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {flashcard.highlight && <HighlightContent highlight={flashcard.highlight} />}
 
-        {/* Question field */}
         <Box>
           <Typography
             variant="caption"
@@ -116,7 +115,6 @@ export const FlashcardEditDialog = ({
           />
         </Box>
 
-        {/* Answer field */}
         <Box>
           <Typography
             variant="caption"

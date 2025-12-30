@@ -146,7 +146,6 @@ export const FlashcardsTab = ({
 
   return (
     <>
-      {/* Mobile Layout */}
       {!isDesktop && (
         <>
           <MobileFlashcardsContent
@@ -174,7 +173,6 @@ export const FlashcardsTab = ({
         </>
       )}
 
-      {/* Desktop Layout */}
       {isDesktop && (
         <DesktopFlashcardsContent
           book={book}
@@ -194,7 +192,6 @@ export const FlashcardsTab = ({
         />
       )}
 
-      {/* Flashcard Edit Dialog */}
       {editingFlashcard && (
         <FlashcardEditDialog
           flashcard={editingFlashcard}
@@ -207,7 +204,6 @@ export const FlashcardsTab = ({
   );
 };
 
-// Mobile content component
 interface MobileFlashcardsContentProps {
   searchText: string;
   onSearch: (value: string) => void;
@@ -261,7 +257,6 @@ const MobileFlashcardsContent = ({
   </>
 );
 
-// Desktop content component
 interface DesktopFlashcardsContentProps {
   book: BookDetails;
   tags: HighlightTagInBook[];
@@ -296,7 +291,6 @@ const DesktopFlashcardsContent = ({
   onChapterClick,
 }: DesktopFlashcardsContentProps) => (
   <ThreeColumnLayout>
-    {/* Left Column - Tags (filtered to those with flashcards) */}
     <HighlightTags
       tags={tags}
       tagGroups={book.highlight_tag_groups || []}
@@ -306,7 +300,6 @@ const DesktopFlashcardsContent = ({
       hideEmptyGroups
     />
 
-    {/* Middle Column - Search + Content */}
     <Box>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 3 }}>
         <Box sx={{ flexGrow: 1 }}>

@@ -19,7 +19,6 @@ export const ChapterNav = ({ chapters, onChapterClick, hideTitle }: ChapterNavPr
   const [isExpanded, setIsExpanded] = useState(() => true);
   const effectiveIsExpanded = hideTitle ? true : isExpanded;
 
-  // If no chapters, don't render anything
   if (!chapters || chapters.length === 0) {
     return null;
   }
