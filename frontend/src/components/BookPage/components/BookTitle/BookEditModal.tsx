@@ -5,15 +5,15 @@ import {
   useUpdateBookApiV1BooksBookIdPost,
 } from '@/api/generated/books/books.ts';
 import { BookDetails } from '@/api/generated/model';
-import { DeleteIcon } from '@/components/common/Icons';
+import { DeleteIcon } from '@/components/common/Icons.tsx';
 import { Box, Button, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { BookCover } from '../../common/BookCover';
-import { CommonDialog } from '../../common/CommonDialog';
-import { TagInput } from '../../common/TagInput';
+import { BookCover } from '../../../common/BookCover.tsx';
+import { CommonDialog } from '../../../common/CommonDialog.tsx';
+import { TagInput } from '../../../common/TagInput.tsx';
 
 interface BookEditFormData {
   tags: string[];

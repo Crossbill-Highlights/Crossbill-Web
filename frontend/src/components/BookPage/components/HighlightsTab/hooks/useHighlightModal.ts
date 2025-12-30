@@ -1,5 +1,5 @@
 import type { Highlight } from '@/api/generated/model';
-import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils';
+import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils.ts';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 

@@ -14,13 +14,13 @@ import { Box, IconButton, Tooltip } from '@mui/material';
 import { useSearch } from '@tanstack/react-router';
 import { keyBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
-import { useHighlightModal } from '../../hooks/useHighlightModal.ts';
-import { groupSearchResultsIntoChapters } from '../../utils/groupSearchResults.ts';
-import { BookmarkList } from '../BookmarkList.tsx';
-import { HighlightTagsList } from '../HighlightTagsList.tsx';
-import { MobileNavigation } from '../MobileNavigation.tsx';
+import { useHighlightModal } from '@/components/BookPage/components/HighlightsTab/hooks/useHighlightModal.ts';
+import { groupSearchResultsIntoChapters } from '@/components/BookPage/components/HighlightsTab/utils/groupSearchResults.ts';
+import { BookmarkList } from '../navigation/BookmarkList.tsx';
+import { HighlightTagsList } from '../navigation/HighlightTagsList.tsx';
+import { MobileNavigation } from '../navigation/MobileNavigation.tsx';
 import { HighlightsList, type ChapterData } from './HighlightsList.tsx';
-import { ChapterNav, ChapterNavigationData } from '../ChapterNav.tsx';
+import { ChapterNav, ChapterNavigationData } from '../navigation/ChapterNav.tsx';
 import { HighlightViewModal } from './HighlightViewModal';
 
 interface HighlightsTabProps {

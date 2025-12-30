@@ -25,7 +25,7 @@ import { flatMap } from 'lodash';
 import { useCallback, useEffect, useMemo } from 'react';
 import { ScrollToTopButton } from '../common/ScrollToTopButton';
 import { Spinner } from '../common/Spinner';
-import { BookTitle } from './components/BookTitle';
+import { BookTitle } from './components/BookTitle/BookTitle.tsx';
 
 type TabValue = 'highlights' | 'flashcards';
 

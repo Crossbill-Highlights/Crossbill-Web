@@ -1,5 +1,5 @@
 import type { Bookmark, Highlight } from '@/api/generated/model';
-import { BookTagList } from '@/components/BookPage/components/BookTagList.tsx';
+import { BookTagList } from '@/components/BookPage/components/BookTitle/BookTagList.tsx';
 import {
   BookmarkFilledIcon,
   DateIcon,

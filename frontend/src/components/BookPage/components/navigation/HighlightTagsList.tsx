@@ -1,15 +1,15 @@
 import {
   getGetBookDetailsApiV1BooksBookIdGetQueryKey,
   useUpdateHighlightTagApiV1BooksBookIdHighlightTagTagIdPost,
-} from '@/api/generated/books/books';
+} from '@/api/generated/books/books.ts';
 import {
   useCreateOrUpdateTagGroupApiV1HighlightsTagGroupPost,
   useDeleteTagGroupApiV1HighlightsTagGroupTagGroupIdDelete,
-} from '@/api/generated/highlights/highlights';
+} from '@/api/generated/highlights/highlights.ts';
 import { HighlightTagGroupInBook, HighlightTagInBook } from '@/api/generated/model';
-import { Collapsable } from '@/components/common/animations/Collapsable';
-import { AddIcon, DeleteIcon, EditIcon, ExpandMoreIcon, TagIcon } from '@/components/common/Icons';
-import { createAdaptiveHoverStyles, createAdaptiveTouchTarget } from '@/utils/adaptiveHover';
+import { Collapsable } from '@/components/common/animations/Collapsable.tsx';
+import { AddIcon, DeleteIcon, EditIcon, ExpandMoreIcon, TagIcon } from '@/components/common/Icons.tsx';
+import { createAdaptiveHoverStyles, createAdaptiveTouchTarget } from '@/utils/adaptiveHover.ts';
 import {
   DndContext,
   DragEndEvent,

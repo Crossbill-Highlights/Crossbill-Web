@@ -1,6 +1,6 @@
 import type { Bookmark, Highlight } from '@/api/generated/model';
-import { Collapsable } from '@/components/common/animations/Collapsable';
-import { BookmarkFilledIcon, ExpandMoreIcon } from '@/components/common/Icons';
+import { Collapsable } from '@/components/common/animations/Collapsable.tsx';
+import { BookmarkFilledIcon, ExpandMoreIcon } from '@/components/common/Icons.tsx';
 import { Box, IconButton, Typography } from '@mui/material';
 import { useState } from 'react';
 

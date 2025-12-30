@@ -8,8 +8,8 @@ import type {
 import {
   ChapterNav,
   type ChapterNavigationData,
-} from '@/components/BookPage/components/ChapterNav.tsx';
-import { MobileNavigation } from '@/components/BookPage/components/MobileNavigation.tsx';
+} from '@/components/BookPage/components/navigation/ChapterNav.tsx';
+import { MobileNavigation } from '@/components/BookPage/components/navigation/MobileNavigation.tsx';
 import { SortIcon } from '@/components/common/Icons.tsx';
 import { SearchBar } from '@/components/common/SearchBar.tsx';
 import { ThreeColumnLayout } from '@/components/layout/Layouts.tsx';
@@ -17,7 +17,7 @@ import { Box, IconButton, Tooltip } from '@mui/material';
 import { useSearch } from '@tanstack/react-router';
 import { flatMap } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
-import { HighlightTagsList } from '../HighlightTagsList.tsx';
+import { HighlightTagsList } from '../navigation/HighlightTagsList.tsx';
 import {
   FlashcardChapterList,
   type FlashcardChapterData,
