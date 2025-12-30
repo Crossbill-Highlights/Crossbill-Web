@@ -41,7 +41,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { sortBy } from 'lodash';
 import { AnimatePresence, motion } from 'motion/react';
-import { KeyboardEvent, useRef, useState } from 'react';
+import { KeyboardEvent, useState } from 'react';
 
 interface HighlightTagsProps {
   tags: HighlightTagInBook[];
@@ -185,23 +185,7 @@ const TagGroup = ({
   onTagClick,
 }: TagGroupProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(group.name);
 
-  const handleStartEdit = () => {
-    setEditValue(group.name);
-    setIsEditing(true);
-  };
-
-  const handleEditCancel = () => {
-    setEditValue(group.name);
-    setIsEditing(false);
-  };
-
-  const handleEditSubmit = () => {
-    onEditSubmit(group.id, editValue);
-    setIsEditing(false);
-  };
   return (
     <Box
       sx={{
@@ -217,13 +201,8 @@ const TagGroup = ({
         group={group}
         tagCount={tags.length}
         isExpanded={isExpanded}
-        isEditing={isEditing}
-        editValue={editValue}
         onToggleCollapse={() => setIsExpanded(!isExpanded)}
-        onStartEdit={handleStartEdit}
-        onEditChange={setEditValue}
-        onEditSubmit={handleEditSubmit}
-        onEditCancel={handleEditCancel}
+        onEditSubmit={(value) => onEditSubmit(group.id, value)}
         onDelete={onDelete}
         isProcessing={isProcessing}
       />
@@ -488,17 +467,70 @@ const TagGroupTitle = ({ title, count, isExpanded, onToggleCollapse }: TagGroupT
   );
 };
 
+interface TagGroupNameEditFormProps {
+  initialValue: string;
+  isProcessing: boolean;
+  onSubmit: (value: string) => void;
+  onCancel: () => void;
+}
+
+const TagGroupNameEditForm = ({
+  initialValue,
+  isProcessing,
+  onSubmit,
+  onCancel,
+}: TagGroupNameEditFormProps) => {
+  const [editValue, setEditValue] = useState(initialValue);
+
+  const handleSubmit = () => {
+    onSubmit(editValue);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    } else if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
+  return (
+    <ClickAwayListener onClickAway={handleSubmit}>
+      <TextField
+        value={editValue}
+        onChange={(e) => setEditValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSubmit}
+        size="small"
+        autoFocus
+        disabled={isProcessing}
+        sx={{
+          flex: 1,
+          mr: 1,
+          '& .MuiInputBase-input': {
+            py: 0.5,
+            px: 1,
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          },
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 1,
+          },
+        }}
+      />
+    </ClickAwayListener>
+  );
+};
+
 interface TagGroupHeaderProps {
   group: HighlightTagGroupInBook;
   tagCount: number;
   isExpanded: boolean;
-  isEditing: boolean;
-  editValue: string;
   onToggleCollapse: () => void;
-  onStartEdit: () => void;
-  onEditChange: (value: string) => void;
-  onEditSubmit: () => void;
-  onEditCancel: () => void;
+  onEditSubmit: (value: string) => void;
   onDelete: () => void;
   isProcessing: boolean;
 }
@@ -507,17 +539,12 @@ const TagGroupHeader = ({
   group,
   tagCount,
   isExpanded,
-  isEditing,
-  editValue,
   onToggleCollapse,
-  onStartEdit,
-  onEditChange,
   onEditSubmit,
-  onEditCancel,
   onDelete,
   isProcessing,
 }: TagGroupHeaderProps) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const adaptiveStyles = createAdaptiveHoverStyles({
     actionsClassName: 'group-actions',
@@ -525,13 +552,9 @@ const TagGroupHeader = ({
   });
   const touchTarget = createAdaptiveTouchTarget();
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      onEditSubmit();
-    } else if (e.key === 'Escape') {
-      onEditCancel();
-    }
+  const handleEditSubmit = (value: string) => {
+    onEditSubmit(value);
+    setIsEditing(false);
   };
 
   return (
@@ -546,33 +569,12 @@ const TagGroupHeader = ({
       }}
     >
       {isEditing ? (
-        <ClickAwayListener onClickAway={onEditSubmit}>
-          <TextField
-            inputRef={inputRef}
-            value={editValue}
-            onChange={(e) => onEditChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onBlur={onEditSubmit}
-            size="small"
-            autoFocus
-            disabled={isProcessing}
-            sx={{
-              flex: 1,
-              mr: 1,
-              '& .MuiInputBase-input': {
-                py: 0.5,
-                px: 1,
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              },
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 1,
-              },
-            }}
-          />
-        </ClickAwayListener>
+        <TagGroupNameEditForm
+          initialValue={group.name}
+          isProcessing={isProcessing}
+          onSubmit={handleEditSubmit}
+          onCancel={() => setIsEditing(false)}
+        />
       ) : (
         <TagGroupTitle
           title={group.name}
@@ -595,7 +597,7 @@ const TagGroupHeader = ({
                 size="small"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onStartEdit();
+                  setIsEditing(true);
                 }}
                 sx={{ ...touchTarget, color: 'text.disabled' }}
               >
