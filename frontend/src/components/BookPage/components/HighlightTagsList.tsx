@@ -615,7 +615,7 @@ const TagGroupHeader = ({
   );
 };
 
-export const HighlightTags = ({
+export const HighlightTagsList = ({
   tags,
   tagGroups,
   bookId,

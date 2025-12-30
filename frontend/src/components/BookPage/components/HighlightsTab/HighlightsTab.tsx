@@ -17,9 +17,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useHighlightModal } from '../../hooks/useHighlightModal.ts';
 import { groupSearchResultsIntoChapters } from '../../utils/groupSearchResults.ts';
 import { BookmarkList } from '../BookmarkList.tsx';
-import { HighlightTags } from '../HighlightTags.tsx';
+import { HighlightTagsList } from '../HighlightTagsList.tsx';
 import { MobileNavigation } from '../MobileNavigation.tsx';
-import { ChapterList, type ChapterData } from './ChapterList.tsx';
+import { HighlightsList, type ChapterData } from './HighlightsList.tsx';
 import { ChapterNav, ChapterNavigationData } from '../ChapterNav.tsx';
 import { HighlightViewModal } from './HighlightViewModal';
 
@@ -236,7 +236,7 @@ const MobileHighlightsContent = ({
         </IconButton>
       </Tooltip>
     </Box>
-    <ChapterList
+    <HighlightsList
       chapters={chapters}
       bookmarksByHighlightId={bookmarksByHighlightId}
       isLoading={isSearching}
@@ -287,7 +287,7 @@ const DesktopHighlightsContent = ({
   onChapterClick,
 }: DesktopHighlightsContentProps) => (
   <ThreeColumnLayout>
-    <HighlightTags
+    <HighlightTagsList
       tags={tags}
       tagGroups={book.highlight_tag_groups || []}
       bookId={book.id}
@@ -317,7 +317,7 @@ const DesktopHighlightsContent = ({
           </IconButton>
         </Tooltip>
       </Box>
-      <ChapterList
+      <HighlightsList
         chapters={chapters}
         bookmarksByHighlightId={bookmarksByHighlightId}
         isLoading={isSearching}

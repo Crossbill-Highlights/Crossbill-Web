@@ -17,7 +17,7 @@ import { Box, IconButton, Tooltip } from '@mui/material';
 import { useSearch } from '@tanstack/react-router';
 import { flatMap } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
-import { HighlightTags } from '../HighlightTags.tsx';
+import { HighlightTagsList } from '../HighlightTagsList.tsx';
 import {
   FlashcardChapterList,
   type FlashcardChapterData,
@@ -291,7 +291,7 @@ const DesktopFlashcardsContent = ({
   onChapterClick,
 }: DesktopFlashcardsContentProps) => (
   <ThreeColumnLayout>
-    <HighlightTags
+    <HighlightTagsList
       tags={tags}
       tagGroups={book.highlight_tag_groups || []}
       bookId={book.id}

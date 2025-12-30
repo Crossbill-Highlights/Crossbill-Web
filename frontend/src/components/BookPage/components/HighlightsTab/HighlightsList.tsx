@@ -20,7 +20,7 @@ interface ChapterListProps {
   onOpenHighlight?: (highlightId: number) => void;
 }
 
-export const ChapterList = ({
+export const HighlightsList = ({
   chapters,
   bookmarksByHighlightId,
   isLoading,

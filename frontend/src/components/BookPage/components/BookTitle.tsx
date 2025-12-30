@@ -1,5 +1,5 @@
 import type { BookDetails } from '@/api/generated/model';
-import { TagList } from '@/components/BookPage/components/TagList.tsx';
+import { BookTagList } from '@/components/BookPage/components/BookTagList.tsx';
 import { EditIcon, ExpandLessIcon, ExpandMoreIcon } from '@/components/common/Icons';
 import { Box, Button, Typography } from '@mui/material';
 import DOMPurify from 'dompurify';
@@ -183,7 +183,7 @@ export const BookTitle = ({ book }: BookTitleProps) => {
             </Button>
           </Box>
 
-          <TagList tags={book.tags} />
+          <BookTagList tags={book.tags} />
         </Box>
       </Box>
 

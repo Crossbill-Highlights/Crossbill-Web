@@ -1,5 +1,5 @@
 import type { Bookmark, Highlight } from '@/api/generated/model';
-import { TagList } from '@/components/BookPage/components/TagList.tsx';
+import { BookTagList } from '@/components/BookPage/components/BookTagList.tsx';
 import {
   BookmarkFilledIcon,
   DateIcon,
@@ -86,7 +86,7 @@ const Footer = ({ highlight, bookmark }: FooterProps) => {
       </Box>
 
       <Box>
-        <TagList tags={highlight.highlight_tags} />
+        <BookTagList tags={highlight.highlight_tags} />
       </Box>
     </Box>
   );

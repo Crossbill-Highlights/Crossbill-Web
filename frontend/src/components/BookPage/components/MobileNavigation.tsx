@@ -21,7 +21,7 @@ import {
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { BookmarkList } from './BookmarkList.tsx';
-import { HighlightTags } from './HighlightTags.tsx';
+import { HighlightTagsList } from './HighlightTagsList.tsx';
 
 const BottomDrawer = ({
   isOpen,
@@ -71,7 +71,7 @@ const TagsDrawerContent = ({
 }: TagsDrawerContentProps) => {
   return (
     <Box>
-      <HighlightTags
+      <HighlightTagsList
         tags={displayTags || book.highlight_tags || []}
         tagGroups={book.highlight_tag_groups || []}
         bookId={book.id}
