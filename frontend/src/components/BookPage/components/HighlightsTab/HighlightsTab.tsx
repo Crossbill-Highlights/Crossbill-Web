@@ -1,6 +1,12 @@
 import { useGetHighlightTagsApiV1BooksBookIdHighlightTagsGet } from '@/api/generated/books/books.ts';
 import { useSearchHighlightsApiV1HighlightsSearchGet } from '@/api/generated/highlights/highlights.ts';
-import type { BookDetails, Bookmark, Highlight, HighlightTagInBook } from '@/api/generated/model';
+import type {
+  BookDetails,
+  Bookmark,
+  ChapterWithHighlights,
+  Highlight,
+  HighlightTagInBook,
+} from '@/api/generated/model';
 import { SortIcon } from '@/components/common/Icons.tsx';
 import { SearchBar } from '@/components/common/SearchBar.tsx';
 import { ThreeColumnLayout } from '@/components/layout/Layouts.tsx';
@@ -59,26 +65,6 @@ export const HighlightsTab = ({
     [book.bookmarks]
   );
 
-  // Filter chapters by selected tag
-  const filteredChapters = useMemo(() => {
-    const chaptersWithHighlights = (book.chapters || []).filter(
-      (chapter) => chapter.highlights && chapter.highlights.length > 0
-    );
-
-    if (!selectedTagId) {
-      return chaptersWithHighlights;
-    }
-
-    return chaptersWithHighlights
-      .map((chapter) => ({
-        ...chapter,
-        highlights: chapter.highlights?.filter((highlight) =>
-          highlight.highlight_tags?.some((tag) => tag.id === selectedTagId)
-        ),
-      }))
-      .filter((chapter) => chapter.highlights && chapter.highlights.length > 0);
-  }, [book.chapters, selectedTagId]);
-
   // Unified chapter data for both search and regular views
   // This is a side effect of our search api returning different data structure from regular book api.
   const chapters: ChapterData[] = useMemo(() => {
@@ -86,7 +72,11 @@ export const HighlightsTab = ({
     if (bookSearch.showSearchResults) {
       result = bookSearch.chapters;
     } else {
-      result = filteredChapters.map((chapter) => ({
+      const chaptersWithHighlights = (book.chapters || []).filter(
+        (chapter) => chapter.highlights && chapter.highlights.length > 0
+      );
+
+      result = filterChaptersByTag(selectedTagId, chaptersWithHighlights).map((chapter) => ({
         id: chapter.id,
         name: chapter.name || 'Unknown Chapter',
         chapterNumber: chapter.chapter_number ?? undefined,
@@ -102,7 +92,7 @@ export const HighlightsTab = ({
     }
 
     return result;
-  }, [bookSearch.showSearchResults, bookSearch.chapters, isReversed, filteredChapters]);
+  }, [bookSearch.showSearchResults, bookSearch.chapters, isReversed, book.chapters, selectedTagId]);
 
   const allHighlights = useMemo(() => {
     return chapters.flatMap((chapter) => chapter.highlights);
@@ -398,3 +388,21 @@ const useBookSearch = (bookId: number, searchText: string, selectedTagId: number
     isSearching: isSearching && showSearchResults,
   };
 };
+
+function filterChaptersByTag(
+  selectedTagId: number | undefined,
+  chaptersWithHighlights: ChapterWithHighlights[]
+) {
+  if (!selectedTagId) {
+    return chaptersWithHighlights;
+  }
+
+  return chaptersWithHighlights
+    .map((chapter) => ({
+      ...chapter,
+      highlights: chapter.highlights?.filter((highlight) =>
+        highlight.highlight_tags?.some((tag) => tag.id === selectedTagId)
+      ),
+    }))
+    .filter((chapter) => chapter.highlights && chapter.highlights.length > 0);
+}
