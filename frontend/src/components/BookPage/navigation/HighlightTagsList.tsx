@@ -891,19 +891,19 @@ export const HighlightTagsList = ({
   };
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <Box>
-        {!hideTitle && <ListTitle onAddGroupClick={() => setShowAddGroup(true)} />}
+    <Box>
+      {!hideTitle && <ListTitle onAddGroupClick={() => setShowAddGroup(true)} />}
 
-        <AddGroupForm
-          isVisible={showAddGroup}
-          isProcessing={isProcessing}
-          onSubmit={(newName: string) => handleAddGroup(newName, () => setShowAddGroup(false))}
-          onCancel={() => {
-            setShowAddGroup(false);
-          }}
-        />
+      <AddGroupForm
+        isVisible={showAddGroup}
+        isProcessing={isProcessing}
+        onSubmit={(newName: string) => handleAddGroup(newName, () => setShowAddGroup(false))}
+        onCancel={() => {
+          setShowAddGroup(false);
+        }}
+      />
 
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* Tag Groups Content */}
         {tags && tags.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -940,35 +940,35 @@ export const HighlightTagsList = ({
           </Typography>
         )}
 
-        {/* Tip */}
-        {tags && tags.length > 0 && (
-          <Box
-            sx={{
-              mt: 2,
-              p: 1.5,
-              bgcolor: 'action.hover',
-              borderRadius: 1,
-              fontSize: '0.7rem',
-              color: 'text.secondary',
-              lineHeight: 1.5,
-            }}
-          >
-            <strong>Tip:</strong> Drag tags between groups to organize them. Click the pencil icon
-            to rename a group.
-          </Box>
-        )}
-      </Box>
+        <DragOverlay>
+          {activeTag ? (
+            <DraggableTag
+              tag={activeTag}
+              selectedTag={selectedTag}
+              onTagClick={onTagClick}
+              isDragOverlay
+            />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
-      <DragOverlay>
-        {activeTag ? (
-          <DraggableTag
-            tag={activeTag}
-            selectedTag={selectedTag}
-            onTagClick={onTagClick}
-            isDragOverlay
-          />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+      {/* Tip */}
+      {tags && tags.length > 0 && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 1.5,
+            bgcolor: 'action.hover',
+            borderRadius: 1,
+            fontSize: '0.7rem',
+            color: 'text.secondary',
+            lineHeight: 1.5,
+          }}
+        >
+          <strong>Tip:</strong> Drag tags between groups to organize them. Click the pencil icon to
+          rename a group.
+        </Box>
+      )}
+    </Box>
   );
 };
