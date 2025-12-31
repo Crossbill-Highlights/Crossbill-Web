@@ -129,9 +129,8 @@ export const HighlightViewModal = ({
 
   // Shared content for both layouts
   const renderContent = () => (
-    <>
+    <Box key={highlight.id}>
       <Toolbar
-        key={highlight.id}
         highlightId={highlight.id}
         bookId={bookId}
         highlightText={highlight.text}
@@ -164,7 +163,7 @@ export const HighlightViewModal = ({
         visible={flashcardVisible}
         disabled={isLoading}
       />
-    </>
+    </Box>
   );
 
   return (
