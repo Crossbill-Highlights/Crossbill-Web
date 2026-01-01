@@ -15,7 +15,6 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
-import { motion } from 'motion/react';
 import { useState } from 'react';
 import { BookmarkList } from './BookmarkList.tsx';
 import { HighlightTagsList } from './HighlightTagsList.tsx';
@@ -209,45 +208,38 @@ export const MobileNavigation = ({
 
   return (
     <>
-      <motion.div
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100 }}
-      >
-        <Paper elevation={3}>
-          <BottomNavigation
-            showLabels
-            onChange={() => {
-              setDrawerState(true);
+      <Paper elevation={3} sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100 }}>
+        <BottomNavigation
+          showLabels
+          onChange={() => {
+            setDrawerState(true);
+          }}
+        >
+          <BottomNavigationAction
+            label="Tags"
+            icon={<TagIcon />}
+            onClick={() => {
+              setDrawerContent('tags');
             }}
-          >
+          />
+          {currentTab === 'highlights' && (
             <BottomNavigationAction
-              label="Tags"
-              icon={<TagIcon />}
+              label="Bookmarks"
+              icon={<BookmarkFilledIcon />}
               onClick={() => {
-                setDrawerContent('tags');
+                setDrawerContent('bookmarks');
               }}
             />
-            {currentTab === 'highlights' && (
-              <BottomNavigationAction
-                label="Bookmarks"
-                icon={<BookmarkFilledIcon />}
-                onClick={() => {
-                  setDrawerContent('bookmarks');
-                }}
-              />
-            )}
-            <BottomNavigationAction
-              label="Chapters"
-              icon={<ChapterListIcon />}
-              onClick={() => {
-                setDrawerContent('chapters');
-              }}
-            />
-          </BottomNavigation>
-        </Paper>
-      </motion.div>
+          )}
+          <BottomNavigationAction
+            label="Chapters"
+            icon={<ChapterListIcon />}
+            onClick={() => {
+              setDrawerContent('chapters');
+            }}
+          />
+        </BottomNavigation>
+      </Paper>
       <BottomDrawer
         isOpen={drawerIsOpen}
         onClose={() => setDrawerState(false)}
