@@ -97,10 +97,8 @@ export const useHighlightModal = ({
   // Handler for modal navigation - converts index to highlight ID
   const handleModalNavigate = useCallback(
     (newIndex: number) => {
-      const newHighlight = allHighlights[newIndex];
-      if (newHighlight) {
-        handleNavigateHighlight(newHighlight.id);
-      }
+      const newHighlight = allHighlights[newIndex]!;
+      handleNavigateHighlight(newHighlight.id);
     },
     [allHighlights, handleNavigateHighlight]
   );

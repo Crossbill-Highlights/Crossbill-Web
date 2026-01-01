@@ -69,8 +69,8 @@ const TagsDrawerContent = ({
   return (
     <Box>
       <HighlightTagsList
-        tags={displayTags || book.highlight_tags || []}
-        tagGroups={book.highlight_tag_groups || []}
+        tags={displayTags || book.highlight_tags}
+        tagGroups={book.highlight_tag_groups}
         bookId={book.id}
         selectedTag={selectedTag}
         onTagClick={onTagClick}
@@ -95,7 +95,7 @@ const BookmarksDrawerContent = ({
   return (
     <Box>
       <BookmarkList
-        bookmarks={bookmarks || []}
+        bookmarks={bookmarks}
         allHighlights={allHighlights}
         onBookmarkClick={onBookmarkClick}
         hideTitle={true}
@@ -164,17 +164,15 @@ export const MobileNavigation = ({
         />
       );
     }
-    if (type === 'chapters') {
-      return (
-        <ChaptersDrawerContent
-          chapters={chapters}
-          onChapterClick={(data) => {
-            setDrawerState(false);
-            onChapterClick(data);
-          }}
-        />
-      );
-    }
+    return (
+      <ChaptersDrawerContent
+        chapters={chapters}
+        onChapterClick={(data) => {
+          setDrawerState(false);
+          onChapterClick(data);
+        }}
+      />
+    );
   };
 
   const getDrawerTitle = (type: DrawerContentType): React.ReactNode => {

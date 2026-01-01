@@ -11,5 +11,5 @@ import type { Bookmark } from './bookmark';
  */
 export interface BookmarksResponse {
   /** List of bookmarks */
-  bookmarks?: Bookmark[];
+  bookmarks: Bookmark[];
 }

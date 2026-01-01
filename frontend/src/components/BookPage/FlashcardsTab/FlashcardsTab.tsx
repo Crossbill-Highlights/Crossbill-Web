@@ -60,11 +60,9 @@ export const FlashcardsTab = ({
 
   // Extract all flashcards with context from book chapters
   const allFlashcardsWithContext = useMemo((): FlashcardWithContext[] => {
-    if (!bookChapters) return [];
-
     return flatMap(bookChapters, (chapter: ChapterWithHighlights) =>
-      flatMap(chapter.highlights || [], (highlight: Highlight) =>
-        (highlight.flashcards || []).map((flashcard: Flashcard) => ({
+      flatMap(chapter.highlights, (highlight: Highlight) =>
+        highlight.flashcards.map((flashcard: Flashcard) => ({
           ...flashcard,
           highlight: highlight,
           chapterName: chapter.name || 'Unknown Chapter',
@@ -81,7 +79,7 @@ export const FlashcardsTab = ({
 
     // Filter by tag
     if (selectedTagId) {
-      result = result.filter((fc) => fc.highlightTags?.some((tag) => tag.id === selectedTagId));
+      result = result.filter((fc) => fc.highlightTags.some((tag) => tag.id === selectedTagId));
     }
 
     // Filter by search (question or answer)
@@ -99,21 +97,21 @@ export const FlashcardsTab = ({
 
   // Group flashcards by chapter
   const flashcardChapters = useMemo((): FlashcardChapterData[] => {
-    const grouped: Record<number, FlashcardWithContext[]> = {};
+    const grouped: Partial<Record<number, FlashcardWithContext[]>> = {};
     for (const fc of filteredFlashcards) {
-      if (fc.chapterId) {
-        if (!grouped[fc.chapterId]) {
-          grouped[fc.chapterId] = [];
-        }
-        grouped[fc.chapterId].push(fc);
+      if (!grouped[fc.chapterId]) {
+        grouped[fc.chapterId] = [];
       }
+      grouped[fc.chapterId]!.push(fc);
     }
 
-    const result = Object.entries(grouped).map(([chapterId, flashcards]) => ({
-      id: Number(chapterId),
-      name: flashcards[0]?.chapterName || 'Unknown Chapter',
-      flashcards,
-    }));
+    const result = Object.entries(grouped)
+      .filter((entry): entry is [string, FlashcardWithContext[]] => entry[1] !== undefined)
+      .map(([chapterId, flashcards]) => ({
+        id: Number(chapterId),
+        name: flashcards[0].chapterName,
+        flashcards,
+      }));
 
     if (isReversed) {
       return [...result].reverse().map((chapter) => ({
@@ -293,7 +291,7 @@ const DesktopFlashcardsContent = ({
   <ThreeColumnLayout>
     <HighlightTagsList
       tags={tags}
-      tagGroups={book.highlight_tag_groups || []}
+      tagGroups={book.highlight_tag_groups}
       bookId={book.id}
       selectedTag={selectedTagId}
       onTagClick={onTagClick}
@@ -346,7 +344,7 @@ const useFlashcardsTabData = (
 
     const tagIdsWithFlashcards = new Set<number>();
     allFlashcardsWithContext.forEach((fc) =>
-      fc.highlightTags?.forEach((tag) => tagIdsWithFlashcards.add(tag.id))
+      fc.highlightTags.forEach((tag) => tagIdsWithFlashcards.add(tag.id))
     );
 
     return tagsInBook.filter((tag) => tagIdsWithFlashcards.has(tag.id));

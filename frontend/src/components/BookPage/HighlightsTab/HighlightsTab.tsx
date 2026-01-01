@@ -62,7 +62,7 @@ export const HighlightsTab = ({
   const bookSearch = useBookSearch(book.id, searchText);
 
   const bookmarksByHighlightId = useMemo(
-    () => keyBy(book.bookmarks || [], 'highlight_id'),
+    () => keyBy(book.bookmarks, 'highlight_id'),
     [book.bookmarks]
   );
 
@@ -101,7 +101,7 @@ export const HighlightsTab = ({
     handleModalNavigate,
   } = useHighlightModal({ allHighlights, isMobile: !isDesktop });
 
-  const tags = book.highlight_tags || [];
+  const tags = book.highlight_tags;
 
   const navData = useHighlightsTabData(chapters);
 
@@ -135,7 +135,7 @@ export const HighlightsTab = ({
             book={book}
             onTagClick={handleTagClick}
             selectedTag={selectedTagId}
-            bookmarks={book.bookmarks || []}
+            bookmarks={book.bookmarks}
             allHighlights={allHighlights}
             onBookmarkClick={onBookmarkClick}
             chapters={navData.chapters}
@@ -283,7 +283,7 @@ const DesktopHighlightsContent = ({
   <ThreeColumnLayout>
     <HighlightTagsList
       tags={tags}
-      tagGroups={book.highlight_tag_groups || []}
+      tagGroups={book.highlight_tag_groups}
       bookId={book.id}
       selectedTag={selectedTagId}
       onTagClick={onTagClick}
@@ -323,7 +323,7 @@ const DesktopHighlightsContent = ({
 
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <BookmarkList
-        bookmarks={book.bookmarks || []}
+        bookmarks={book.bookmarks}
         allHighlights={allHighlights}
         onBookmarkClick={onBookmarkClick}
       />
@@ -381,7 +381,7 @@ function filterChaptersByTag(
     .map((chapter) => ({
       ...chapter,
       highlights: chapter.highlights.filter((highlight) =>
-        highlight.highlight_tags?.some((tag) => tag.id === selectedTagId)
+        highlight.highlight_tags.some((tag) => tag.id === selectedTagId)
       ),
     }))
     .filter((chapter) => chapter.highlights.length > 0);

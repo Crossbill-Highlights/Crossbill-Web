@@ -42,7 +42,7 @@ class HighlightTagCreateRequest(BaseModel):
 class HighlightTagsResponse(BaseModel):
     """Schema for list of highlight tags response."""
 
-    tags: list[HighlightTag] = Field(default_factory=list, description="List of highlight tags")
+    tags: list[HighlightTag] = Field(..., description="List of highlight tags")
 
 
 class HighlightTagAssociationRequest(BaseModel):
@@ -98,6 +98,4 @@ class HighlightTagGroupCreateRequest(BaseModel):
 class HighlightTagGroupsResponse(BaseModel):
     """Schema for list of highlight tag groups response."""
 
-    tag_groups: list[HighlightTagGroup] = Field(
-        default_factory=list, description="List of highlight tag groups"
-    )
+    tag_groups: list[HighlightTagGroup] = Field(..., description="List of highlight tag groups")

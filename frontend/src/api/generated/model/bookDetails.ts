@@ -30,13 +30,13 @@ export interface BookDetails {
   language?: BookDetailsLanguage;
   page_count?: BookDetailsPageCount;
   /** List of tags for this book */
-  tags?: TagInBook[];
+  tags: TagInBook[];
   /** List of highlight tags for this book */
-  highlight_tags?: HighlightTagInBook[];
+  highlight_tags: HighlightTagInBook[];
   /** List of highlight tag groups for this book */
-  highlight_tag_groups?: HighlightTagGroupInBook[];
+  highlight_tag_groups: HighlightTagGroupInBook[];
   /** List of bookmarks for this book */
-  bookmarks?: Bookmark[];
+  bookmarks: Bookmark[];
   /** List of chapters with highlights */
   chapters: ChapterWithHighlights[];
   created_at: string;

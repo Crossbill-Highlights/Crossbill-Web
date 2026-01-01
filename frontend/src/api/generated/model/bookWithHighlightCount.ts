@@ -36,7 +36,7 @@ export interface BookWithHighlightCount {
    */
   flashcard_count?: number;
   /** List of tags for this book */
-  tags?: TagInBook[];
+  tags: TagInBook[];
   created_at: string;
   updated_at: string;
   last_viewed?: BookWithHighlightCountLastViewed;

@@ -152,7 +152,7 @@ export const FlashcardListCard = ({ flashcard, bookId, onEdit }: FlashcardCardPr
             </Typography>
 
             {/* Source highlight preview */}
-            {flashcard.highlight?.text && (
+            {flashcard.highlight.text && (
               <Box
                 sx={{
                   mt: 2,
@@ -177,7 +177,7 @@ export const FlashcardListCard = ({ flashcard, bookId, onEdit }: FlashcardCardPr
                       lineHeight: 1.4,
                     }}
                   >
-                    {flashcard.highlight?.text}
+                    {flashcard.highlight.text}
                   </Typography>
                 </Box>
               </Box>

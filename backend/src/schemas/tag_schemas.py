@@ -24,4 +24,4 @@ class Tag(TagBase):
 class BookUpdateRequest(BaseModel):
     """Schema for updating a book."""
 
-    tags: list[str] = Field(default_factory=list, description="List of tag names")
+    tags: list[str] = Field(..., description="List of tag names")

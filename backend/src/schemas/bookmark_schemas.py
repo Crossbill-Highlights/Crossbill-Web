@@ -30,4 +30,4 @@ class BookmarkCreateRequest(BaseModel):
 class BookmarksResponse(BaseModel):
     """Schema for list of bookmarks response."""
 
-    bookmarks: list[Bookmark] = Field(default_factory=list, description="List of bookmarks")
+    bookmarks: list[Bookmark] = Field(..., description="List of bookmarks")

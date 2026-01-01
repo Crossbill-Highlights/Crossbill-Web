@@ -908,7 +908,7 @@ export const HighlightTagsList = ({
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* Tag Groups Content */}
-        {tags && tags.length > 0 ? (
+        {tags.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {/* Grouped tags */}
             {groupedTags.map(({ group, tags: groupTags }) =>
@@ -956,7 +956,7 @@ export const HighlightTagsList = ({
       </DndContext>
 
       {/* Tip */}
-      {tags && tags.length > 0 && (
+      {tags.length > 0 && (
         <Box
           sx={{
             mt: 2,

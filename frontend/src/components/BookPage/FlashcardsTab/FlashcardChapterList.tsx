@@ -5,10 +5,10 @@ import { SectionTitle } from '@/components/common/SectionTitle.tsx';
 import { Box, Typography } from '@mui/material';
 
 export interface FlashcardWithContext extends Flashcard {
-  highlight?: Highlight;
-  chapterName?: string;
-  chapterId?: number;
-  highlightTags?: { id: number; name: string }[];
+  highlight: Highlight;
+  chapterName: string;
+  chapterId: number;
+  highlightTags: { id: number; name: string }[];
 }
 
 export interface FlashcardChapterData {

@@ -58,7 +58,7 @@ export const HighlightViewModal = ({
   const hasNote = !!highlight.note;
   const noteVisible = hasNote || noteVisibleWhenEmpty;
 
-  const hasFlashcards = !!highlight.flashcards?.length;
+  const hasFlashcards = !!highlight.flashcards.length;
   const flashcardVisible = hasFlashcards || flashcardVisibleWhenEmpty;
 
   const handleNoteToggle = () => {
@@ -145,7 +145,7 @@ export const HighlightViewModal = ({
       <TagInput
         highlightId={highlight.id}
         bookId={bookId}
-        initialTags={highlight.highlight_tags || []}
+        initialTags={highlight.highlight_tags}
         availableTags={availableTags}
         disabled={isLoading}
       />
@@ -159,7 +159,7 @@ export const HighlightViewModal = ({
       <FlashcardSection
         highlightId={highlight.id}
         bookId={bookId}
-        flashcards={highlight.flashcards || []}
+        flashcards={highlight.flashcards}
         visible={flashcardVisible}
         disabled={isLoading}
       />

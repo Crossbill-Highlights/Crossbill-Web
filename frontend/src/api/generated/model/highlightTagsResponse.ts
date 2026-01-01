@@ -11,5 +11,5 @@ import type { HighlightTag } from './highlightTag';
  */
 export interface HighlightTagsResponse {
   /** List of highlight tags */
-  tags?: HighlightTag[];
+  tags: HighlightTag[];
 }

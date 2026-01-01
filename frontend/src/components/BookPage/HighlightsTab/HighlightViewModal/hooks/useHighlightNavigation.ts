@@ -19,14 +19,14 @@ export const useHighlightNavigation = ({
   const hasNext = hasNavigation && currentIndex < totalCount - 1;
 
   const handlePrevious = useCallback(() => {
-    if (hasPrevious && onNavigate) {
-      onNavigate(currentIndex - 1);
+    if (hasPrevious) {
+      onNavigate!(currentIndex - 1);
     }
   }, [currentIndex, hasPrevious, onNavigate]);
 
   const handleNext = useCallback(() => {
-    if (hasNext && onNavigate) {
-      onNavigate(currentIndex + 1);
+    if (hasNext) {
+      onNavigate!(currentIndex + 1);
     }
   }, [currentIndex, hasNext, onNavigate]);
 

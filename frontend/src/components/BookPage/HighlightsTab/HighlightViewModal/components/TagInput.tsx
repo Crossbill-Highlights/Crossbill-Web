@@ -80,7 +80,7 @@ const useTagState = (bookId: number, highlightId: number, initialTags: Highlight
   const addTagMutation = useAddTagToHighlightApiV1BooksBookIdHighlightHighlightIdTagPost({
     mutation: {
       onSuccess: (data) => {
-        setCurrentTags(data.highlight_tags || []);
+        setCurrentTags(data.highlight_tags);
         void queryClient.invalidateQueries({
           queryKey: getGetBookDetailsApiV1BooksBookIdGetQueryKey(bookId),
         });
@@ -99,7 +99,7 @@ const useTagState = (bookId: number, highlightId: number, initialTags: Highlight
     useRemoveTagFromHighlightApiV1BooksBookIdHighlightHighlightIdTagTagIdDelete({
       mutation: {
         onSuccess: (data) => {
-          setCurrentTags(data.highlight_tags || []);
+          setCurrentTags(data.highlight_tags);
           void queryClient.invalidateQueries({
             queryKey: getGetBookDetailsApiV1BooksBookIdGetQueryKey(bookId),
           });

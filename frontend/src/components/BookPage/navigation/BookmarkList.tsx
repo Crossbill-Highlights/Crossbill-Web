@@ -25,7 +25,7 @@ export const BookmarkList = ({
 
   // Get highlights for bookmarks and sort by page number
   const bookmarkedHighlights =
-    bookmarks && bookmarks.length > 0
+    bookmarks.length > 0
       ? bookmarks
           .map((bookmark) => ({
             bookmark,

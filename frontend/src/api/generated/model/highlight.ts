@@ -39,9 +39,9 @@ export interface Highlight {
   book_id: number;
   chapter_id: HighlightChapterId;
   /** List of highlight tags for this highlight */
-  highlight_tags?: HighlightTagInBook[];
+  highlight_tags: HighlightTagInBook[];
   created_at: string;
   updated_at: string;
   /** List of flashcards for this highlight */
-  flashcards?: Flashcard[];
+  flashcards: Flashcard[];
 }

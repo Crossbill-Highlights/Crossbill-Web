@@ -173,7 +173,7 @@ export const BookTitle = ({ book }: BookTitleProps) => {
               justifyContent: { xs: 'center', lg: 'flex-start' },
               alignItems: 'center',
               gap: 1,
-              mb: book.tags && book.tags.length > 0 ? 2 : 0,
+              mb: book.tags.length > 0 ? 2 : 0,
               width: '100%',
               flexWrap: 'wrap',
             }}

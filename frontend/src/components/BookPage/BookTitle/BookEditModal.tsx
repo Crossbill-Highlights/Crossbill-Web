@@ -30,7 +30,7 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
   const navigate = useNavigate();
   const { control, handleSubmit, reset } = useForm<BookEditFormData>({
     defaultValues: {
-      tags: book.tags?.map((tag) => tag.name) || [],
+      tags: book.tags.map((tag) => tag.name),
     },
   });
 
@@ -75,7 +75,7 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
   useEffect(() => {
     if (open) {
       reset({
-        tags: book.tags?.map((tag) => tag.name) || [],
+        tags: book.tags.map((tag) => tag.name),
       });
       updateBookMutation.reset(); // Reset mutation state
     }

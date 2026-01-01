@@ -23,5 +23,5 @@ class FlashcardsWithHighlightsResponse(BaseModel):
     """Schema for list of flashcards response with highlight data."""
 
     flashcards: list[FlashcardWithHighlight] = Field(
-        default_factory=list, description="List of flashcards with highlight data"
+        ..., description="List of flashcards with highlight data"
     )

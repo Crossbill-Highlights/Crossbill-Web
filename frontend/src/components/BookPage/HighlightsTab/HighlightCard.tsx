@@ -75,7 +75,7 @@ const Footer = ({ highlight, bookmark }: FooterProps) => {
               <NotesIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
             </span>
           )}
-          {!!highlight.flashcards?.length && (
+          {!!highlight.flashcards.length && (
             <span>
               &nbsp;&nbsp;•
               <FlashcardsIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />

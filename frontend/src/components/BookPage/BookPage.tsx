@@ -30,13 +30,12 @@ const BookTabs = ({
   book: BookDetails;
 }) => {
   const totalHighlights = useMemo(() => {
-    return book.chapters?.reduce((sum, chapter) => sum + (chapter.highlights?.length || 0), 0) || 0;
+    return book.chapters.reduce((sum, chapter) => sum + chapter.highlights.length, 0);
   }, [book.chapters]);
 
   const totalFlashcards = useMemo(() => {
-    if (!book.chapters) return 0;
     return flatMap(book.chapters, (chapter) =>
-      flatMap(chapter.highlights || [], (highlight) => highlight.flashcards || [])
+      flatMap(chapter.highlights, (highlight) => highlight.flashcards)
     ).length;
   }, [book.chapters]);
 

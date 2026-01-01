@@ -29,7 +29,7 @@ export interface HighlightSearchResult {
   /** Chapter order number from TOC */
   chapter_number?: HighlightSearchResultChapterNumber;
   /** List of highlight tags for this highlight */
-  highlight_tags?: HighlightTagInBook[];
+  highlight_tags: HighlightTagInBook[];
   created_at: string;
   updated_at: string;
 }
