@@ -1,5 +1,5 @@
 import type { Highlight } from '@/api/generated/model';
-import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils';
+import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils.ts';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -97,10 +97,8 @@ export const useHighlightModal = ({
   // Handler for modal navigation - converts index to highlight ID
   const handleModalNavigate = useCallback(
     (newIndex: number) => {
-      const newHighlight = allHighlights[newIndex];
-      if (newHighlight) {
-        handleNavigateHighlight(newHighlight.id);
-      }
+      const newHighlight = allHighlights[newIndex]!;
+      handleNavigateHighlight(newHighlight.id);
     },
     [allHighlights, handleNavigateHighlight]
   );

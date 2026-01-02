@@ -11,7 +11,7 @@ import type { HighlightSearchResult } from './highlightSearchResult';
  */
 export interface HighlightSearchResponse {
   /** List of matching highlights */
-  highlights?: HighlightSearchResult[];
+  highlights: HighlightSearchResult[];
   /**
    * Total number of results
    * @minimum 0

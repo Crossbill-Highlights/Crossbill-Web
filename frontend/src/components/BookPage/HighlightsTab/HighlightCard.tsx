@@ -1,12 +1,12 @@
 import type { Bookmark, Highlight } from '@/api/generated/model';
-import { TagList } from '@/components/BookPage/components/TagList.tsx';
+import { BookTagList } from '@/components/BookPage/BookTitle/BookTagList.tsx';
 import {
   BookmarkFilledIcon,
   DateIcon,
   FlashcardsIcon,
   NotesIcon,
   QuoteIcon,
-} from '@/components/common/Icons';
+} from '@/components/common/Icons.tsx';
 import { Box, CardActionArea, Typography } from '@mui/material';
 
 export interface HighlightCardProps {
@@ -75,7 +75,7 @@ const Footer = ({ highlight, bookmark }: FooterProps) => {
               <NotesIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
             </span>
           )}
-          {!!highlight.flashcards?.length && (
+          {!!highlight.flashcards.length && (
             <span>
               &nbsp;&nbsp;•
               <FlashcardsIcon sx={{ fontSize: 16, verticalAlign: 'middle', ml: 1, mt: -0.5 }} />
@@ -86,7 +86,7 @@ const Footer = ({ highlight, bookmark }: FooterProps) => {
       </Box>
 
       <Box>
-        <TagList tags={highlight.highlight_tags} />
+        <BookTagList tags={highlight.highlight_tags} />
       </Box>
     </Box>
   );
@@ -142,7 +142,6 @@ export const HighlightCard = ({ highlight, bookmark, onOpenModal }: HighlightCar
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        {/* Quote Icon and Text */}
         <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5, mb: 2 }}>
           <QuoteIcon
             sx={{

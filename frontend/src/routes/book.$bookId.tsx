@@ -11,10 +11,10 @@ export const Route = createFileRoute('/book/$bookId')({
   component: BookPage,
   validateSearch: (search: Record<string, unknown>): BookPageSearch => {
     return {
-      search: (search?.search as string) || undefined,
-      tagId: (search?.tagId as number) || undefined,
-      highlightId: (search?.highlightId as number) || undefined,
-      tab: (search?.tab as 'highlights' | 'flashcards') || undefined,
+      search: (search.search as string | undefined) || undefined,
+      tagId: (search.tagId as number | undefined) || undefined,
+      highlightId: (search.highlightId as number | undefined) || undefined,
+      tab: (search.tab as 'highlights' | 'flashcards' | undefined) || undefined,
     };
   },
 });

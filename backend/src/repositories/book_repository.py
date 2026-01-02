@@ -20,17 +20,6 @@ class BookRepository:
         """Initialize repository with database session."""
         self.db = db
 
-    def find_by_title_and_author(
-        self, title: str, author: str | None, user_id: int
-    ) -> models.Book | None:
-        """Find a book by its title, author, and user."""
-        stmt = select(models.Book).where(
-            models.Book.title == title,
-            models.Book.author == author,
-            models.Book.user_id == user_id,
-        )
-        return self.db.execute(stmt).scalar_one_or_none()
-
     def find_by_content_hash(self, content_hash: str, user_id: int) -> models.Book | None:
         """Find a book by its content hash and user."""
         stmt = select(models.Book).where(
@@ -48,19 +37,6 @@ class BookRepository:
         self.db.flush()
         self.db.refresh(book)
         logger.info(f"Created book: {book.title} (id={book.id}, user_id={user_id})")
-        return book
-
-    def update(self, book: models.Book, book_data: schemas.BookCreate) -> models.Book:
-        """Update an existing book's metadata."""
-        book.title = book_data.title
-        book.author = book_data.author
-        book.isbn = book_data.isbn
-        book.description = book_data.description
-        book.language = book_data.language
-        book.page_count = book_data.page_count
-        self.db.flush()
-        self.db.refresh(book)
-        logger.info(f"Updated book: {book.title} (id={book.id})")
         return book
 
     def get_or_create(

@@ -10,5 +10,5 @@
  */
 export interface BookUpdateRequest {
   /** List of tag names */
-  tags?: string[];
+  tags: string[];
 }

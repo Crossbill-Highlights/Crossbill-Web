@@ -40,7 +40,7 @@ export interface HighlightResponseBase {
   book_id: number;
   chapter_id: HighlightResponseBaseChapterId;
   /** List of highlight tags for this highlight */
-  highlight_tags?: HighlightTagInBook[];
+  highlight_tags: HighlightTagInBook[];
   created_at: string;
   updated_at: string;
 }

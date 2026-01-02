@@ -1,20 +1,21 @@
 import type { Flashcard, Highlight } from '@/api/generated/model';
-import { FlashcardListCard } from '@/components/BookPage/components/FlashcardsTab/FlashcardListCard.tsx';
-import { FadeInOut } from '@/components/common/animations/FadeInOut';
-import { SectionTitle } from '@/components/common/SectionTitle';
+import { FlashcardListCard } from '@/components/BookPage/FlashcardsTab/FlashcardListCard.tsx';
+import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
+import { SectionTitle } from '@/components/common/SectionTitle.tsx';
 import { Box, Typography } from '@mui/material';
 
 export interface FlashcardWithContext extends Flashcard {
-  highlight?: Highlight;
-  chapterName?: string;
-  chapterId?: number;
-  highlightTags?: { id: number; name: string }[];
+  highlight: Highlight;
+  chapterName: string;
+  chapterId: number;
+  highlightTags: { id: number; name: string }[];
 }
 
 export interface FlashcardChapterData {
-  id: number | string;
+  id: number;
   name: string;
   flashcards: FlashcardWithContext[];
+  chapter_number?: number;
 }
 
 interface FlashcardChapterListProps {

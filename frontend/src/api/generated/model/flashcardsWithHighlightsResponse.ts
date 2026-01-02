@@ -11,5 +11,5 @@ import type { FlashcardWithHighlight } from './flashcardWithHighlight';
  */
 export interface FlashcardsWithHighlightsResponse {
   /** List of flashcards with highlight data */
-  flashcards?: FlashcardWithHighlight[];
+  flashcards: FlashcardWithHighlight[];
 }

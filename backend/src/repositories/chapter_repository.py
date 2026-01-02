@@ -1,7 +1,6 @@
 """Chapter repository for database operations."""
 
 import logging
-from collections.abc import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -48,47 +47,6 @@ class ChapterRepository:
         self.db.refresh(chapter)
         logger.info(f"Created chapter: {name} for book_id={book_id} (number={chapter_number})")
         return chapter
-
-    def update_chapter_number(
-        self, chapter_id: int, user_id: int, chapter_number: int | None
-    ) -> models.Chapter | None:
-        """Update the chapter number for an existing chapter, verifying user ownership."""
-        stmt = (
-            select(models.Chapter)
-            .join(models.Book, models.Chapter.book_id == models.Book.id)
-            .where(
-                models.Chapter.id == chapter_id,
-                models.Book.user_id == user_id,
-            )
-        )
-        chapter = self.db.execute(stmt).scalar_one_or_none()
-        if chapter:
-            chapter.chapter_number = chapter_number
-            self.db.flush()
-            self.db.refresh(chapter)
-            logger.info(f"Updated chapter {chapter_id} number to {chapter_number}")
-        return chapter
-
-    def get_or_create(
-        self, book_id: int, user_id: int, name: str, chapter_number: int | None = None
-    ) -> models.Chapter:
-        """Get existing chapter by name and book or create a new one."""
-        chapter = self.find_by_name_and_book(book_id, name, user_id)
-
-        if chapter:
-            # Update chapter number if it's different
-            if chapter_number is not None and chapter.chapter_number != chapter_number:
-                chapter.chapter_number = chapter_number
-                self.db.flush()
-                self.db.refresh(chapter)
-                logger.info(
-                    f"Updated chapter number for '{name}' (book_id={book_id}) to {chapter_number}"
-                )
-            return chapter
-
-        # Create the chapter without handling IntegrityError here
-        # Any integrity errors will propagate up and be handled by the caller
-        return self.create(book_id, user_id, name, chapter_number)
 
     def get_by_names(
         self, book_id: int, names: set[str], user_id: int
@@ -138,22 +96,3 @@ class ChapterRepository:
 
         logger.info(f"Bulk created {len(chapters)} chapters for book_id={book_id}")
         return chapters
-
-    def get_by_book_id(self, book_id: int, user_id: int) -> Sequence[models.Chapter]:
-        """Get all chapters for a book, ordered by chapter_number if available."""
-        stmt = (
-            select(models.Chapter)
-            .join(models.Book, models.Chapter.book_id == models.Book.id)
-            .where(
-                models.Chapter.book_id == book_id,
-                models.Book.user_id == user_id,
-            )
-            .order_by(
-                # Order by chapter_number if available, otherwise by name
-                # NULL chapter_numbers go to the end
-                models.Chapter.chapter_number.is_(None),
-                models.Chapter.chapter_number,
-                models.Chapter.name,
-            )
-        )
-        return self.db.execute(stmt).scalars().all()

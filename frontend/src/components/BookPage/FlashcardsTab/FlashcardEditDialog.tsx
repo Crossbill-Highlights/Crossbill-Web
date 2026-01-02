@@ -1,11 +1,11 @@
 import { getGetBookDetailsApiV1BooksBookIdGetQueryKey } from '@/api/generated/books/books.ts';
 import { useUpdateFlashcardApiV1FlashcardsFlashcardIdPut } from '@/api/generated/flashcards/flashcards.ts';
-import { HighlightContent } from '@/components/BookPage/components/HighlightContent.tsx';
+import { HighlightContent } from '@/components/BookPage/common/HighlightContent.tsx';
 import { CommonDialog } from '@/components/common/CommonDialog.tsx';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import type { FlashcardWithContext } from './FlashcardChapterList';
+import type { FlashcardWithContext } from './FlashcardChapterList.tsx';
 
 interface FlashcardEditDialogProps {
   flashcard: FlashcardWithContext;
@@ -85,9 +85,8 @@ export const FlashcardEditDialog = ({
       }
     >
       <Box sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {flashcard.highlight && <HighlightContent highlight={flashcard.highlight} />}
+        <HighlightContent highlight={flashcard.highlight} />
 
-        {/* Question field */}
         <Box>
           <Typography
             variant="caption"
@@ -116,7 +115,6 @@ export const FlashcardEditDialog = ({
           />
         </Box>
 
-        {/* Answer field */}
         <Box>
           <Typography
             variant="caption"

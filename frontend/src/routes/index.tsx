@@ -10,8 +10,8 @@ export const Route = createFileRoute('/')({
   component: LandingPage,
   validateSearch: (search: Record<string, unknown>): LandingPageSearch => {
     return {
-      search: (search?.search as string) || undefined,
-      page: Number(search?.page) || 1,
+      search: (search.search as string | undefined) || undefined,
+      page: Number(search.page) || 1,
     };
   },
 });

@@ -9,8 +9,8 @@ import { ArrowBackIcon, ArrowForwardIcon } from '@/components/common/Icons.tsx';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { CommonDialog } from '../../../../common/CommonDialog.tsx';
-import { HighlightContent } from '../../HighlightContent.tsx';
+import { CommonDialog } from '../../../common/CommonDialog.tsx';
+import { HighlightContent } from '../../common/HighlightContent.tsx';
 import { FlashcardSection } from './components/FlashcardSection.tsx';
 import { HighlightNote } from './components/HighlightNote.tsx';
 import { ProgressBar } from './components/ProgressBar.tsx';
@@ -58,7 +58,7 @@ export const HighlightViewModal = ({
   const hasNote = !!highlight.note;
   const noteVisible = hasNote || noteVisibleWhenEmpty;
 
-  const hasFlashcards = !!highlight.flashcards?.length;
+  const hasFlashcards = !!highlight.flashcards.length;
   const flashcardVisible = hasFlashcards || flashcardVisibleWhenEmpty;
 
   const handleNoteToggle = () => {
@@ -129,9 +129,8 @@ export const HighlightViewModal = ({
 
   // Shared content for both layouts
   const renderContent = () => (
-    <>
+    <Box key={highlight.id}>
       <Toolbar
-        key={highlight.id}
         highlightId={highlight.id}
         bookId={bookId}
         highlightText={highlight.text}
@@ -146,7 +145,7 @@ export const HighlightViewModal = ({
       <TagInput
         highlightId={highlight.id}
         bookId={bookId}
-        initialTags={highlight.highlight_tags || []}
+        initialTags={highlight.highlight_tags}
         availableTags={availableTags}
         disabled={isLoading}
       />
@@ -160,11 +159,11 @@ export const HighlightViewModal = ({
       <FlashcardSection
         highlightId={highlight.id}
         bookId={bookId}
-        flashcards={highlight.flashcards || []}
+        flashcards={highlight.flashcards}
         visible={flashcardVisible}
         disabled={isLoading}
       />
-    </>
+    </Box>
   );
 
   return (

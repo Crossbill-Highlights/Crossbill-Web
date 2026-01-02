@@ -60,7 +60,7 @@ class BookWithHighlightCount(BaseModel):
     page_count: int | None = None
     highlight_count: int = Field(..., ge=0, description="Number of highlights for this book")
     flashcard_count: int = Field(0, ge=0, description="Number of flashcards for this book")
-    tags: list[TagInBook] = Field(default_factory=list, description="List of tags for this book")
+    tags: list[TagInBook] = Field(..., description="List of tags for this book")
     created_at: datetime
     updated_at: datetime
     last_viewed: datetime | None = None

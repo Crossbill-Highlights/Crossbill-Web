@@ -19,25 +19,6 @@ class HighlightTagService:
         self.highlight_repo = repositories.HighlightRepository(db)
         self.book_repo = repositories.BookRepository(db)
 
-    def get_tags_for_highlight(self, highlight_id: int, user_id: int) -> list[models.HighlightTag]:
-        """
-        Get all tags associated with a highlight.
-
-        Args:
-            highlight_id: ID of the highlight
-
-        Returns:
-            List of HighlightTag models
-
-        Raises:
-            ValueError: If highlight not found
-        """
-        highlight = self.highlight_repo.get_by_id(highlight_id, user_id)
-        if not highlight:
-            raise ValueError(f"Highlight with id {highlight_id} not found")
-
-        return highlight.highlight_tags
-
     def get_tags_for_book(self, book_id: int, user_id: int) -> list[models.HighlightTag]:
         """
         Get all highlight tags for a book.
@@ -311,20 +292,6 @@ class HighlightTagService:
             return updated_tag
 
         raise ValueError(f"Failed to update tag {tag_id}")
-
-    # HighlightTagGroup service methods
-
-    def get_tag_groups_for_book(self, book_id: int, user_id: int) -> list[models.HighlightTagGroup]:
-        """
-        Get all highlight tag groups for a book.
-
-        Args:
-            book_id: ID of the book
-
-        Returns:
-            List of HighlightTagGroup models (empty list if book doesn't exist)
-        """
-        return self.highlight_tag_repo.get_tag_groups_by_book_id(book_id, user_id)
 
     def upsert_tag_group(
         self, book_id: int, name: str, user_id: int, tag_group_id: int | None = None

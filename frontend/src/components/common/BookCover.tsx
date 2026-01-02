@@ -85,7 +85,7 @@ export const BookCover = ({
           onError={(e) => {
             // Fallback to placeholder if image fails to load
             e.currentTarget.style.display = 'none';
-            const placeholder = e.currentTarget.nextSibling as HTMLElement;
+            const placeholder = e.currentTarget.nextSibling as HTMLElement | null;
             if (placeholder) placeholder.style.display = 'flex';
           }}
         />

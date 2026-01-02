@@ -80,11 +80,96 @@ export const FlashcardSection = ({
   visible,
   disabled = false,
 }: FlashcardSectionProps) => {
-  const queryClient = useQueryClient();
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+  const { isProcessing, saveFlashcard, deleteFlashcard } = useFlashcardMutations(
+    bookId,
+    highlightId
+  );
 
+  const isDisabled = disabled || isProcessing;
+  const canSave = question.trim() && answer.trim() && !isDisabled;
+
+  const handleSave = async () => {
+    await saveFlashcard(question, answer);
+    setQuestion('');
+    setAnswer('');
+  };
+
+  return (
+    <AnimatePresence initial={false}>
+      {visible && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+          style={{ overflow: 'hidden' }}
+        >
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Flashcards
+            </Typography>
+
+            {/* Existing flashcards */}
+            {flashcards.length > 0 && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
+                {flashcards.map((flashcard) => (
+                  <Flashcard
+                    key={flashcard.id}
+                    onDelete={() => deleteFlashcard(flashcard.id)}
+                    isLoading={isDisabled}
+                    {...flashcard}
+                  />
+                ))}
+              </Box>
+            )}
+
+            {/* Create form */}
+            <Box
+              sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-start' }}
+            >
+              <TextField
+                fullWidth
+                size="small"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="Question..."
+                disabled={isDisabled}
+              />
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                minRows={2}
+                maxRows={4}
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                placeholder="Answer..."
+                disabled={isDisabled}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={handleSave}
+                  disabled={!canSave}
+                  sx={{ flexShrink: 0, height: 'fit-content', mt: 0.5 }}
+                >
+                  {isProcessing ? 'Saving...' : 'Add Flashcard'}
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const useFlashcardMutations = (bookId: number, highlightId: number) => {
+  const queryClient = useQueryClient();
+  const [isProcessing, setIsProcessing] = useState(false);
   const createFlashcardMutation =
     useCreateFlashcardForHighlightApiV1HighlightsHighlightIdFlashcardsPost({
       mutation: {
@@ -114,98 +199,29 @@ export const FlashcardSection = ({
     },
   });
 
-  const handleSave = async () => {
+  const saveFlashcard = async (question: string, answer: string) => {
     if (!question.trim() || !answer.trim()) return;
 
-    setIsSaving(true);
+    setIsProcessing(true);
     try {
       await createFlashcardMutation.mutateAsync({
         highlightId,
         data: { question: question.trim(), answer: answer.trim() },
       });
-      setQuestion('');
-      setAnswer('');
     } finally {
-      setIsSaving(false);
+      setIsProcessing(false);
     }
   };
 
-  const handleDelete = async (flashcardId: number) => {
+  const deleteFlashcard = async (flashcardId: number) => {
     if (!confirm('Are you sure you want to delete this flashcard?')) return;
 
     await deleteFlashcardMutation.mutateAsync({ flashcardId });
   };
 
-  const isLoading = disabled || isSaving;
-  const canSave = question.trim() && answer.trim() && !isLoading;
-
-  return (
-    <AnimatePresence initial={false}>
-      {visible && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.2, ease: 'easeInOut' }}
-          style={{ overflow: 'hidden' }}
-        >
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Flashcards
-            </Typography>
-
-            {/* Existing flashcards */}
-            {flashcards.length > 0 && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
-                {flashcards.map((flashcard) => (
-                  <Flashcard
-                    key={flashcard.id}
-                    onDelete={handleDelete}
-                    isLoading={isLoading}
-                    {...flashcard}
-                  />
-                ))}
-              </Box>
-            )}
-
-            {/* Create form */}
-            <Box
-              sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-start' }}
-            >
-              <TextField
-                fullWidth
-                size="small"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Question..."
-                disabled={isLoading}
-              />
-              <TextField
-                fullWidth
-                size="small"
-                multiline
-                minRows={2}
-                maxRows={4}
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Answer..."
-                disabled={isLoading}
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                <Button
-                  variant="text"
-                  size="small"
-                  onClick={handleSave}
-                  disabled={!canSave}
-                  sx={{ flexShrink: 0, height: 'fit-content', mt: 0.5 }}
-                >
-                  {isSaving ? 'Saving...' : 'Add Flashcard'}
-                </Button>
-              </Box>
-            </Box>
-          </Box>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+  return {
+    isProcessing,
+    saveFlashcard,
+    deleteFlashcard,
+  };
 };

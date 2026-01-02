@@ -1,11 +1,11 @@
 import type { BookDetails } from '@/api/generated/model';
-import { TagList } from '@/components/BookPage/components/TagList.tsx';
-import { BookmarkIcon, EditIcon, ExpandLessIcon, ExpandMoreIcon } from '@/components/common/Icons';
+import { BookTagList } from '@/components/BookPage/BookTitle/BookTagList.tsx';
+import { EditIcon, ExpandLessIcon, ExpandMoreIcon } from '@/components/common/Icons.tsx';
 import { Box, Button, Typography } from '@mui/material';
 import DOMPurify from 'dompurify';
 import { useMemo, useState } from 'react';
-import { BookCover } from '../../common/BookCover';
-import { BookEditModal } from './BookEditModal';
+import { BookCover } from '../../common/BookCover.tsx';
+import { BookEditModal } from './BookEditModal.tsx';
 
 // Strip HTML tags from description for plain text preview
 const stripHtml = (html: string): string => {
@@ -23,10 +23,9 @@ const sanitizeHtml = (html: string): string => {
 
 export interface BookTitleProps {
   book: BookDetails;
-  highlightCount: number;
 }
 
-export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
+export const BookTitle = ({ book }: BookTitleProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
@@ -174,40 +173,22 @@ export const BookTitle = ({ book, highlightCount }: BookTitleProps) => {
               justifyContent: { xs: 'center', lg: 'flex-start' },
               alignItems: 'center',
               gap: 1,
-              mb: book.tags && book.tags.length > 0 ? 2 : 0,
+              mb: book.tags.length > 0 ? 2 : 0,
               width: '100%',
               flexWrap: 'wrap',
             }}
           >
-            <BookmarkIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-              {highlightCount} {highlightCount === 1 ? 'highlight' : 'highlights'}
-            </Typography>
             <Button variant="text" startIcon={<EditIcon />} onClick={handleEdit} size="small">
               Edit
             </Button>
           </Box>
 
-          <TagList tags={book.tags} />
+          <BookTagList tags={book.tags} />
         </Box>
       </Box>
 
       {/* Edit Modal */}
-      <BookEditModal
-        book={{
-          id: book.id,
-          title: book.title,
-          author: book.author,
-          isbn: book.isbn,
-          cover: book.cover,
-          highlight_count: highlightCount,
-          tags: book.tags || [],
-          created_at: book.created_at,
-          updated_at: book.updated_at,
-        }}
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-      />
+      <BookEditModal book={book} open={editModalOpen} onClose={() => setEditModalOpen(false)} />
     </>
   );
 };

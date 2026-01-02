@@ -34,6 +34,7 @@ from src.schemas.flashcard_schemas import (
 )
 from src.schemas.highlight_schemas import (
     BookDetails,
+    BookHighlightSearchResponse,
     ChapterWithHighlights,
     Highlight,
     HighlightBase,
@@ -69,6 +70,7 @@ __all__ = [
     "BookBase",
     "BookCreate",
     "BookDetails",
+    "BookHighlightSearchResponse",
     "BookUpdateRequest",
     "BookWithHighlightCount",
     "Bookmark",

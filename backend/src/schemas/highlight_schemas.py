@@ -39,7 +39,7 @@ class HighlightResponseBase(HighlightBase):
     book_id: int
     chapter_id: int | None
     highlight_tags: list[HighlightTagInBook] = Field(
-        default_factory=list, description="List of highlight tags for this highlight"
+        ..., description="List of highlight tags for this highlight"
     )
     created_at: dt
     updated_at: dt
@@ -96,9 +96,7 @@ class HighlightResponseBase(HighlightBase):
 class Highlight(HighlightResponseBase):
     """Schema for Highlight response with flashcards."""
 
-    flashcards: list[Flashcard] = Field(
-        default_factory=list, description="List of flashcards for this highlight"
-    )
+    flashcards: list[Flashcard] = Field(..., description="List of flashcards for this highlight")
 
 
 class HighlightUploadRequest(BaseModel):
@@ -126,9 +124,7 @@ class ChapterWithHighlights(BaseModel):
     id: int
     name: str
     chapter_number: int | None = Field(None, description="Chapter order number from TOC")
-    highlights: list[Highlight] = Field(
-        default_factory=list, description="List of highlights in this chapter"
-    )
+    highlights: list[Highlight] = Field(..., description="List of highlights in this chapter")
     created_at: dt
     updated_at: dt
 
@@ -146,18 +142,16 @@ class BookDetails(BaseModel):
     description: str | None = None
     language: str | None = None
     page_count: int | None = None
-    tags: list[TagInBook] = Field(default_factory=list, description="List of tags for this book")
+    tags: list[TagInBook] = Field(..., description="List of tags for this book")
     highlight_tags: list[HighlightTagInBook] = Field(
-        default_factory=list, description="List of highlight tags for this book"
+        ..., description="List of highlight tags for this book"
     )
     highlight_tag_groups: list[HighlightTagGroupInBook] = Field(
-        default_factory=list, description="List of highlight tag groups for this book"
+        ..., description="List of highlight tag groups for this book"
     )
-    bookmarks: list[Bookmark] = Field(
-        default_factory=list, description="List of bookmarks for this book"
-    )
+    bookmarks: list[Bookmark] = Field(..., description="List of bookmarks for this book")
     chapters: list[ChapterWithHighlights] = Field(
-        default_factory=list, description="List of chapters with highlights"
+        ..., description="List of chapters with highlights"
     )
     created_at: dt
     updated_at: dt
@@ -197,7 +191,7 @@ class HighlightSearchResult(BaseModel):
     chapter_name: str | None
     chapter_number: int | None = Field(None, description="Chapter order number from TOC")
     highlight_tags: list[HighlightTagInBook] = Field(
-        default_factory=list, description="List of highlight tags for this highlight"
+        ..., description="List of highlight tags for this highlight"
     )
     created_at: dt
     updated_at: dt
@@ -208,10 +202,17 @@ class HighlightSearchResult(BaseModel):
 class HighlightSearchResponse(BaseModel):
     """Schema for highlight search response."""
 
-    highlights: list[HighlightSearchResult] = Field(
-        default_factory=list, description="List of matching highlights"
-    )
+    highlights: list[HighlightSearchResult] = Field(..., description="List of matching highlights")
     total: int = Field(..., ge=0, description="Total number of results")
+
+
+class BookHighlightSearchResponse(BaseModel):
+    """Schema for book-scoped highlight search response grouped by chapter."""
+
+    chapters: list[ChapterWithHighlights] = Field(
+        ..., description="Chapters containing matching highlights"
+    )
+    total: int = Field(..., ge=0, description="Total number of matching highlights")
 
 
 class HighlightNoteUpdate(BaseModel):

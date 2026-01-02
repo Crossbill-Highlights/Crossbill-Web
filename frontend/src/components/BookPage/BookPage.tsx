@@ -3,110 +3,43 @@ import {
   useGetBookDetailsApiV1BooksBookIdGet,
 } from '@/api/generated/books/books';
 import type { BookDetails } from '@/api/generated/model';
-import {
-  FlashcardsTab,
-  useFlashcardsTabData,
-} from '@/components/BookPage/components/FlashcardsTab/FlashcardsTab.tsx';
-import {
-  HighlightsTab,
-  useHighlightsTabData,
-} from '@/components/BookPage/components/HighlightsTab/HighlightsTab.tsx';
+import { BookTitle } from '@/components/BookPage/BookTitle/BookTitle.tsx';
+import { FlashcardsTab } from '@/components/BookPage/FlashcardsTab/FlashcardsTab.tsx';
+import { HighlightsTab } from '@/components/BookPage/HighlightsTab/HighlightsTab.tsx';
 import { FadeInOut } from '@/components/common/animations/FadeInOut.tsx';
 import { scrollToElementWithHighlight } from '@/components/common/animations/scrollUtils';
 import { FlashcardsIcon, HighlightsIcon } from '@/components/common/Icons.tsx';
-import { ThreeColumnLayout } from '@/components/layout/Layouts.tsx';
+import { PageContainer, ThreeColumnLayout } from '@/components/layout/Layouts.tsx';
 import { queryClient } from '@/lib/queryClient';
-import {
-  Alert,
-  Box,
-  Container,
-  Tab,
-  Tabs,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Alert, Box, Tab, Tabs, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { flatMap } from 'lodash';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { ScrollToTopButton } from '../common/ScrollToTopButton';
 import { Spinner } from '../common/Spinner';
-import { BookTitle } from './components/BookTitle';
-import { MobileNavigation } from './components/MobileNavigation.tsx';
 
 type TabValue = 'highlights' | 'flashcards';
 
-export const BookPage = () => {
-  const { bookId } = useParams({ from: '/book/$bookId' });
-  const { tab } = useSearch({ from: '/book/$bookId' });
-  const { data: book, isLoading, isError } = useGetBookDetailsApiV1BooksBookIdGet(Number(bookId));
-
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const navigate = useNavigate({ from: '/book/$bookId' });
-  const activeTab: TabValue = tab || 'highlights';
-
-  // Update recently viewed on mount
-  useEffect(() => {
-    if (book) {
-      void queryClient.invalidateQueries({
-        queryKey: getGetRecentlyViewedBooksApiV1BooksRecentlyViewedGetQueryKey(),
-      });
-    }
-  });
-
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        tab: newValue === 'highlights' ? undefined : newValue,
-        search: undefined,
-        tagId: undefined,
-      }),
-      replace: true,
-    });
-  };
-
-  // Calculate totals for tab labels
+const BookTabs = ({
+  activeTab,
+  handleTabChange,
+  book,
+}: {
+  activeTab: TabValue;
+  handleTabChange: (_event: React.SyntheticEvent, newValue: TabValue) => void;
+  book: BookDetails;
+}) => {
   const totalHighlights = useMemo(() => {
-    return (
-      book?.chapters?.reduce((sum, chapter) => sum + (chapter.highlights?.length || 0), 0) || 0
-    );
-  }, [book?.chapters]);
+    return book.chapters.reduce((sum, chapter) => sum + chapter.highlights.length, 0);
+  }, [book.chapters]);
 
-  const bookChapters = book?.chapters;
   const totalFlashcards = useMemo(() => {
-    if (!bookChapters) return 0;
-    return flatMap(bookChapters, (chapter) =>
-      flatMap(chapter.highlights || [], (highlight) => highlight.flashcards || [])
+    return flatMap(book.chapters, (chapter) =>
+      flatMap(chapter.highlights, (highlight) => highlight.flashcards)
     ).length;
-  }, [bookChapters]);
+  }, [book.chapters]);
 
-  if (isLoading) {
-    return (
-      <Box sx={{ minHeight: '100vh' }}>
-        <Box sx={{ px: { xs: 2, sm: 3, lg: 4 }, maxWidth: '1400px', mx: 'auto' }}>
-          <Spinner />
-        </Box>
-      </Box>
-    );
-  }
-
-  if (isError || !book) {
-    return (
-      <Box sx={{ minHeight: '100vh' }}>
-        <Box sx={{ px: { xs: 2, sm: 3, lg: 4 }, maxWidth: '1400px', mx: 'auto' }}>
-          <Box sx={{ pt: 4 }}>
-            <Alert severity="error">Failed to load book details. Please try again later.</Alert>
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
-
-  const TabsComponent = (
+  return (
     <Tabs
       value={activeTab}
       onChange={handleTabChange}
@@ -143,113 +76,164 @@ export const BookPage = () => {
       />
     </Tabs>
   );
-
-  return (
-    <Container sx={{ minHeight: '100vh' }} maxWidth="xl">
-      <ScrollToTopButton />
-      <FadeInOut ekey={'book-title'}>
-        {/* Mobile Layout */}
-        {!isDesktop && (
-          <>
-            <Box sx={{ py: 8, maxWidth: '800px', mx: 'auto' }}>
-              <BookTitle book={book} highlightCount={totalHighlights} />
-              {TabsComponent}
-
-              {activeTab === 'highlights' ? (
-                <HighlightsTab book={book} isDesktop={false} isMobile={isMobile} />
-              ) : (
-                <FlashcardsTab book={book} isDesktop={false} />
-              )}
-            </Box>
-            <MobileNavigationWrapper book={book} activeTab={activeTab} />
-          </>
-        )}
-
-        {/* Desktop Layout */}
-        {isDesktop && (
-          <Box sx={{ px: 4, py: 4 }}>
-            <BookTitle book={book} highlightCount={totalHighlights} />
-            <ThreeColumnLayout>
-              <div></div> {/* Empty left column for spacing */}
-              {TabsComponent}
-            </ThreeColumnLayout>
-
-            {activeTab === 'highlights' ? (
-              <HighlightsTab book={book} isDesktop={true} isMobile={false} />
-            ) : (
-              <FlashcardsTab book={book} isDesktop={true} />
-            )}
-          </Box>
-        )}
-      </FadeInOut>
-    </Container>
-  );
 };
 
-// Wrapper component that uses the appropriate hooks based on active tab
-interface MobileNavigationWrapperProps {
+export const BookPage = () => {
+  const { bookId } = useParams({ from: '/book/$bookId' });
+  const { data: book, isLoading, isError } = useGetBookDetailsApiV1BooksBookIdGet(Number(bookId));
+
+  if (isLoading) {
+    return (
+      <Box sx={{ minHeight: '100vh' }}>
+        <Box sx={{ px: { xs: 2, sm: 3, lg: 4 }, maxWidth: '1400px', mx: 'auto' }}>
+          <Spinner />
+        </Box>
+      </Box>
+    );
+  }
+
+  if (isError || !book) {
+    return (
+      <Box sx={{ minHeight: '100vh' }}>
+        <Box sx={{ px: { xs: 2, sm: 3, lg: 4 }, maxWidth: '1400px', mx: 'auto' }}>
+          <Box sx={{ pt: 4 }}>
+            <Alert severity="error">Failed to load book details. Please try again later.</Alert>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  return <BookPageContent book={book} />;
+};
+
+interface BookPageContentProps {
   book: BookDetails;
-  activeTab: TabValue;
 }
 
-const MobileNavigationWrapper = ({ book, activeTab }: MobileNavigationWrapperProps) => {
+const BookPageContent = ({ book }: BookPageContentProps) => {
+  const { tab, search: urlSearch } = useSearch({ from: '/book/$bookId' });
+
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
+
   const navigate = useNavigate({ from: '/book/$bookId' });
-  const { search: urlSearch } = useSearch({ from: '/book/$bookId' });
-  const searchText = urlSearch || '';
+  const activeTab: TabValue = tab || 'highlights';
 
-  const highlightsData = useHighlightsTabData(book);
-  const flashcardsData = useFlashcardsTabData(book);
+  // Update recently viewed on mount
+  useEffect(() => {
+    void queryClient.invalidateQueries({
+      queryKey: getGetRecentlyViewedBooksApiV1BooksRecentlyViewedGetQueryKey(),
+    });
+  }, []);
 
-  const handleTagClick = (newTagId: number | null) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
     navigate({
       search: (prev) => ({
         ...prev,
-        tagId: newTagId || undefined,
+        tab: newValue === 'highlights' ? undefined : newValue,
+        search: undefined,
+        tagId: undefined,
       }),
       replace: true,
     });
   };
 
-  const handleBookmarkClick = (highlightId: number) => {
-    if (searchText) {
+  const handleSearch = useCallback(
+    (value: string) => {
       navigate({
         search: (prev) => ({
           ...prev,
-          search: undefined,
+          search: value || undefined,
         }),
         replace: true,
       });
-    }
-    scrollToElementWithHighlight(`highlight-${highlightId}`, { behavior: 'smooth' });
-  };
+    },
+    [navigate]
+  );
 
-  const handleChapterClick = (chapterId: number | string) => {
-    if (searchText) {
+  const handleTagClick = useCallback(
+    (newTagId: number | null) => {
       navigate({
         search: (prev) => ({
           ...prev,
-          search: undefined,
+          tagId: newTagId || undefined,
         }),
         replace: true,
       });
-    }
-    scrollToElementWithHighlight(`chapter-${chapterId}`, { behavior: 'smooth', block: 'start' });
-  };
+    },
+    [navigate]
+  );
 
-  const data = activeTab === 'highlights' ? highlightsData : flashcardsData;
+  const handleBookmarkClick = useCallback(
+    (highlightId: number) => {
+      if (urlSearch) {
+        navigate({
+          search: (prev) => ({
+            ...prev,
+            search: undefined,
+          }),
+          replace: true,
+        });
+      }
+      scrollToElementWithHighlight(`highlight-${highlightId}`, { behavior: 'smooth' });
+    },
+    [navigate, urlSearch]
+  );
+
+  const handleChapterClick = useCallback(
+    (chapterId: number) => {
+      if (urlSearch) {
+        navigate({
+          search: (prev) => ({
+            ...prev,
+            search: undefined,
+          }),
+          replace: true,
+        });
+      }
+      scrollToElementWithHighlight(`chapter-${chapterId}`, { behavior: 'smooth', block: 'start' });
+    },
+    [navigate, urlSearch]
+  );
 
   return (
-    <MobileNavigation
-      book={book}
-      onTagClick={handleTagClick}
-      selectedTag={data.selectedTagId}
-      bookmarks={activeTab === 'highlights' ? book.bookmarks || [] : []}
-      allHighlights={activeTab === 'highlights' ? highlightsData.allHighlights : []}
-      onBookmarkClick={handleBookmarkClick}
-      chapters={data.chapters}
-      onChapterClick={handleChapterClick}
-      displayTags={data.tags}
-      currentTab={activeTab}
-    />
+    <PageContainer maxWidth="xl">
+      <ScrollToTopButton />
+      <FadeInOut ekey={'book-title'}>
+        {isDesktop ? (
+          <Box>
+            <BookTitle book={book} />
+            <ThreeColumnLayout>
+              <div></div> {/* Empty left column for spacing */}
+              <BookTabs activeTab={activeTab} handleTabChange={handleTabChange} book={book} />
+            </ThreeColumnLayout>
+          </Box>
+        ) : (
+          <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
+            <BookTitle book={book} />
+            <BookTabs activeTab={activeTab} handleTabChange={handleTabChange} book={book} />
+          </Box>
+        )}
+        {activeTab === 'highlights' ? (
+          <HighlightsTab
+            book={book}
+            isDesktop={isDesktop}
+            onSearch={handleSearch}
+            onTagClick={handleTagClick}
+            onBookmarkClick={handleBookmarkClick}
+            onChapterClick={handleChapterClick}
+          />
+        ) : (
+          <FlashcardsTab
+            book={book}
+            isDesktop={isDesktop}
+            onSearch={handleSearch}
+            onTagClick={handleTagClick}
+            onChapterClick={handleChapterClick}
+          />
+        )}
+      </FadeInOut>
+    </PageContainer>
   );
 };

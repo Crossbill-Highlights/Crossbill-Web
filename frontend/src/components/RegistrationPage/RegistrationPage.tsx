@@ -33,7 +33,7 @@ export const RegistrationPage = () => {
       navigate({ to: '/' });
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { detail?: string } } };
-      if (errorObj?.response?.data?.detail) {
+      if (errorObj.response?.data?.detail) {
         setError(errorObj.response.data.detail);
       } else {
         setError('Registration failed. Please try again.');

@@ -130,6 +130,42 @@ def get_book_details(
         ) from e
 
 
+@router.get(
+    "/{book_id}/highlights",
+    response_model=schemas.BookHighlightSearchResponse,
+    status_code=status.HTTP_200_OK,
+)
+def search_book_highlights(
+    book_id: int,
+    db: DatabaseSession,
+    current_user: Annotated[User, Depends(get_current_user)],
+    search_text: str = Query(
+        ...,
+        alias="searchText",
+        min_length=1,
+        description="Text to search for in highlights",
+    ),
+) -> schemas.BookHighlightSearchResponse:
+    """
+    Search for highlights in book using full-text search.
+
+    Searches across all highlight text using PostgreSQL full-text search.
+    Results are ranked by relevance and excludes soft-deleted highlights.
+    """
+    try:
+        service = BookService(db)
+        return service.search_book_highlights(book_id, current_user.id, search_text)
+    except CrossbillError:
+        # Re-raise custom exceptions - handled by exception handlers
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch book details for book_id={book_id}: {e!s}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again later.",
+        ) from e
+
+
 @router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_book(
     book_id: int,

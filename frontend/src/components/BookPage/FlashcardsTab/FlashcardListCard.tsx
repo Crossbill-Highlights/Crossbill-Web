@@ -1,6 +1,6 @@
-import { getGetBookDetailsApiV1BooksBookIdGetQueryKey } from '@/api/generated/books/books';
-import { useDeleteFlashcardApiV1FlashcardsFlashcardIdDelete } from '@/api/generated/flashcards/flashcards';
-import { FlashcardWithContext } from '@/components/BookPage/components/FlashcardsTab/FlashcardChapterList.tsx';
+import { getGetBookDetailsApiV1BooksBookIdGetQueryKey } from '@/api/generated/books/books.ts';
+import { useDeleteFlashcardApiV1FlashcardsFlashcardIdDelete } from '@/api/generated/flashcards/flashcards.ts';
+import { FlashcardWithContext } from '@/components/BookPage/FlashcardsTab/FlashcardChapterList.tsx';
 import { Collapsable } from '@/components/common/animations/Collapsable.tsx';
 import { DeleteIcon, EditIcon, QuoteIcon } from '@/components/common/Icons.tsx';
 import {
@@ -152,7 +152,7 @@ export const FlashcardListCard = ({ flashcard, bookId, onEdit }: FlashcardCardPr
             </Typography>
 
             {/* Source highlight preview */}
-            {flashcard.highlight?.text && (
+            {flashcard.highlight.text && (
               <Box
                 sx={{
                   mt: 2,
@@ -177,7 +177,7 @@ export const FlashcardListCard = ({ flashcard, bookId, onEdit }: FlashcardCardPr
                       lineHeight: 1.4,
                     }}
                   >
-                    {flashcard.highlight?.text}
+                    {flashcard.highlight.text}
                   </Typography>
                 </Box>
               </Box>

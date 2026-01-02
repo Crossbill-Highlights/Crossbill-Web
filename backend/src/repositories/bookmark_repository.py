@@ -122,21 +122,6 @@ class BookmarkRepository:
         )
         return list(self.db.execute(stmt).scalars().all())
 
-    def get_by_book_and_highlight(
-        self, book_id: int, highlight_id: int, user_id: int
-    ) -> models.Bookmark | None:
-        """Get a bookmark by book_id and highlight_id, verifying user ownership."""
-        stmt = (
-            select(models.Bookmark)
-            .join(models.Book, models.Bookmark.book_id == models.Book.id)
-            .where(
-                models.Bookmark.book_id == book_id,
-                models.Bookmark.highlight_id == highlight_id,
-                models.Book.user_id == user_id,
-            )
-        )
-        return self.db.execute(stmt).scalar_one_or_none()
-
     def create(self, book_id: int, highlight_id: int, user_id: int) -> models.Bookmark:
         """Create a new bookmark.
 

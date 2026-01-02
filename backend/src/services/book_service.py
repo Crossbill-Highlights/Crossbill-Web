@@ -2,13 +2,15 @@
 
 import logging
 from collections import defaultdict
+from collections.abc import Sequence
 from pathlib import Path
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
-from src import repositories, schemas
+from src import models, repositories, schemas
 from src.exceptions import BookNotFoundError
+from src.schemas.highlight_schemas import ChapterWithHighlights
 from src.services.tag_service import TagService
 
 logger = logging.getLogger(__name__)
@@ -72,6 +74,63 @@ class BookService:
         self.bookmark_repo = repositories.BookmarkRepository(db)
         self.flashcard_repo = repositories.FlashcardRepository(db)
 
+    def _group_highlights_by_chapter(
+        self, highlights: Sequence[models.Highlight]
+    ) -> tuple[list[ChapterWithHighlights], int]:
+        highlights_by_chapter: dict[int | None, list[schemas.Highlight]] = defaultdict(list)
+        chapter_lookup: dict[int, models.Chapter] = {}
+
+        for h in highlights:
+            # Build chapter lookup from highlight relationships
+            if h.chapter_id is not None and h.chapter is not None:
+                chapter_lookup[h.chapter_id] = h.chapter
+
+            chapter = h.chapter
+            highlight_schema = schemas.Highlight(
+                id=h.id,
+                book_id=h.book_id,
+                chapter_id=h.chapter_id,
+                text=h.text,
+                chapter=chapter.name if chapter else None,
+                chapter_number=chapter.chapter_number if chapter else None,
+                page=h.page,
+                note=h.note,
+                datetime=h.datetime,
+                flashcards=[schemas.Flashcard.model_validate(fc) for fc in h.flashcards],
+                highlight_tags=[
+                    schemas.HighlightTagInBook.model_validate(ht) for ht in h.highlight_tags
+                ],
+                created_at=h.created_at,
+                updated_at=h.updated_at,
+            )
+            highlights_by_chapter[h.chapter_id].append(highlight_schema)
+
+        # Build ChapterWithHighlights only for chapters that have matching highlights
+        chapters_with_highlights = []
+
+        # Sort by chapter_number (None last) for consistent ordering
+        sorted_chapter_ids = sorted(
+            [cid for cid in highlights_by_chapter if cid is not None],
+            key=lambda cid: chapter_lookup[cid].chapter_number or 0,
+        )
+
+        for chapter_id in sorted_chapter_ids:
+            chapter = chapter_lookup.get(chapter_id)
+            if chapter:
+                chapter_with_highlights = schemas.ChapterWithHighlights(
+                    id=chapter.id,
+                    name=chapter.name,
+                    chapter_number=chapter.chapter_number,
+                    highlights=highlights_by_chapter[chapter_id],
+                    created_at=chapter.created_at,
+                    updated_at=chapter.updated_at,
+                )
+                chapters_with_highlights.append(chapter_with_highlights)
+
+        total = sum(len(hs) for hs in highlights_by_chapter.values())
+
+        return chapters_with_highlights, total
+
     def get_book_details(self, book_id: int, user_id: int) -> schemas.BookDetails:
         """
         Get detailed information about a book including its chapters and highlights.
@@ -94,46 +153,10 @@ class BookService:
         if not book:
             raise BookNotFoundError(book_id)
 
-        chapters = self.chapter_repo.get_by_book_id(book_id, user_id)
         highlight_tags = self.highlight_tag_repo.get_by_book_id(book_id, user_id)
         all_highlights = self.highlight_repo.find_by_book_with_relationships(book_id, user_id)
 
-        # Group highlights by chapter_id
-        highlights_by_chapter: dict[int | None, list[schemas.Highlight]] = defaultdict(list)
-        chapter_lookup = {chapter.id: chapter for chapter in chapters}
-
-        for h in all_highlights:
-            chapter = chapter_lookup.get(h.chapter_id) if h.chapter_id is not None else None
-            highlight_schema = schemas.Highlight(
-                id=h.id,
-                book_id=h.book_id,
-                chapter_id=h.chapter_id,
-                text=h.text,
-                chapter=chapter.name if chapter else None,
-                chapter_number=chapter.chapter_number if chapter else None,
-                page=h.page,
-                note=h.note,
-                datetime=h.datetime,
-                flashcards=[schemas.Flashcard.model_validate(fc) for fc in h.flashcards],
-                highlight_tags=[
-                    schemas.HighlightTagInBook.model_validate(ht) for ht in h.highlight_tags
-                ],
-                created_at=h.created_at,
-                updated_at=h.updated_at,
-            )
-            highlights_by_chapter[h.chapter_id].append(highlight_schema)
-
-        chapters_with_highlights = []
-        for chapter in chapters:
-            chapter_with_highlights = schemas.ChapterWithHighlights(
-                id=chapter.id,
-                name=chapter.name,
-                chapter_number=chapter.chapter_number,
-                highlights=highlights_by_chapter[chapter.id],
-                created_at=chapter.created_at,
-                updated_at=chapter.updated_at,
-            )
-            chapters_with_highlights.append(chapter_with_highlights)
+        chapters_with_highlights = self._group_highlights_by_chapter(all_highlights)[0]
 
         bookmarks = self.bookmark_repo.get_by_book_id(book_id, user_id)
         bookmark_schemas = [schemas.Bookmark.model_validate(b) for b in bookmarks]
@@ -160,6 +183,40 @@ class BookService:
             created_at=book.created_at,
             updated_at=book.updated_at,
             last_viewed=book.last_viewed,
+        )
+
+    def search_book_highlights(
+        self, book_id: int, user_id: int, search_text: str, limit: int = 100
+    ) -> schemas.BookHighlightSearchResponse:
+        """
+        Search for highlights within a specific book using full-text search.
+
+        Results are grouped by chapter, with only chapters containing
+        matching highlights included in the response.
+
+        Args:
+            book_id: ID of the book to search within
+            user_id: ID of the user
+            search_text: Text to search for
+            limit: Maximum number of results to return
+
+        Returns:
+            BookHighlightSearchResponse with chapters containing matching highlights
+
+        Raises:
+            BookNotFoundError: If book is not found or doesn't belong to user
+        """
+        # Verify book exists and belongs to user
+        book = self.book_repo.get_by_id(book_id, user_id)
+        if not book:
+            raise BookNotFoundError(book_id)
+
+        highlights = self.highlight_repo.search(search_text, user_id, book_id, limit)
+        chapters_with_highlights, total = self._group_highlights_by_chapter(highlights)
+
+        return schemas.BookHighlightSearchResponse(
+            chapters=chapters_with_highlights,
+            total=total,
         )
 
     def delete_book(self, book_id: int, user_id: int) -> bool:

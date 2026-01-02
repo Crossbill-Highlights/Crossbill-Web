@@ -1,6 +1,5 @@
 import { BookDetails, Bookmark, Highlight, HighlightTagInBook } from '@/api/generated/model';
-import { ChapterData } from '@/components/BookPage/components/HighlightsTab/ChapterList.tsx';
-import { ChapterNav } from '@/components/BookPage/components/HighlightsTab/ChapterNav.tsx';
+import { ChapterNav, ChapterNavigationData } from '@/components/BookPage/navigation/ChapterNav.tsx';
 import {
   BookmarkFilledIcon,
   ChapterListIcon,
@@ -16,10 +15,9 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
-import { motion } from 'motion/react';
 import { useState } from 'react';
 import { BookmarkList } from './BookmarkList.tsx';
-import { HighlightTags } from './HighlightTags.tsx';
+import { HighlightTagsList } from './HighlightTagsList.tsx';
 
 const BottomDrawer = ({
   isOpen,
@@ -69,9 +67,9 @@ const TagsDrawerContent = ({
 }: TagsDrawerContentProps) => {
   return (
     <Box>
-      <HighlightTags
-        tags={displayTags || book.highlight_tags || []}
-        tagGroups={book.highlight_tag_groups || []}
+      <HighlightTagsList
+        tags={displayTags || book.highlight_tags}
+        tagGroups={book.highlight_tag_groups}
         bookId={book.id}
         selectedTag={selectedTag}
         onTagClick={onTagClick}
@@ -96,7 +94,7 @@ const BookmarksDrawerContent = ({
   return (
     <Box>
       <BookmarkList
-        bookmarks={bookmarks || []}
+        bookmarks={bookmarks}
         allHighlights={allHighlights}
         onBookmarkClick={onBookmarkClick}
         hideTitle={true}
@@ -105,20 +103,32 @@ const BookmarksDrawerContent = ({
   );
 };
 
+type TabType = 'highlights' | 'flashcards';
+
 interface ChaptersDrawerContentProps {
-  chapters: ChapterData[];
-  onChapterClick: (chapterId: number | string) => void;
+  chapters: ChapterNavigationData[];
+  onChapterClick: (chapterId: number) => void;
+  currentTab: TabType;
 }
 
-const ChaptersDrawerContent = ({ chapters, onChapterClick }: ChaptersDrawerContentProps) => {
+const ChaptersDrawerContent = ({
+  chapters,
+  onChapterClick,
+  currentTab,
+}: ChaptersDrawerContentProps) => {
   return (
     <Box>
-      <ChapterNav chapters={chapters} onChapterClick={onChapterClick} hideTitle={true} />
+      <ChapterNav
+        chapters={chapters}
+        onChapterClick={onChapterClick}
+        hideTitle={true}
+        countType={currentTab === 'highlights' ? 'highlight' : 'flashcard'}
+      />
     </Box>
   );
 };
 
-type MobileNavigationProps = { currentTab: 'highlights' | 'flashcards' } & TagsDrawerContentProps &
+type MobileNavigationProps = { currentTab: TabType } & TagsDrawerContentProps &
   BookmarksDrawerContentProps &
   ChaptersDrawerContentProps;
 type DrawerContentType = 'tags' | 'bookmarks' | 'chapters';
@@ -165,17 +175,16 @@ export const MobileNavigation = ({
         />
       );
     }
-    if (type === 'chapters') {
-      return (
-        <ChaptersDrawerContent
-          chapters={chapters}
-          onChapterClick={(data) => {
-            setDrawerState(false);
-            onChapterClick(data);
-          }}
-        />
-      );
-    }
+    return (
+      <ChaptersDrawerContent
+        chapters={chapters}
+        currentTab={currentTab}
+        onChapterClick={(data) => {
+          setDrawerState(false);
+          onChapterClick(data);
+        }}
+      />
+    );
   };
 
   const getDrawerTitle = (type: DrawerContentType): React.ReactNode => {
@@ -199,45 +208,38 @@ export const MobileNavigation = ({
 
   return (
     <>
-      <motion.div
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100 }}
-      >
-        <Paper elevation={3}>
-          <BottomNavigation
-            showLabels
-            onChange={() => {
-              setDrawerState(true);
+      <Paper elevation={3} sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100 }}>
+        <BottomNavigation
+          showLabels
+          onChange={() => {
+            setDrawerState(true);
+          }}
+        >
+          <BottomNavigationAction
+            label="Tags"
+            icon={<TagIcon />}
+            onClick={() => {
+              setDrawerContent('tags');
             }}
-          >
+          />
+          {currentTab === 'highlights' && (
             <BottomNavigationAction
-              label="Tags"
-              icon={<TagIcon />}
+              label="Bookmarks"
+              icon={<BookmarkFilledIcon />}
               onClick={() => {
-                setDrawerContent('tags');
+                setDrawerContent('bookmarks');
               }}
             />
-            {currentTab === 'highlights' && (
-              <BottomNavigationAction
-                label="Bookmarks"
-                icon={<BookmarkFilledIcon />}
-                onClick={() => {
-                  setDrawerContent('bookmarks');
-                }}
-              />
-            )}
-            <BottomNavigationAction
-              label="Chapters"
-              icon={<ChapterListIcon />}
-              onClick={() => {
-                setDrawerContent('chapters');
-              }}
-            />
-          </BottomNavigation>
-        </Paper>
-      </motion.div>
+          )}
+          <BottomNavigationAction
+            label="Chapters"
+            icon={<ChapterListIcon />}
+            onClick={() => {
+              setDrawerContent('chapters');
+            }}
+          />
+        </BottomNavigation>
+      </Paper>
       <BottomDrawer
         isOpen={drawerIsOpen}
         onClose={() => setDrawerState(false)}

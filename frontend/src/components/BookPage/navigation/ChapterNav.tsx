@@ -1,21 +1,26 @@
 import { Collapsable } from '@/components/common/animations/Collapsable.tsx';
-import { ChapterListIcon, ExpandMoreIcon } from '@/components/common/Icons';
+import { ChapterListIcon, ExpandMoreIcon } from '@/components/common/Icons.tsx';
 import { Box, IconButton, Typography } from '@mui/material';
 import { useState } from 'react';
-import type { ChapterData } from './ChapterList.tsx';
 
-interface ChapterNavProps {
-  chapters: ChapterData[];
-  onChapterClick: (chapterId: number | string) => void;
-  hideTitle?: boolean;
+export interface ChapterNavigationData {
+  id: number;
+  name: string;
+  itemCount: number;
 }
 
-export const ChapterNav = ({ chapters, onChapterClick, hideTitle }: ChapterNavProps) => {
+interface ChapterNavProps {
+  chapters: ChapterNavigationData[];
+  onChapterClick: (chapterId: number) => void;
+  hideTitle?: boolean;
+  countType: 'highlight' | 'flashcard';
+}
+
+export const ChapterNav = ({ chapters, onChapterClick, hideTitle, countType }: ChapterNavProps) => {
   const [isExpanded, setIsExpanded] = useState(() => true);
   const effectiveIsExpanded = hideTitle ? true : isExpanded;
 
-  // If no chapters, don't render anything
-  if (!chapters || chapters.length === 0) {
+  if (chapters.length === 0) {
     return null;
   }
 
@@ -106,8 +111,8 @@ export const ChapterNav = ({ chapters, onChapterClick, hideTitle }: ChapterNavPr
                   color="text.secondary"
                   sx={{ fontSize: '0.75rem', mt: 0.25, display: 'block' }}
                 >
-                  {chapter.highlights.length} highlight
-                  {chapter.highlights.length !== 1 ? 's' : ''}
+                  {chapter.itemCount} {countType === 'highlight' ? 'highlight' : 'flashcard'}
+                  {chapter.itemCount !== 1 ? 's' : ''}
                 </Typography>
               </Box>
             </Box>

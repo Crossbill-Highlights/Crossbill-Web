@@ -144,32 +144,6 @@ class FlashcardService:
             flashcards=[schemas.FlashcardWithHighlight.model_validate(f) for f in flashcards]
         )
 
-    def get_flashcards_by_highlight(
-        self, highlight_id: int, user_id: int
-    ) -> schemas.FlashcardsListResponse:
-        """
-        Get all flashcards for a specific highlight.
-
-        Args:
-            highlight_id: ID of the highlight
-            user_id: ID of the user
-
-        Returns:
-            List of flashcards
-
-        Raises:
-            HighlightNotFoundError: If highlight is not found
-        """
-        # Validate highlight exists
-        highlight = self.highlight_repo.get_by_id(highlight_id, user_id)
-        if not highlight:
-            raise HighlightNotFoundError(highlight_id)
-
-        flashcards = self.flashcard_repo.get_by_highlight_id(highlight_id, user_id)
-        return schemas.FlashcardsListResponse(
-            flashcards=[schemas.Flashcard.model_validate(f) for f in flashcards]
-        )
-
     def update_flashcard(
         self,
         flashcard_id: int,

@@ -16,7 +16,7 @@ export interface ChapterWithHighlights {
   /** Chapter order number from TOC */
   chapter_number?: ChapterWithHighlightsChapterNumber;
   /** List of highlights in this chapter */
-  highlights?: Highlight[];
+  highlights: Highlight[];
   created_at: string;
   updated_at: string;
 }

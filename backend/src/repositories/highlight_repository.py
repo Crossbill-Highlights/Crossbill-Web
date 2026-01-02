@@ -20,25 +20,6 @@ class HighlightRepository:
         """Initialize repository with database session."""
         self.db = db
 
-    def create(
-        self,
-        book_id: int,
-        user_id: int,
-        content_hash: str,
-        highlight_data: schemas.HighlightCreate,
-    ) -> models.Highlight:
-        """Create a new highlight."""
-        highlight = models.Highlight(
-            book_id=book_id,
-            user_id=user_id,
-            content_hash=content_hash,
-            **highlight_data.model_dump(exclude={"chapter", "chapter_number"}),
-        )
-        self.db.add(highlight)
-        self.db.flush()
-        self.db.refresh(highlight)
-        return highlight
-
     def create_with_chapter(
         self,
         book_id: int,
@@ -135,15 +116,6 @@ class HighlightRepository:
         )
         return self.db.execute(stmt).scalar_one_or_none()
 
-    def find_by_book(self, book_id: int, user_id: int) -> Sequence[models.Highlight]:
-        """Find all non-deleted highlights for a book owned by the user."""
-        stmt = select(models.Highlight).where(
-            models.Highlight.book_id == book_id,
-            models.Highlight.user_id == user_id,
-            models.Highlight.deleted_at.is_(None),
-        )
-        return self.db.execute(stmt).scalars().all()
-
     def find_by_book_with_relationships(
         self, book_id: int, user_id: int
     ) -> Sequence[models.Highlight]:
@@ -199,6 +171,7 @@ class HighlightRepository:
                 selectinload(models.Highlight.book),
                 selectinload(models.Highlight.chapter),
                 selectinload(models.Highlight.highlight_tags),
+                selectinload(models.Highlight.flashcards),
             )
             .where(
                 models.Highlight.user_id == user_id,

@@ -1,6 +1,6 @@
 import type { Bookmark, Highlight } from '@/api/generated/model';
-import { Collapsable } from '@/components/common/animations/Collapsable';
-import { BookmarkFilledIcon, ExpandMoreIcon } from '@/components/common/Icons';
+import { Collapsable } from '@/components/common/animations/Collapsable.tsx';
+import { BookmarkFilledIcon, ExpandMoreIcon } from '@/components/common/Icons.tsx';
 import { Box, IconButton, Typography } from '@mui/material';
 import { useState } from 'react';
 
@@ -25,7 +25,7 @@ export const BookmarkList = ({
 
   // Get highlights for bookmarks and sort by page number
   const bookmarkedHighlights =
-    bookmarks && bookmarks.length > 0
+    bookmarks.length > 0
       ? bookmarks
           .map((bookmark) => ({
             bookmark,

@@ -4,23 +4,23 @@ import {
   useDeleteBookApiV1BooksBookIdDelete,
   useUpdateBookApiV1BooksBookIdPost,
 } from '@/api/generated/books/books.ts';
-import { BookWithHighlightCount } from '@/api/generated/model';
-import { DeleteIcon } from '@/components/common/Icons';
+import { BookDetails } from '@/api/generated/model';
+import { DeleteIcon } from '@/components/common/Icons.tsx';
 import { Box, Button, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { BookCover } from '../../common/BookCover';
-import { CommonDialog } from '../../common/CommonDialog';
-import { TagInput } from '../../common/TagInput';
+import { BookCover } from '../../common/BookCover.tsx';
+import { CommonDialog } from '../../common/CommonDialog.tsx';
+import { TagInput } from '../../common/TagInput.tsx';
 
 interface BookEditFormData {
   tags: string[];
 }
 
 interface BookEditModalProps {
-  book: BookWithHighlightCount;
+  book: BookDetails;
   open: boolean;
   onClose: () => void;
 }
@@ -30,7 +30,7 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
   const navigate = useNavigate();
   const { control, handleSubmit, reset } = useForm<BookEditFormData>({
     defaultValues: {
-      tags: book.tags?.map((tag) => tag.name) || [],
+      tags: book.tags.map((tag) => tag.name),
     },
   });
 
@@ -75,7 +75,7 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
   useEffect(() => {
     if (open) {
       reset({
-        tags: book.tags?.map((tag) => tag.name) || [],
+        tags: book.tags.map((tag) => tag.name),
       });
       updateBookMutation.reset(); // Reset mutation state
     }
@@ -171,9 +171,6 @@ export const BookEditModal = ({ book, open, onClose }: BookEditModalProps) => {
                 ISBN: {book.isbn}
               </Typography>
             )}
-            <Typography variant="body2" color="text.secondary">
-              {book.highlight_count} {book.highlight_count === 1 ? 'highlight' : 'highlights'}
-            </Typography>
           </Box>
         </Box>
 

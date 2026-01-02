@@ -71,4 +71,4 @@ class FlashcardDeleteResponse(BaseModel):
 class FlashcardsListResponse(BaseModel):
     """Schema for list of flashcards response."""
 
-    flashcards: list[Flashcard] = Field(default_factory=list, description="List of flashcards")
+    flashcards: list[Flashcard] = Field(..., description="List of flashcards")

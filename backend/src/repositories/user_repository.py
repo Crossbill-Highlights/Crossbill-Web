@@ -44,15 +44,3 @@ class UserRepository:
         self.db.refresh(user)
         logger.info(f"Created user with password: {user.email} (id={user.id})")
         return user
-
-    def get_or_create(self, email: str) -> models.User:
-        """Get existing user by email or create a new one."""
-        user = self.get_by_email(email)
-        if user:
-            return user
-        return self.create(email)
-
-    def get_all(self) -> list[models.User]:
-        """Get all users."""
-        stmt = select(models.User).order_by(models.User.email)
-        return list(self.db.execute(stmt).scalars().all())

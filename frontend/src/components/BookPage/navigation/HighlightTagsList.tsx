@@ -1,15 +1,21 @@
 import {
   getGetBookDetailsApiV1BooksBookIdGetQueryKey,
   useUpdateHighlightTagApiV1BooksBookIdHighlightTagTagIdPost,
-} from '@/api/generated/books/books';
+} from '@/api/generated/books/books.ts';
 import {
   useCreateOrUpdateTagGroupApiV1HighlightsTagGroupPost,
   useDeleteTagGroupApiV1HighlightsTagGroupTagGroupIdDelete,
-} from '@/api/generated/highlights/highlights';
+} from '@/api/generated/highlights/highlights.ts';
 import { HighlightTagGroupInBook, HighlightTagInBook } from '@/api/generated/model';
-import { Collapsable } from '@/components/common/animations/Collapsable';
-import { AddIcon, DeleteIcon, EditIcon, ExpandMoreIcon, TagIcon } from '@/components/common/Icons';
-import { createAdaptiveHoverStyles, createAdaptiveTouchTarget } from '@/utils/adaptiveHover';
+import { Collapsable } from '@/components/common/animations/Collapsable.tsx';
+import {
+  AddIcon,
+  DeleteIcon,
+  EditIcon,
+  ExpandMoreIcon,
+  TagIcon,
+} from '@/components/common/Icons.tsx';
+import { createAdaptiveHoverStyles, createAdaptiveTouchTarget } from '@/utils/adaptiveHover.ts';
 import {
   DndContext,
   DragEndEvent,
@@ -35,7 +41,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { sortBy } from 'lodash';
 import { AnimatePresence, motion } from 'motion/react';
-import { KeyboardEvent, useRef, useState } from 'react';
+import { KeyboardEvent, useState } from 'react';
 
 interface HighlightTagsProps {
   tags: HighlightTagInBook[];
@@ -127,12 +133,13 @@ const DroppableGroup = ({ id, children, isEmpty, emptyHeight }: DroppableGroupPr
           : isEmpty
             ? 'rgba(0, 0, 0, 0.12)'
             : 'rgba(0, 0, 0, 0)',
+        borderWidth: isEmpty ? 1 : isOver ? 2 : 0,
+        padding: isEmpty ? 12 : isOver ? 8 : 0,
       }}
       transition={{ duration: 0.2 }}
       style={{
-        border: isEmpty ? '1px dashed' : isOver ? '2px solid' : 'none',
+        borderStyle: isEmpty ? 'dashed' : 'solid',
         borderRadius: 8,
-        padding: isEmpty ? 12 : isOver ? 8 : 0,
         minHeight: isEmpty ? emptyHeight || 40 : 'auto',
       }}
     >
@@ -162,16 +169,9 @@ const EmptyGroupPlaceholder = ({ message }: { message: string }) => (
 interface TagGroupProps {
   group: HighlightTagGroupInBook;
   tags: HighlightTagInBook[];
-  isCollapsed: boolean;
-  isEditing: boolean;
-  editValue: string;
   isProcessing: boolean;
   selectedTag: number | null | undefined;
-  onToggleCollapse: () => void;
-  onStartEdit: () => void;
-  onEditChange: (value: string) => void;
-  onEditSubmit: () => void;
-  onEditCancel: () => void;
+  onEditSubmit: (groupId: number, value: string) => void;
   onDelete: () => void;
   onTagClick: (tagId: number | null) => void;
 }
@@ -179,19 +179,14 @@ interface TagGroupProps {
 const TagGroup = ({
   group,
   tags,
-  isCollapsed,
-  isEditing,
-  editValue,
   isProcessing,
   selectedTag,
-  onToggleCollapse,
-  onStartEdit,
-  onEditChange,
   onEditSubmit,
-  onEditCancel,
   onDelete,
   onTagClick,
 }: TagGroupProps) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   return (
     <Box
       sx={{
@@ -206,18 +201,13 @@ const TagGroup = ({
       <TagGroupHeader
         group={group}
         tagCount={tags.length}
-        isCollapsed={isCollapsed}
-        isEditing={isEditing}
-        editValue={editValue}
-        onToggleCollapse={onToggleCollapse}
-        onStartEdit={onStartEdit}
-        onEditChange={onEditChange}
-        onEditSubmit={onEditSubmit}
-        onEditCancel={onEditCancel}
+        isExpanded={isExpanded}
+        onToggleCollapse={() => setIsExpanded(!isExpanded)}
+        onEditSubmit={(value) => onEditSubmit(group.id, value)}
         onDelete={onDelete}
         isProcessing={isProcessing}
       />
-      <Collapsable isExpanded={!isCollapsed}>
+      <Collapsable isExpanded={isExpanded}>
         <DroppableGroup id={`group-${group.id}`} isEmpty={tags.length === 0}>
           {tags.length > 0 ? (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
@@ -244,8 +234,6 @@ interface UngroupedTagsProps {
   selectedTag: number | null | undefined;
   activeTag: HighlightTagInBook | null;
   movingTagId: number | null;
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
   onTagClick: (tagId: number | null) => void;
 }
 
@@ -254,10 +242,9 @@ const UngroupedTags = ({
   selectedTag,
   activeTag,
   movingTagId,
-  isCollapsed,
-  onToggleCollapse,
   onTagClick,
 }: UngroupedTagsProps) => {
+  const [isExpanded, setIsExpanded] = useState(true);
   const shouldHide = tags.length === 0 && activeTag === null && movingTagId === null;
 
   return (
@@ -279,15 +266,15 @@ const UngroupedTags = ({
           borderColor: 'divider',
         }}
       >
-        <Box sx={{ mb: isCollapsed ? 0 : 1 }}>
+        <Box sx={{ mb: isExpanded ? 1 : 0 }}>
           <TagGroupTitle
             title="Ungrouped"
             count={tags.length}
-            isCollapsed={isCollapsed}
-            onToggleCollapse={onToggleCollapse}
+            isExpanded={isExpanded}
+            onToggleCollapse={() => setIsExpanded(!isExpanded)}
           />
         </Box>
-        <Collapsable isExpanded={!isCollapsed}>
+        <Collapsable isExpanded={isExpanded}>
           <DroppableGroup id="ungrouped" isEmpty={tags.length === 0} emptyHeight={30}>
             {tags.length > 0 ? (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
@@ -312,25 +299,23 @@ const UngroupedTags = ({
 
 interface AddGroupFormProps {
   isVisible: boolean;
-  groupName: string;
   isProcessing: boolean;
-  onGroupNameChange: (name: string) => void;
-  onSubmit: () => void;
+  onSubmit: (newGroupName: string) => void;
   onCancel: () => void;
 }
 
-const AddGroupForm = ({
-  isVisible,
-  groupName,
-  isProcessing,
-  onGroupNameChange,
-  onSubmit,
-  onCancel,
-}: AddGroupFormProps) => {
+const AddGroupForm = ({ isVisible, isProcessing, onSubmit, onCancel }: AddGroupFormProps) => {
+  const [groupName, setGroupName] = useState('');
+
+  const handleSubmit = () => {
+    onSubmit(groupName);
+    setGroupName('');
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      onSubmit();
+      handleSubmit();
     } else if (e.key === 'Escape') {
       onCancel();
     }
@@ -356,10 +341,10 @@ const AddGroupForm = ({
               borderColor: 'divider',
             }}
           >
-            <ClickAwayListener onClickAway={onSubmit}>
+            <ClickAwayListener onClickAway={handleSubmit}>
               <TextField
                 value={groupName}
-                onChange={(e) => onGroupNameChange(e.target.value)}
+                onChange={(e) => setGroupName(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Group name..."
                 size="small"
@@ -383,7 +368,7 @@ const AddGroupForm = ({
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Box
                 component="button"
-                onClick={onSubmit}
+                onClick={handleSubmit}
                 disabled={isProcessing}
                 sx={{
                   flex: 1,
@@ -432,11 +417,11 @@ const AddGroupForm = ({
 interface TagGroupTitleProps {
   title: string;
   count: number;
-  isCollapsed: boolean;
+  isExpanded: boolean;
   onToggleCollapse: () => void;
 }
 
-const TagGroupTitle = ({ title, count, isCollapsed, onToggleCollapse }: TagGroupTitleProps) => {
+const TagGroupTitle = ({ title, count, isExpanded, onToggleCollapse }: TagGroupTitleProps) => {
   return (
     <Box
       onClick={onToggleCollapse}
@@ -452,7 +437,7 @@ const TagGroupTitle = ({ title, count, isCollapsed, onToggleCollapse }: TagGroup
         sx={{
           fontSize: 16,
           color: 'text.secondary',
-          transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+          transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
           transition: 'transform 0.15s',
         }}
       />
@@ -483,17 +468,70 @@ const TagGroupTitle = ({ title, count, isCollapsed, onToggleCollapse }: TagGroup
   );
 };
 
+interface TagGroupNameEditFormProps {
+  initialValue: string;
+  isProcessing: boolean;
+  onSubmit: (value: string) => void;
+  onCancel: () => void;
+}
+
+const TagGroupNameEditForm = ({
+  initialValue,
+  isProcessing,
+  onSubmit,
+  onCancel,
+}: TagGroupNameEditFormProps) => {
+  const [editValue, setEditValue] = useState(initialValue);
+
+  const handleSubmit = () => {
+    onSubmit(editValue);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    } else if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
+  return (
+    <ClickAwayListener onClickAway={handleSubmit}>
+      <TextField
+        value={editValue}
+        onChange={(e) => setEditValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSubmit}
+        size="small"
+        autoFocus
+        disabled={isProcessing}
+        sx={{
+          flex: 1,
+          mr: 1,
+          '& .MuiInputBase-input': {
+            py: 0.5,
+            px: 1,
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          },
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 1,
+          },
+        }}
+      />
+    </ClickAwayListener>
+  );
+};
+
 interface TagGroupHeaderProps {
   group: HighlightTagGroupInBook;
   tagCount: number;
-  isCollapsed: boolean;
-  isEditing: boolean;
-  editValue: string;
+  isExpanded: boolean;
   onToggleCollapse: () => void;
-  onStartEdit: () => void;
-  onEditChange: (value: string) => void;
-  onEditSubmit: () => void;
-  onEditCancel: () => void;
+  onEditSubmit: (value: string) => void;
   onDelete: () => void;
   isProcessing: boolean;
 }
@@ -501,18 +539,13 @@ interface TagGroupHeaderProps {
 const TagGroupHeader = ({
   group,
   tagCount,
-  isCollapsed,
-  isEditing,
-  editValue,
+  isExpanded,
   onToggleCollapse,
-  onStartEdit,
-  onEditChange,
   onEditSubmit,
-  onEditCancel,
   onDelete,
   isProcessing,
 }: TagGroupHeaderProps) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const adaptiveStyles = createAdaptiveHoverStyles({
     actionsClassName: 'group-actions',
@@ -520,13 +553,9 @@ const TagGroupHeader = ({
   });
   const touchTarget = createAdaptiveTouchTarget();
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      onEditSubmit();
-    } else if (e.key === 'Escape') {
-      onEditCancel();
-    }
+  const handleEditSubmit = (value: string) => {
+    onEditSubmit(value);
+    setIsEditing(false);
   };
 
   return (
@@ -535,44 +564,23 @@ const TagGroupHeader = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        mb: isCollapsed ? 0 : 1,
+        mb: isExpanded ? 1 : 0,
         cursor: 'pointer',
         ...adaptiveStyles.container,
       }}
     >
       {isEditing ? (
-        <ClickAwayListener onClickAway={onEditSubmit}>
-          <TextField
-            inputRef={inputRef}
-            value={editValue}
-            onChange={(e) => onEditChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onBlur={onEditSubmit}
-            size="small"
-            autoFocus
-            disabled={isProcessing}
-            sx={{
-              flex: 1,
-              mr: 1,
-              '& .MuiInputBase-input': {
-                py: 0.5,
-                px: 1,
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              },
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 1,
-              },
-            }}
-          />
-        </ClickAwayListener>
+        <TagGroupNameEditForm
+          initialValue={group.name}
+          isProcessing={isProcessing}
+          onSubmit={handleEditSubmit}
+          onCancel={() => setIsEditing(false)}
+        />
       ) : (
         <TagGroupTitle
           title={group.name}
           count={tagCount}
-          isCollapsed={isCollapsed}
+          isExpanded={isExpanded}
           onToggleCollapse={onToggleCollapse}
         />
       )}
@@ -585,29 +593,33 @@ const TagGroupHeader = ({
           }}
         >
           <Tooltip title="Rename group">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                onStartEdit();
-              }}
-              sx={{ ...touchTarget, color: 'text.disabled' }}
-            >
-              <EditIcon sx={{ fontSize: 14 }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }}
+                sx={{ ...touchTarget, color: 'text.disabled' }}
+              >
+                <EditIcon sx={{ fontSize: 14 }} />
+              </IconButton>
+            </span>
           </Tooltip>
           <Tooltip title="Delete group">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              disabled={isProcessing}
-              sx={{ ...touchTarget, color: 'text.disabled' }}
-            >
-              <DeleteIcon sx={{ fontSize: 14 }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                disabled={isProcessing}
+                sx={{ ...touchTarget, color: 'text.disabled' }}
+              >
+                <DeleteIcon sx={{ fontSize: 14 }} />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
       )}
@@ -615,78 +627,87 @@ const TagGroupHeader = ({
   );
 };
 
-export const HighlightTags = ({
-  tags,
-  tagGroups,
-  bookId,
-  selectedTag,
-  onTagClick,
-  hideTitle,
-  hideEmptyGroups,
-}: HighlightTagsProps) => {
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<number, boolean>>({});
-  const [ungroupedCollapsed, setUngroupedCollapsed] = useState(false);
-  const [editingGroupId, setEditingGroupId] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState('');
-  const [showAddGroup, setShowAddGroup] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
-  const [activeTag, setActiveTag] = useState<HighlightTagInBook | null>(null);
-  const [movingTagId, setMovingTagId] = useState<number | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const queryClient = useQueryClient();
-
-  // Set up sensors for drag and drop
-  const sensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 200,
-        tolerance: 5,
-      },
-    })
+const ListTitle = ({ onAddGroupClick }: { onAddGroupClick: () => void }) => {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        mb: 2,
+        pb: 1.5,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <TagIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+        <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+          Tags
+        </Typography>
+      </Box>
+      <Tooltip title="Add new group">
+        <IconButton
+          size="small"
+          onClick={onAddGroupClick}
+          sx={{ color: 'text.secondary', padding: 0.5 }}
+        >
+          <AddIcon sx={{ fontSize: 18 }} />
+        </IconButton>
+      </Tooltip>
+    </Box>
   );
+};
 
-  // Mutations
+const useTagMutations = (bookId: number) => {
+  const queryClient = useQueryClient();
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const updateTagMutation = useUpdateHighlightTagApiV1BooksBookIdHighlightTagTagIdPost({
     mutation: {
       onMutate: async (variables) => {
         await queryClient.cancelQueries({
-          queryKey: [`/api/v1/books/${bookId}`],
+          queryKey: getGetBookDetailsApiV1BooksBookIdGetQueryKey(bookId),
         });
-        const previousBook = queryClient.getQueryData([`/api/v1/books/${bookId}`]);
-        queryClient.setQueryData([`/api/v1/books/${bookId}`], (old: unknown) => {
-          if (!old || typeof old !== 'object') return old;
-          const bookData = old as { highlight_tags: HighlightTagInBook[] };
-          return {
-            ...bookData,
-            highlight_tags: bookData.highlight_tags.map((tag: HighlightTagInBook) =>
-              tag.id === variables.tagId
-                ? { ...tag, tag_group_id: variables.data.tag_group_id }
-                : tag
-            ),
-          };
-        });
+        const previousBook = queryClient.getQueryData(
+          getGetBookDetailsApiV1BooksBookIdGetQueryKey(bookId)
+        );
+        queryClient.setQueryData(
+          getGetBookDetailsApiV1BooksBookIdGetQueryKey(bookId),
+          (old: unknown) => {
+            if (!old || typeof old !== 'object') return old;
+            const bookData = old as { highlight_tags: HighlightTagInBook[] };
+            return {
+              ...bookData,
+              highlight_tags: bookData.highlight_tags.map((tag: HighlightTagInBook) =>
+                tag.id === variables.tagId
+                  ? { ...tag, tag_group_id: variables.data.tag_group_id }
+                  : tag
+              ),
+            };
+          }
+        );
         return { previousBook };
       },
       onSuccess: (updatedTag) => {
-        queryClient.setQueryData([`/api/v1/books/${bookId}`], (old: unknown) => {
-          if (!old || typeof old !== 'object') return old;
-          const bookData = old as { highlight_tags: HighlightTagInBook[] };
-          return {
-            ...bookData,
-            highlight_tags: bookData.highlight_tags.map((tag: HighlightTagInBook) =>
-              tag.id === updatedTag.id ? updatedTag : tag
-            ),
-          };
-        });
+        queryClient.setQueryData(
+          getGetBookDetailsApiV1BooksBookIdGetQueryKey(bookId),
+          (old: unknown) => {
+            if (!old || typeof old !== 'object') return old;
+            const bookData = old as { highlight_tags: HighlightTagInBook[] };
+            return {
+              ...bookData,
+              highlight_tags: bookData.highlight_tags.map((tag: HighlightTagInBook) =>
+                tag.id === updatedTag.id ? updatedTag : tag
+              ),
+            };
+          }
+        );
       },
       onError: (error: unknown, _variables, context) => {
         if (context?.previousBook) {
-          queryClient.setQueryData([`/api/v1/books/${bookId}`], context.previousBook);
+          queryClient.setQueryData(
+            getGetBookDetailsApiV1BooksBookIdGetQueryKey(bookId),
+            context.previousBook
+          );
         }
         console.error('Failed to update tag:', error);
       },
@@ -718,6 +739,111 @@ export const HighlightTags = ({
       },
     },
   });
+
+  const handleEditSubmit = async (groupId: number, value: string) => {
+    if (!value.trim()) {
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await createOrUpdateGroupMutation.mutateAsync({
+        data: {
+          book_id: bookId,
+          id: groupId,
+          name: value.trim(),
+        },
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUpdateTagGroup = async (tagId: number, newGroupId: number | null) => {
+    await updateTagMutation.mutateAsync({
+      bookId,
+      tagId,
+      data: {
+        tag_group_id: newGroupId,
+      },
+    });
+  };
+
+  const handleDeleteGroup = async (groupId: number) => {
+    setIsProcessing(true);
+    try {
+      await deleteGroupMutation.mutateAsync({
+        tagGroupId: groupId,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleAddGroup = async (newGroupName: string, onSuccess: () => void) => {
+    if (!newGroupName.trim()) {
+      onSuccess();
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await createOrUpdateGroupMutation.mutateAsync({
+        data: {
+          book_id: bookId,
+          name: newGroupName.trim(),
+        },
+      });
+      onSuccess();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return {
+    isProcessing,
+    handleEditSubmit,
+    handleUpdateTagGroup,
+    handleAddGroup,
+    handleDeleteGroup,
+  };
+};
+
+export const HighlightTagsList = ({
+  tags,
+  tagGroups,
+  bookId,
+  selectedTag,
+  onTagClick,
+  hideTitle,
+  hideEmptyGroups,
+}: HighlightTagsProps) => {
+  const [showAddGroup, setShowAddGroup] = useState(false);
+  const [activeTag, setActiveTag] = useState<HighlightTagInBook | null>(null);
+  const [movingTagId, setMovingTagId] = useState<number | null>(null);
+
+  const {
+    handleEditSubmit,
+    handleAddGroup,
+    handleDeleteGroup,
+    handleUpdateTagGroup,
+    isProcessing,
+  } = useTagMutations(bookId);
+
+  // Set up sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    })
+  );
 
   // Sort tags alphabetically and filter out the tag being moved
   const sortedTags = [...tags]
@@ -758,13 +884,7 @@ export const HighlightTags = ({
     if (tag.tag_group_id !== newGroupId) {
       setMovingTagId(tag.id);
       try {
-        await updateTagMutation.mutateAsync({
-          bookId,
-          tagId: tag.id,
-          data: {
-            tag_group_id: newGroupId,
-          },
-        });
+        await handleUpdateTagGroup(tag.id, newGroupId);
       } catch (error) {
         console.error('Error updating tag group:', error);
       } finally {
@@ -773,137 +893,22 @@ export const HighlightTags = ({
     }
   };
 
-  const handleToggleCollapse = (groupId: number) => {
-    setCollapsedGroups((prev) => ({
-      ...prev,
-      [groupId]: !prev[groupId],
-    }));
-  };
-
-  const handleToggleUngroupedCollapse = () => {
-    setUngroupedCollapsed((prev) => !prev);
-  };
-
-  const handleStartEdit = (group: HighlightTagGroupInBook) => {
-    setEditingGroupId(group.id);
-    setEditValue(group.name);
-  };
-
-  const handleEditSubmit = async () => {
-    if (!editingGroupId || !editValue.trim()) {
-      setEditingGroupId(null);
-      setEditValue('');
-      return;
-    }
-
-    const originalGroup = tagGroups.find((g) => g.id === editingGroupId);
-    if (originalGroup && originalGroup.name === editValue.trim()) {
-      setEditingGroupId(null);
-      setEditValue('');
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      await createOrUpdateGroupMutation.mutateAsync({
-        data: {
-          book_id: bookId,
-          id: editingGroupId,
-          name: editValue.trim(),
-        },
-      });
-    } finally {
-      setIsProcessing(false);
-      setEditingGroupId(null);
-      setEditValue('');
-    }
-  };
-
-  const handleEditCancel = () => {
-    setEditingGroupId(null);
-    setEditValue('');
-  };
-
-  const handleDeleteGroup = async (groupId: number) => {
-    setIsProcessing(true);
-    try {
-      await deleteGroupMutation.mutateAsync({
-        tagGroupId: groupId,
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleAddGroup = async () => {
-    if (!newGroupName.trim()) {
-      setShowAddGroup(false);
-      setNewGroupName('');
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      await createOrUpdateGroupMutation.mutateAsync({
-        data: {
-          book_id: bookId,
-          name: newGroupName.trim(),
-        },
-      });
-      setNewGroupName('');
-      setShowAddGroup(false);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <Box>
-        {/* Header */}
-        {!hideTitle && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mb: 2,
-              pb: 1.5,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <TagIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-              <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-                Tags
-              </Typography>
-            </Box>
-            <Tooltip title="Add new group">
-              <IconButton
-                size="small"
-                onClick={() => setShowAddGroup(true)}
-                sx={{ color: 'text.secondary', padding: 0.5 }}
-              >
-                <AddIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
+    <Box>
+      {!hideTitle && <ListTitle onAddGroupClick={() => setShowAddGroup(true)} />}
 
-        {/* Add New Group Form */}
-        <AddGroupForm
-          isVisible={showAddGroup}
-          groupName={newGroupName}
-          isProcessing={isProcessing}
-          onGroupNameChange={setNewGroupName}
-          onSubmit={() => void handleAddGroup()}
-          onCancel={() => {
-            setShowAddGroup(false);
-            setNewGroupName('');
-          }}
-        />
+      <AddGroupForm
+        isVisible={showAddGroup}
+        isProcessing={isProcessing}
+        onSubmit={(newName: string) => handleAddGroup(newName, () => setShowAddGroup(false))}
+        onCancel={() => {
+          setShowAddGroup(false);
+        }}
+      />
 
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* Tag Groups Content */}
-        {tags && tags.length > 0 ? (
+        {tags.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {/* Grouped tags */}
             {groupedTags.map(({ group, tags: groupTags }) =>
@@ -912,16 +917,9 @@ export const HighlightTags = ({
                   key={group.id}
                   group={group}
                   tags={groupTags}
-                  isCollapsed={!!collapsedGroups[group.id]}
-                  isEditing={editingGroupId === group.id}
-                  editValue={editValue}
                   isProcessing={isProcessing}
                   selectedTag={selectedTag}
-                  onToggleCollapse={() => handleToggleCollapse(group.id)}
-                  onStartEdit={() => handleStartEdit(group)}
-                  onEditChange={setEditValue}
-                  onEditSubmit={() => void handleEditSubmit()}
-                  onEditCancel={handleEditCancel}
+                  onEditSubmit={handleEditSubmit}
                   onDelete={() => void handleDeleteGroup(group.id)}
                   onTagClick={onTagClick}
                 />
@@ -935,8 +933,6 @@ export const HighlightTags = ({
                 selectedTag={selectedTag}
                 activeTag={activeTag}
                 movingTagId={movingTagId}
-                isCollapsed={ungroupedCollapsed}
-                onToggleCollapse={handleToggleUngroupedCollapse}
                 onTagClick={onTagClick}
               />
             )}
@@ -947,35 +943,35 @@ export const HighlightTags = ({
           </Typography>
         )}
 
-        {/* Tip */}
-        {tags && tags.length > 0 && (
-          <Box
-            sx={{
-              mt: 2,
-              p: 1.5,
-              bgcolor: 'action.hover',
-              borderRadius: 1,
-              fontSize: '0.7rem',
-              color: 'text.secondary',
-              lineHeight: 1.5,
-            }}
-          >
-            <strong>Tip:</strong> Drag tags between groups to organize them. Click the pencil icon
-            to rename a group.
-          </Box>
-        )}
-      </Box>
+        <DragOverlay>
+          {activeTag ? (
+            <DraggableTag
+              tag={activeTag}
+              selectedTag={selectedTag}
+              onTagClick={onTagClick}
+              isDragOverlay
+            />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
-      <DragOverlay>
-        {activeTag ? (
-          <DraggableTag
-            tag={activeTag}
-            selectedTag={selectedTag}
-            onTagClick={onTagClick}
-            isDragOverlay
-          />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+      {/* Tip */}
+      {tags.length > 0 && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 1.5,
+            bgcolor: 'action.hover',
+            borderRadius: 1,
+            fontSize: '0.7rem',
+            color: 'text.secondary',
+            lineHeight: 1.5,
+          }}
+        >
+          <strong>Tip:</strong> Drag tags between groups to organize them. Click the pencil icon to
+          rename a group.
+        </Box>
+      )}
+    </Box>
   );
 };

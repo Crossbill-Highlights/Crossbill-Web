@@ -23,6 +23,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
   BodyUploadBookCoverApiV1BooksBookIdMetadataCoverPost,
   BookDetails,
+  BookHighlightSearchResponse,
   BookUpdateRequest,
   BookWithHighlightCount,
   Bookmark,
@@ -45,6 +46,7 @@ import type {
   HighlightTagUpdateRequest,
   HighlightTagsResponse,
   RecentlyViewedBooksResponse,
+  SearchBookHighlightsApiV1BooksBookIdHighlightsGetParams,
 } from '.././model';
 
 import { axiosInstance } from '../../axios-instance';
@@ -666,6 +668,174 @@ export const useUpdateBookApiV1BooksBookIdPost = <TError = HTTPValidationError, 
 
   return useMutation(mutationOptions, queryClient);
 };
+/**
+ * Search for highlights in book using full-text search.
+
+Searches across all highlight text using PostgreSQL full-text search.
+Results are ranked by relevance and excludes soft-deleted highlights.
+ * @summary Search Book Highlights
+ */
+export const searchBookHighlightsApiV1BooksBookIdHighlightsGet = (
+  bookId: number,
+  params: SearchBookHighlightsApiV1BooksBookIdHighlightsGetParams,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<BookHighlightSearchResponse>({
+    url: `/api/v1/books/${bookId}/highlights`,
+    method: 'GET',
+    params,
+    signal,
+  });
+};
+
+export const getSearchBookHighlightsApiV1BooksBookIdHighlightsGetQueryKey = (
+  bookId?: number,
+  params?: SearchBookHighlightsApiV1BooksBookIdHighlightsGetParams
+) => {
+  return [`/api/v1/books/${bookId}/highlights`, ...(params ? [params] : [])] as const;
+};
+
+export const getSearchBookHighlightsApiV1BooksBookIdHighlightsGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+  TError = HTTPValidationError,
+>(
+  bookId: number,
+  params: SearchBookHighlightsApiV1BooksBookIdHighlightsGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+        TError,
+        TData
+      >
+    >;
+  }
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getSearchBookHighlightsApiV1BooksBookIdHighlightsGetQueryKey(bookId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>
+  > = ({ signal }) => searchBookHighlightsApiV1BooksBookIdHighlightsGet(bookId, params, signal);
+
+  return { queryKey, queryFn, enabled: !!bookId, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type SearchBookHighlightsApiV1BooksBookIdHighlightsGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>
+>;
+export type SearchBookHighlightsApiV1BooksBookIdHighlightsGetQueryError = HTTPValidationError;
+
+export function useSearchBookHighlightsApiV1BooksBookIdHighlightsGet<
+  TData = Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+  TError = HTTPValidationError,
+>(
+  bookId: number,
+  params: SearchBookHighlightsApiV1BooksBookIdHighlightsGetParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+          TError,
+          Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>
+        >,
+        'initialData'
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useSearchBookHighlightsApiV1BooksBookIdHighlightsGet<
+  TData = Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+  TError = HTTPValidationError,
+>(
+  bookId: number,
+  params: SearchBookHighlightsApiV1BooksBookIdHighlightsGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+          TError,
+          Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>
+        >,
+        'initialData'
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useSearchBookHighlightsApiV1BooksBookIdHighlightsGet<
+  TData = Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+  TError = HTTPValidationError,
+>(
+  bookId: number,
+  params: SearchBookHighlightsApiV1BooksBookIdHighlightsGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Search Book Highlights
+ */
+
+export function useSearchBookHighlightsApiV1BooksBookIdHighlightsGet<
+  TData = Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+  TError = HTTPValidationError,
+>(
+  bookId: number,
+  params: SearchBookHighlightsApiV1BooksBookIdHighlightsGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof searchBookHighlightsApiV1BooksBookIdHighlightsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getSearchBookHighlightsApiV1BooksBookIdHighlightsGetQueryOptions(
+    bookId,
+    params,
+    options
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
 /**
  * Soft delete highlights from a book.
 
